@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Bio Check</title>
+    <style>
+      #HEADER {
+        clear: both;
+        padding: 0px 5% 0px 5%;
+        text-align: right;
+      }
+      .SMALL {
+        font-size: 11px;
+      }
+      #FOOTER {
+        clear:both;
+        margin: 1% 5% 1% 1%;
+        font-size: 13px;
+      }
+      .NOLINE {
+      }
+      #CONTENT {
+        clear:both;
+        margin: 0 1% 0 1%;
+        padding: 0.25em 0.75em 0.5em 0.75em;
+      }
+      .MISC-PAGE {
+        border: 4px solid #b7c0cf;
+      }
+      #HEADLINE {
+        display: flex;
+        justify-content: center;
+      }
+      #logged_in {
+        display: none;
+      }
+      #need_login {
+        width: 40%;
+        margin: auto;
+        padding-top:5%;
+        display: none;
+      }
+    </style>
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="./jquery.cookie.js"></script>
+<script src="./wikitree.js"></script>
+<script type="text/javascript">
+
+
+  window.theDollar = $;
+  window.wts = wikitree;
+  myCookie = $.cookie("biocheck_state");
+
+  // User wants to skip login
+  function startTheApp() {
+    document.getElementById("need_login").style.display = "none";
+    document.getElementById("logged_in").style.display = "block";
+    $.cookie("biocheck_state", "skip");
+    window.location.reload(false);
+  }
+
+</script>
+
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+
+    <!-- This div is shown if the user is not logged in. -->
+    <div id="need_login">
+      <p>You are not currently logged in to apps.wikitree.com.<br/>
+         Login with the same information that you use for WikiTree.
+        <form action="https://api.wikitree.com/api.php" method="POST">
+        <form action="https://apps.wikitree.com/api.php" method="POST">
+        <input type="hidden" name="action" value="clientLogin">
+        <input type="hidden" name="returnURL" value="https://apps.wikitree.com/apps/sands1865/biocheck/index.html">
+        <input type="submit" class="button" value="Client Login">
+        </form>
+      </p>
+      <p>Click <a href="javascript:void(0)" onclick="startTheApp(); return false">here</a> if you want to use the app without logging in.</p>
+    </div>
+
+    <!-- This div is shown if the user is logged in. -->
+    <div id="logged_in">
+      <div id="CONTENT" class="MISC-PAGE">
+        <div id="app"></div>
+          <!-- built files will be auto injected -->
+      </div>
+    </div>             <!-- end of content div -->
+  </body>
+</html>
