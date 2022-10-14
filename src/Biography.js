@@ -25,7 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Gather information about style and the parts needed to validate
  * along with information about the bio and methods to parse and validate
  */
-import { BiographyResults } from "./biographyResults.js"
+import { BiographyResults } from "./BiographyResults.js"
 export class Biography extends BiographyResults {
 
   sourceRules = null;             // rules for testing sources

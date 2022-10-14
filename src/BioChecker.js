@@ -24,10 +24,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Check biographies
  * This is a base class for various types of checks to be performed
  */
-import { SourceRules } from "./sourceRules.js"
-import { PeopleManager } from "./peopleManager.js"
-import { Person } from "./person.js"
-import { Biography } from "./biography.js"
+import { SourceRules } from "./SourceRules.js"
+import { PeopleManager } from "./PeopleManager.js"
+import { Person } from "./Person.js"
+import { Biography } from "./Biography.js"
 
 export class BioChecker {
 

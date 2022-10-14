@@ -24,8 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Check biography for a profile, and optionally ancestors
  */
 
-import { Person } from "./person.js"
-import { BioChecker } from "./bioChecker.js"
+import { Person } from "./Person.js"
+import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckProfile extends BioChecker {
 

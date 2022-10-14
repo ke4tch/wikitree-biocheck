@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Contains information about a WikiTree Profile
  * only contains a subset of the complete set of data available
  */
-import { PersonDate } from "./personDate.js"
+import { PersonDate } from "./PersonDate.js"
 export class Person extends PersonDate {
 
   person = {

@@ -23,8 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * Check biographies obtained via a WT+ query
  */
-import { Person } from "./person.js"
-import { BioChecker } from "./bioChecker.js"
+import { Person } from "./Person.js"
+import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckQueryResults extends BioChecker {
 

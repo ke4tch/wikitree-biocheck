@@ -526,8 +526,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 <script>
 
-import { BioCheck } from "./bioCheck.js"
-import { BioResultsExport } from "./bioResultsExport.js"
+import { BioCheck } from "./BioCheck.js"
+import { BioResultsExport } from "./BioResultsExport.js"
 
 export default {
   name: 'App',

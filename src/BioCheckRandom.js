@@ -23,8 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Check biographies for a random set of profiles
  */
-import { Person } from "./person.js"
-import { BioChecker } from "./bioChecker.js"
+import { Person } from "./Person.js"
+import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckRandom extends BioChecker {
 

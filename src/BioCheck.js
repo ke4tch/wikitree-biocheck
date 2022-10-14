@@ -24,12 +24,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Send inputs from gui onto the checker and ripple results back
  * in the bio test results
  */
-import { BioTestResults } from "./bioTestResults.js"
+import { BioTestResults } from "./BioTestResults.js"
 
-import { BioCheckProfile } from "./bioCheckProfile.js"
-import { BioCheckQueryResults } from "./bioCheckQueryResults.js"
-import { BioCheckWatchlist } from "./bioCheckWatchlist.js"
-import { BioCheckRandom } from "./bioCheckRandom.js"
+import { BioCheckProfile } from "./BioCheckProfile.js"
+import { BioCheckQueryResults } from "./BioCheckQueryResults.js"
+import { BioCheckWatchlist } from "./BioCheckWatchlist.js"
+import { BioCheckRandom } from "./BioCheckRandom.js"
 
 export class BioCheck {
 

@@ -23,8 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * Check biographies for profiles on Watchlist
  */
-import { Person } from "./person.js"
-import { BioChecker } from "./bioChecker.js"
+import { Person } from "./Person.js"
+import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckWatchlist extends BioChecker {
 
