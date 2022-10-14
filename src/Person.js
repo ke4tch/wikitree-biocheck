@@ -31,8 +31,8 @@ export class Person extends PersonDate {
     profileId: 0,
     wikiTreeId: "",
     managerId: 0,
-    firstName: "",
-    lastName: "",
+    firstName: "",   // name for reporting
+    lastName: "",   // name for reporting if there is current use that else LNAB
     hasBio: false,
     bio: "",
     requestedProfileId: 0,
@@ -63,7 +63,7 @@ export class Person extends PersonDate {
 
   /**
    * Initialize person
-   * @param profileObj containing the profile
+   * @param profileObj containing the profile as returned from WikiTree APIs
    * @param mustBeOpen true if profile must be open privacy
    * @param ingorePre1500 true to ignore Pre1500 profiles
    * @param userId wikiTreeId of the person running the app
@@ -145,4 +145,91 @@ export class Person extends PersonDate {
   hasName() {
     return this.person.hasName;
   }
+  /**
+   * Get wikiTreeId for the person
+   * @return wikiTreeId
+   */
+  getWikiTreeId() {
+    return this.person.wikiTreeId;
+  }
+  /**
+   * Get profileId for the person
+   * @return profileId 
+   */
+  getProfileId() {
+    return this.person.profileId;
+  }
+  /**
+   * Get first name
+   * @return first name
+   */
+  getFirstName() {
+    return this.person.firstName;
+  }
+  /**
+   * Get last name to report
+   * @return last name to report
+   */
+  getLastName() {
+    return this.person.lastName;
+  }
+  /**
+   * Get name to report
+   * @return string with first and last name
+   */
+  getReportName() {
+    let reportName = this.getFirstName() + " " + this.getLastName();
+    return reportName;
+  }
+  /**
+   * Get manager Id for the person
+   * @return manager Id
+   */
+  getManagerId() {
+    return this.person.managerId;
+  }
+  /**
+   * Get WikiTree link
+   * @param wikiTreeId for the person
+   * @return link to the WikiTree person
+   */
+  getWikiTreeLink() {
+    const WIKI_TREE_URI = "https://www.wikitree.com/wiki/";
+    return WIKI_TREE_URI  + this.person.wikiTreeId;
+  }
+  /**
+   * Get the privacy as a string to be displayed to the user
+   * @return privacy string (i.e., the color)
+   */
+  getPrivacyString() {
+    let privacyString = "";
+    switch (this.person.privacyLevel) {
+      case 0:           // Not returned by API
+        privacyString = "Unknown";
+      break;
+      case 10:           // Unlisted
+        privacyString = "Black";
+      break;
+      case 20:           // Private
+        privacyString = "Red";
+      break;
+      case 30:           // Private, Public Bio
+        privacyString = "Orange";
+      break;
+      case 35:           // Private, Public Tree
+        privacyString = "Light Orange";
+      break;
+      case 40:          // Private, Public Bio & Tree
+        privacyString = "Yellow";
+      break;
+      case 50:         // Public
+        privacyString = "Green";
+      break;
+      case 60:         // Open
+        privacyString = " ";
+      break;
+    }
+    return privacyString;
+  }
+
 }

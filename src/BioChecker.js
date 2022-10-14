@@ -369,14 +369,15 @@ export class BioChecker {
       }
     }
     // add person to report
-    this.testResults.addProfile(biography.bioResults, 
-                                thePerson,
-                                this.getReportAllProfiles(),
-                                this.getReportNonManaged(), 
-                                this.getSourcesReport(),
-                                this.getProfileReviewReport(),
-                                this.getReportStatsOnly(), 
-                                this.getUserId());
+    this.testResults.addProfile(biography.bioResults, thePerson.getProfileId(),
+        thePerson.getWikiTreeId(), thePerson.getWikiTreeLink(),
+        thePerson.getReportName(), thePerson.getManagerId(),
+        thePerson.getPrivacyString(), 
+        thePerson.getReportDate(true), thePerson.getReportDate(false),
+        this.getReportAllProfiles(), this.getReportNonManaged(), 
+        this.getSourcesReport(), this.getProfileReviewReport(),
+        this.getReportStatsOnly(), this.getUserId());
+
     // allow garbage collection
     //bioValidator = null;
     biography = null;

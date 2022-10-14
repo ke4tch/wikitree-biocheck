@@ -48,6 +48,15 @@ export class BioTestResults {
   EXTRA_EQUALS = "Extra =";
 
   // the results
+  /* 
+   * results are tied into the GUI via Vue
+   * specifically, the checkStatus and checkResults are defined in the App
+   * The checkStatus contains messages and state management
+   * The checkResults contain arrays of row data that are populated
+   * with row data items. These are tied to the GUI via a Vue template
+   * that will populate the results data with row data items as rows
+   * are added to the results.
+   */
   results = {
     checkStatus: null,
     checkResults: null,
@@ -159,33 +168,25 @@ export class BioTestResults {
   /**
    * Add a profile to the results
    * @param bioResults results of parsing and validating profile
-   * @param thePerson the person
+   * @param profileId to report
+   * @param wikiTreeId to report
+   * @param wikiTreeLink to report
+   * @param reportName name to report
+   * @param managerId for the person
+   * @param privacyString to report
+   * @param birthDate to report
+   * @param deathDate to report
    * @param reportAllProfiles true to report all profiles
    * @param reportNonManaged true to report profiles not managed by user
    * @param sourcesReport true to report sources for profile
    * @param profileReviewReport true to generate profile review report
    * @param userId for testing nonManaged profiles
    */
-  addProfile(bioResults, thePerson, 
-             reportAllProfiles, reportNonManaged, sourcesReport,
-             profileReviewReport, reportStatsOnly, userId) {
+  addProfile(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName,
+      managerId, privacyString, birthDate, deathDate,
+      reportAllProfiles, reportNonManaged, sourcesReport,
+      profileReviewReport, reportStatsOnly, userId) {
 
-    let rowDataItem = {
-      profileId: 0,
-      wikiTreeId: "",
-      personName: "",
-      unsourcedStatus: "No",               // Sourced, Marked, Maybe
-      isEmpty: "",
-      misplacedLineCnt: "",
-      missingEnd: "",                      // Comment, references, Span
-      bioHeading: "",                      // Missing, Mulitple, No Lines Follow
-      sourcesHeading: "",                  // Missing, Multiple, Extra =
-      referencesTag: "",                   // Missing, Multiple, ref following
-      acknowledgements: "",                // Before Sources, Extra =
-      bioLineCnt : "",
-      inlineRefCnt : "",
-      sourceLineCnt : "",
-    }
     this.results.sourcesReport = sourcesReport;
     this.results.profileReviewReport = profileReviewReport;
     this.results.reportStatsOnly = reportStatsOnly;
@@ -196,7 +197,7 @@ export class BioTestResults {
       profileShouldBeReported = true;
     }
     if (reportNonManaged) {
-      if (userId != thePerson.person.managerId) {
+      if (userId != managerId) {
         profileShouldBeReported = true;
       }
     }
@@ -211,7 +212,7 @@ export class BioTestResults {
      * An unsourced unmarked profile is always needed.
      */
     if (bioResults.stats.bioIsUncertainExistance) {
-      console.log("Profile " + thePerson.person.wikiTreeId + " is Uncertain Existance, not reported");
+      console.log("Profile " + wikiTreeId + " is Uncertain Existance, not reported");
     } else {
       if (bioResults.style.bioHasStyleIssues) {
         this.results.styleIssuesProfileCnt++;
@@ -241,13 +242,13 @@ export class BioTestResults {
       this.results.reportCount++;
       if (!reportStatsOnly) {
         if (sourcesReport) {
-          this.reportSources(bioResults, thePerson);
+          this.reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
         } else {
           if (profileReviewReport) {
-            this.reportReviewProfile(bioResults, thePerson, profileStatus);
+            this.reportReviewProfile(bioResults, wikiTreeId, wikiTreeLink, reportName,
+                privacyString, managerId, birthDate, deathDate, profileStatus); 
           } else {
-            this.reportUnsourcedStyle(bioResults, thePerson, rowDataItem,
-            profileStatus);
+            this.reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
           }
         }
       }
@@ -257,20 +258,37 @@ export class BioTestResults {
   /*
    * Report unsourced and style for profile (the default)
    * @param bioResults the results of checking
-   * @param thePerson who was checked
-   * @param rowDataItem the item in the row to populated
+   * @param profileId to report
+   * @param wikiTreeId to report
+   * @param wikiTreeLink to report
+   * @param reportName name to report
    * @param profileStatus the unsourced status
    */
-  reportUnsourcedStyle(bioResults, thePerson, rowDataItem, profileStatus) {
+  reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus) {
+    let rowDataItem = {
+      profileId: 0,
+      wikiTreeId: "",
+      personName: "",
+      unsourcedStatus: "No",               // Sourced, Marked, Maybe
+      isEmpty: "",
+      misplacedLineCnt: "",
+      missingEnd: "",                      // Comment, references, Span
+      bioHeading: "",                      // Missing, Mulitple, No Lines Follow
+      sourcesHeading: "",                  // Missing, Multiple, Extra =
+      referencesTag: "",                   // Missing, Multiple, ref following
+      acknowledgements: "",                // Before Sources, Extra =
+      bioLineCnt : "",
+      inlineRefCnt : "",
+      sourceLineCnt : "",
+    }
 
     rowDataItem.unsourcedStatus = profileStatus;
-    rowDataItem.profileId = thePerson.person.profileId;
-    rowDataItem.wikiTreeId = thePerson.person.wikiTreeId;
+    rowDataItem.profileId = profileId;
+    rowDataItem.wikiTreeId = wikiTreeId;
     // HYPERLINK format should work in Excel, LibreOffice and Google Sheets
-    rowDataItem.wikiTreeLink = "https://www.wikitree.com/wiki/" + thePerson.person.wikiTreeId;
-    rowDataItem.wikiTreeHyperLink = this.buildHyperLink(rowDataItem.wikiTreeLink, 
-                                                            thePerson.person.wikiTreeId);
-    rowDataItem.personName = thePerson.person.firstName + " " + thePerson.person.lastName;
+    rowDataItem.wikiTreeLink = wikiTreeLink;
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
+    rowDataItem.personName = reportName;
     if (bioResults.stats.totalBioLines > 0) {
       rowDataItem.bioLineCnt = bioResults.stats.totalBioLines;
     }
@@ -363,30 +381,39 @@ export class BioTestResults {
   /* 
    * Report sources for the profile
    * @param bioResults the results of checking
-   * @param thePerson who was checked
+   * @param profileId to report
+   * @param wikiTreeId to report
+   * @param wikiTreeLink to report
+   * @param reportName name to report
+   * @param reportAllSources true to report all sources
    */
-  reportSources(bioResults, thePerson) {
-
+  reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
     if ((bioResults.sources.invalidSource.length === 0) &&
       (bioResults.sources.validSource.length === 0)) {
-        this.reportSourceRow(thePerson, -1, "");
+        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, -1, "");
     } else {
       for (let i = 0; i < bioResults.sources.invalidSource.length; i++) {
-        this.reportSourceRow(thePerson, 0, bioResults.sources.invalidSource[i]);
+        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, 0, bioResults.sources.invalidSource[i]);
       }
-      for (let i = 0; i < bioResults.sources.validSource.length; i++) {
-        this.reportSourceRow(thePerson, i+1, bioResults.sources.validSource[i]);
+      if (reportAllSources) {
+        for (let i = 0; i < bioResults.sources.validSource.length; i++) {
+          this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName,
+                   i+1, bioResults.sources.validSource[i]);
+        }
       }
     }
   }
 
   /*
    * Report one source row
-   * @param thePerson who was checked
+   * @param profileId to report
+   * @param wikiTreeId to report
+   * @param wikiTreeLink to report
+   * @param reportName name to report
    * @param sourceNum the source number
    * @param sourceContent the source content
    */
-  reportSourceRow(thePerson, sourceNum, sourceContent) {
+  reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, sourceNum, sourceContent) {
     let rowDataItem = {
       profileId: 0,
       wikiTreeId: "",
@@ -396,12 +423,11 @@ export class BioTestResults {
       sourceLine: "",
       wikiTreeLink: "",
     }
-    rowDataItem.profileId = thePerson.person.profileId;
-    rowDataItem.wikiTreeId = thePerson.person.wikiTreeId;
-    rowDataItem.wikiTreeLink = "https://www.wikitree.com/wiki/" + thePerson.person.wikiTreeId;
-    rowDataItem.wikiTreeHyperLink = this.buildHyperLink(rowDataItem.wikiTreeLink, 
-                                                        thePerson.person.wikiTreeId);
-    rowDataItem.personName = thePerson.person.firstName + " " + thePerson.person.lastName;
+    rowDataItem.profileId = profileId;
+    rowDataItem.wikiTreeId = wikiTreeId;
+    rowDataItem.wikiTreeLink = wikiTreeLink;
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
+    rowDataItem.personName = reportName, 
     rowDataItem.sourceCount = sourceNum;
     rowDataItem.sourceLine = sourceContent;
     this.results.checkResults.sourcesRowData.push(rowDataItem);
@@ -410,10 +436,17 @@ export class BioTestResults {
   /**
    * Report profile for review
    * @param bioResults the results of checking
-   * @param thePerson who was checked
+   * @param wikiTreeId to report
+   * @param wikiTreeLink to report
+   * @param reportName name to report
+   * @param privacyString to report
+   * @param managerId for the person
+   * @param birthDate to report
+   * @param deathDate to report
    * @param profileStatus the unsourced status
    */
-  reportReviewProfile(bioResults, thePerson, profileStatus) {
+  reportReviewProfile(bioResults, wikiTreeId, wikiTreeLink, reportName,
+  privacyString, managerId, birthDate, deathDate, profileStatus) {
     let rowDataItem = {
       wikiTreeId: "",
       wikiTreeHyperLink: "",
@@ -429,11 +462,10 @@ export class BioTestResults {
       deathDate: "",
       wikiTreeLink: "",
     }
-    rowDataItem.wikiTreeId = thePerson.person.wikiTreeId;
-    rowDataItem.wikiTreeLink = "https://www.wikitree.com/wiki/" + thePerson.person.wikiTreeId;
-    rowDataItem.wikiTreeHyperLink = this.buildHyperLink(rowDataItem.wikiTreeLink, 
-                                                        thePerson.personwikiTreeId);
-    rowDataItem.personName = thePerson.person.firstName + " " + thePerson.person.lastName;
+    rowDataItem.wikiTreeId = wikiTreeId;
+    rowDataItem.wikiTreeLink = wikiTreeLink;
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
+    rowDataItem.personName = reportName;
     rowDataItem.reviewerId = " ";
     rowDataItem.reviewStatus = " ";
     rowDataItem.reviewComments = " ";
@@ -441,56 +473,27 @@ export class BioTestResults {
     if (bioResults.style.bioHasStyleIssues) {
       rowDataItem.hasStyleIssues = "X";
     }
-    let privacyString = "";
-    switch (thePerson.person.privacyLevel) {
-      case 0:           // Not returned by API
-        privacyString = "Unknown";
-      break;
-      case 10:           // Unlisted
-        privacyString = "Black";
-      break;
-      case 20:           // Private
-        privacyString = "Red";
-      break;
-      case 30:           // Private, Public Bio
-        privacyString = "Orange";
-      break;
-      case 35:           // Private, Public Tree
-        privacyString = "Light Orange";
-      break;
-      case 40:          // Private, Public Bio & Tree
-        privacyString = "Yellow";
-      break;
-      case 50:         // Public
-        privacyString = "Green";
-      break;
-      case 60:         // Open
-        privacyString = " ";
-      break;
-    }
     rowDataItem.profilePrivacy = privacyString;
-    if (thePerson.person.managerId === 0) {
+    if (managerId === 0) {
       rowDataItem.profileIsOrphan = "X";
     }
-    rowDataItem.birthDate = thePerson.getReportDate(true);
-    rowDataItem.deathDate = thePerson.getReportDate(false);
+    rowDataItem.birthDate = birthDate;
+    rowDataItem.deathDate = deathDate;
     this.results.checkResults.profilesRowData.push(rowDataItem);
   }
 
-
   /**
-   * Build Hyperlink
+   * Get Hyperlink
    * @param theUrl the URL
    * @param displayTest display text for URL
    * @return the hyperlink text
    */
-  buildHyperLink(theUrl, displayText) {
+  getHyperLink(theUrl, displayText) {
     let doubleQuote = "\"\"";
     let hyperlink = "=HYPERLINK(" + doubleQuote + theUrl + doubleQuote + "," 
                                   + doubleQuote + displayText + doubleQuote + ")";
     return hyperlink;
   }
-
 
   /**
    * Report summary statistics 
@@ -532,19 +535,13 @@ export class BioTestResults {
     }
     this.setProgressMessage(msg);
     msg = "Check completed. Examined unique " + this.results.totalProfileCount + " profiles.";
-      this.results.uncheckedDueToPrivacyCount + " profiles";
-      let otherCnt = this.results.uncheckedDueToPrivacyCount;
-      otherCnt += this.results.uncheckedDueToDateCount;
-      if (otherCnt> 0) {
-        msg += " Privacy, date, or other reasons did not allow checking for " +
+    this.results.uncheckedDueToPrivacyCount + " profiles";
+    let otherCnt = this.results.uncheckedDueToPrivacyCount;
+    otherCnt += this.results.uncheckedDueToDateCount;
+    if (otherCnt> 0) {
+      msg += " Privacy, date, or other reasons did not allow checking for " +
               otherCnt + " profiles";
-      }
-      /*if (this.results.uncheckedDueToPrivacyCount > 0) {
-       msg += " Privacy or other reasons did not allow checking for " +
-              this.results.uncheckedDueToPrivacyCount + 
-              " profiles";
-      }
-              */
+    }
     this.setStateMessage(msg);
     this.results.checkStatus.progressMessageTitle = "";
     this.results.checkStatus.cancelPending = false;
