@@ -51,6 +51,33 @@ export class PersonDate {
   }
 
   /**
+   * Initialize person dates from null, 0000 or various forms
+   * @param bDay birth date
+   * @param dDay death date
+   */
+  initWithDates(bDay, dDay) {
+    if (bDay != null) {
+      this.personDate.birthDateString = bDay;
+      this.personDate.birthDate = this.getDate(this.personDate.birthDateString);
+    }
+    if (this.lastDateCheckedEmpty) {
+      this.personDate.hasBirthDate = false;
+    }
+    if (dDay != null) {
+      this.personDate.deathDateString = dDay;
+      this.personDate.deathDate = this.getDate(this.personDate.deathDateString);
+    }
+    if (this.lastDateCheckedEmpty) {
+      this.personDate.hasDeathDate = false;
+    }
+
+    // Go ahead and see if pre1500, pre1700 or too old
+    this.isPersonPre1500();
+    this.isPersonPre1700();
+    this.mustBeOpen();
+  }
+
+  /**
    * Initialize person dates
    * @param profileObj containing the profile
    */
