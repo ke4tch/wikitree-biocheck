@@ -298,7 +298,6 @@ export class BioTestResults {
     if (bioResults.stats.possibleSourcesLineCount > 0) {
       rowDataItem.sourceLineCnt = bioResults.stats.possibleSourcesLineCount;
     }
-
     if (bioResults.style.misplacedLineCount > 0) {
       rowDataItem.misplacedLineCnt = bioResults.style.misplacedLineCount;
     }

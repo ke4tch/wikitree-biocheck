@@ -49,8 +49,6 @@ export class BioCheckProfile extends BioChecker {
    */
   async check() { 
     this.testResults.setProgressMessage("Gathering profiles");
-    let id = this.getInputWikiTreeId();
-    console.log("id " + id);
 
     const url = BioChecker.WIKI_TREE_URI + "?action=getProfile" + 
                 "&key=" + this.getInputWikiTreeId().trim() + 
