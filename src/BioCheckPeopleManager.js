@@ -21,10 +21,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /** 
- * Manages a collection of WikiTree profiles
+ * Manages a collection of WikiTree profiles for BioCheck
  * should be a singleton. 
 e*/
-export class PeopleManager {
+import { PeopleManager } from "./PeopleManager.js"
+export class BioCheckPeopleManager extends PeopleManager {
 
   /*
    * keep all the persons who have not been checked
@@ -38,52 +39,13 @@ export class PeopleManager {
    * wikiTreeId is the wikitree id (e.g., LNAB-####)
    */
 
-  wikiTreeIdToPersonIdMap = new Map();   // List of person id, accessed by wikitreeId
-  personIdToWikiTreeIdMap = new Map();   // list of wikitree id, accessed by person id
-  allProfileIds = [];                    // all profile ids
   removedProfileIds = [];
-  redirectedProfileIds = new Set();
-  duplicateProfileCount = 0;
+  markedProfileIds = [];
+  unmarkedProfileIds = [];
+  styleProfileIds = [];
 
   constructor() {
-  }
-
-  /**
-   * Add person
-   * @param profileId the unique id for the person
-   * @param wikiTreeId the wikiTree id for the person
-   * @param requestedProfileId id to track redirects
-   */
-  addPerson(profileId, wikiTreeId, requestedProfileId) {
-    if (!this.personIdToWikiTreeIdMap.has(profileId)) {
-      this.personIdToWikiTreeIdMap.set(profileId, wikiTreeId);
-      this.wikiTreeIdToPersonIdMap.set(wikiTreeId, profileId);
-      this.allProfileIds.push(profileId);
-    }
-    // Keep track of redirected profiles
-    if ((requestedProfileId > 0) && (requestedProfileId != profileId)) {
-      this.redirectedProfileIds.add(requestedProfileId);
-    }
-  }
-
-  /**
-   * Has the person already been processed?
-   * @return true if person has already been processed
-   */
-  hasPerson(profileId) {
-    if ((this.personIdToWikiTreeIdMap.has(profileId)) || (this.redirectedProfileIds.has(profileId))) {
-      this.duplicateProfileCount++;
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Get count of duplicate profiles ignored
-   */
-  getDuplicateProfileCount() {
-    return this.duplicateProfileCount;
+    super();
   }
 
   /**
@@ -105,33 +67,69 @@ export class PeopleManager {
     }
   }
 
-  /* 
-   * Get the list of the profiles held by the manager
-   * in alphabetical order
-   * @return array of wikiTreeID
+  /**
+   * Add to list of profiles with style issues
+   * @param profileId profile to add
    */
-  getProfileNames() {
-    let profileNames = [];
-    let m = this.wikiTreeIdToPersonIdMap;
-    for (let profileName of m.keys()) {
-      profileNames.push(profileName);
-    }
-    profileNames.sort();
-    return profileNames;
+  setProfileStyle(profileId) {
+    this.styleProfileIds.push(profileId);
   }
-
   /**
-   * Get total number of profiles managed
-   * @return number of profiles managed
+   * Add to list of profiles marked unsourced
+   * @param profileId profile to add
    */
-  getProfileCount() {
-    return this.allProfileIds.length;
-  } 
+  setProfileMarked(profileId) {
+    this.markedProfileIds.push(profileId);
+  }
+  setProfileUnmarked(profileId) {
   /**
-   * Get all profile IDs managed
+   * Add to list of profiles maybe unsourced, not marked
+   * @param profileId profile to add
+   */
+    this.unmarkedProfileIds.push(profileId);
+  }
+  /**
+   * Get number of profiles marked unsourced
+   * @return number of profiles marked unsourced
+   */
+  getMarkedProfileCount() {
+    return this.markedProfileIds.length;
+  }
+  /**
+   * Get all profiles IDs marked unsourced
    * @return array of profile Id
    */
-  getAllProfileIds() {
-    return this.allProfileIds;
+  getMarkedProfileIds() {
+    return this.markedProfileIds;
+  }
+  /**
+   * Get number of profiles unmarked 
+   * @return number of profiles not marked unsourced
+   * that are possibly not sourced
+   */
+  getUnmarkedProfileCount() {
+    return this.unmarkedProfileIds.length;
+  }
+  /**
+   * Get all profiles IDs not marked unsourced
+   * @return array of profile Id not marked unsourced
+   * that are possibly not sourced
+   */
+  getUnmarkedProfileIds() {
+    return this.unmarkedProfileIds;
+  }
+  /**
+   * Get number of profiles with style issues
+   * @return number of profiles with style issues
+   */
+  getStyleProfileCount() {
+    return this.styleProfileIds.length;
+  }
+  /**
+   * Get all profiles IDs with style issues
+   * @return array of profile Id with style issues
+   */
+  getStyleProfileIds() {
+    return this.styleProfileIds;
   }
 }

@@ -23,7 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * Check biographies obtained via a WT+ query
  */
-import { Person } from "./Person.js"
+import { BioCheckPerson } from "./BioCheckPerson.js"
 import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckQueryResults extends BioChecker {
@@ -67,7 +67,7 @@ export class BioCheckQueryResults extends BioChecker {
       } else {
         const theJson = await (fetchResponse.json());
         let queryResponse = theJson.response;
-        this.testResults.addToTotalProfileCount(queryResponse.found);
+        this.testResults.countProfile(queryResponse.found, false, false);
 
         // Pick out just from start to max but no more than found
         let endIndex = queryResponse.found;
@@ -104,21 +104,17 @@ export class BioCheckQueryResults extends BioChecker {
               } else {
                 if (responseObj.person != null) {
                   let profileObj = responseObj.person;
-                  let thePerson = new Person();
+                  let thePerson = new BioCheckPerson();
                   let canUseThis = thePerson.build(profileObj, this.getOpenOnly(), 
                                                    this.getIgnorePre1500(), this.getUserId(), profileId);
                   if (!canUseThis) {
-                    if (thePerson.person.uncheckedDueToPrivacy) {
-                      this.testResults.addUncheckedDueToPrivacy();
-                    }
-                    if (thePerson.person.uncheckedDueToDate) {
-                      this.testResults.addUncheckedDueToDate();
-                    }
+                    this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
+                        thePerson.isUncheckedDueToDate());
                   } else {
-                    if (profileId != thePerson.person.profileId) {
+                    if (profileId != thePerson.getProfileId()) {
                       this.testResults.addRedirectedProfile();
                     }
-                    if ((!this.thePeopleManager.hasPerson(thePerson.person.profileId)) &&
+                    if ((!this.thePeopleManager.hasPerson(thePerson.getProfileId())) &&
                         (!this.timeToQuit())) {
                       if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
                         await this.sleep(BioChecker.SYNC_DELAY_MS);
@@ -165,22 +161,4 @@ export class BioCheckQueryResults extends BioChecker {
       this.getQueryArg() + " " + error);
     }
   }
-
-  /* 
-   * Need to check relatives?
-   * @return number of relatives to check
-   */
-  needToCheckRelatives() {
-    let numUnsourced = 0;
-    if ((!this.timeToQuit()) && (this.getNumRelatives() > 0)) {
-      numUnsourced = this.thePeopleManager.unmarkedProfileIds.length +
-                     this.thePeopleManager.markedProfileIds.length;
-
-      if (this.getCheckAllConnections()) {
-        numUnsourced = this.thePeopleManager.allProfileIds.length;
-      }
-    }
-    return numUnsourced;
-  }
-
 }

@@ -100,22 +100,38 @@ export class BioTestResults {
    * Set count of number of profiles requested
    * This can include by query, or returned via watchlist,
    * ancestors, or relatives
+   * @param cnt number of profiles to add to total
    */
   addToTotalProfileCount(cnt) {
     this.results.totalProfileCount += cnt;
   }
 
   /**
+   * Count profile
+   * This can include by query, or returned via watchlist,
+   * ancestors, or relatives
+   * @param cnt number of profiles to add to total
+   * @param dueToPrivacy true if not checked because of privacy
+   * @param dueToDate true if not checked because of date
+   */
+  countProfile(cnt, dueToPrivacy, dueToDate) { 
+    if (cnt > 0) {
+      this.results.totalProfileCount += cnt;
+    }
+    if (dueToPrivacy) {
+      this.results.uncheckedDueToPrivacyCount++;
+    }
+    if (dueToDate) {
+      this.results.uncheckedDueToDateCount++;
+    }
+  }
+
+  /**
    * Add to number of unchecked profiles due to privacy
+   * typically just used by countProfile but also for random
    */
   addUncheckedDueToPrivacy() {
     this.results.uncheckedDueToPrivacyCount++;
-  }
-  /**
-   * Add to number of unchecked profiles due to date
-   */
-  addUncheckedDueToDate() {
-    this.results.uncheckedDueToDateCount++;
   }
 
   /*
@@ -533,7 +549,7 @@ export class BioTestResults {
       msg = "Canceled. " + msg;
     }
     this.setProgressMessage(msg);
-    msg = "Check completed. Examined unique " + this.results.totalProfileCount + " profiles.";
+    msg = "Check completed. Examined " + this.results.totalProfileCount + " unique profiles.";
     this.results.uncheckedDueToPrivacyCount + " profiles";
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;

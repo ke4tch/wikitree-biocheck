@@ -23,7 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Check biographies for a random set of profiles
  */
-import { Person } from "./Person.js"
+import { BioCheckPerson } from "./BioCheckPerson.js"
 import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckRandom extends BioChecker {
@@ -100,7 +100,7 @@ export class BioCheckRandom extends BioChecker {
             console.log("   Profile " + profileId + " has already been checked");
           }
         } else {
-          this.testResults.addToTotalProfileCount(1);
+          this.testResults.countProfile(1, false, false);
           const url = BioChecker.WIKI_TREE_URI + "?action=getPerson" + "&key=" + profileId
                       + "&fields=" + BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
                       BioChecker.REDIRECT_KEY;
@@ -131,7 +131,7 @@ export class BioCheckRandom extends BioChecker {
                 }
               } else {
                 let profileObj = responseObj.person;
-                let thePerson = new Person();
+                let thePerson = new BioCheckPerson();
                 thePerson.setVerbose(true);
                 let canUseThis = thePerson.build(profileObj, this.getOpenOnly(), 
                                                  this.getIgnorePre1500(), this.getUserId(), profileId);
@@ -140,16 +140,13 @@ export class BioCheckRandom extends BioChecker {
                 }
                 if (!canUseThis) {
                   //console.log("Profile " + profileId + " privacy does not allow testing");
-                  if (thePerson.person.uncheckedDueToPrivacy) {
-                    this.testResults.addUncheckedDueToPrivacy();
-                    this.privacyCount++;
-                  }
-                  if (thePerson.person.uncheckedDueToDate) {
-                    this.testResults.addUncheckedDueToDate();
+                  this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
+                      thePerson.isUncheckedDueToDate());
+                  if (thePerson.isUncheckedDueToPrivacy()) {
                     this.privacyCount++;
                   }
                 } else {
-                  if ((!this.thePeopleManager.hasPerson(thePerson.person.profileId)) &&
+                  if ((!this.thePeopleManager.hasPerson(thePerson.getProfileId())) &&
                     (!this.timeToQuit())) {
                     if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
                       await this.sleep(BioChecker.SYNC_DELAY_MS);

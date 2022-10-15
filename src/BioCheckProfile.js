@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Check biography for a profile, and optionally ancestors
  */
 
-import { Person } from "./Person.js"
+import { BioCheckPerson } from "./BioCheckPerson.js"
 import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckProfile extends BioChecker {
@@ -53,7 +53,7 @@ export class BioCheckProfile extends BioChecker {
     const url = BioChecker.WIKI_TREE_URI + "?action=getProfile" + 
                 "&key=" + this.getInputWikiTreeId().trim() + 
                 "&fields=" + BioChecker.BASIC_PROFILE_REQUEST_FIELDS + BioChecker.REDIRECT_KEY;
-    this.testResults.addToTotalProfileCount(1);
+    this.testResults.countProfile(1, false, false);
     this.setDetailedProgress();
     this.pendingRequestCount++;
     try {
@@ -77,16 +77,12 @@ export class BioCheckProfile extends BioChecker {
       } else {
         if (responseObj.profile != null) {
           let profileObj = responseObj.profile;
-          let thePerson = new Person();
+          let thePerson = new BioCheckPerson();
           let canUseThis = thePerson.build(profileObj, this.getOpenOnly(), 
                                            this.getIgnorePre1500(), this.getUserId(), 0);
           if (!canUseThis) {
-            if (thePerson.person.uncheckedDueToPrivacy) {
-              this.testResults.addUncheckedDueToPrivacy();
-            }
-            if (thePerson.person.uncheckedDueToDate) {
-              this.testResults.addUncheckedDueToDate();
-            }
+            this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
+                thePerson.isUncheckedDueToDate());
             // in most cases just swallow the error, but this is what user asked for
             this.testResults.resetStateOnError();
             this.testResults.setProgressMessage("Profile " +
@@ -193,20 +189,15 @@ export class BioCheckProfile extends BioChecker {
           this.testResults.setProgressMessage("Examining " + len + " ancestors");
           while ((ancestorNum < len) && (!this.timeToQuit())) {
             let profileObj = ancestorArray[ancestorNum];
-            let thePerson = new Person();
+            let thePerson = new BioCheckPerson();
             let canUseThis = thePerson.build(profileObj, this.getOpenOnly(),
                                              this.getIgnorePre1500(), this.getUserId(), 0);
             if (canUseThis) {
               this.saveAncestorParents(profileObj, ancestorParents);
             }
-            if (!this.thePeopleManager.hasPerson(thePerson.person.profileId)) {
-              this.testResults.addToTotalProfileCount(1);
-              if (thePerson.person.uncheckedDueToPrivacy) {
-                this.testResults.addUncheckedDueToPrivacy();
-              }
-              if (thePerson.person.uncheckedDueToDate) {
-                this.testResults.addUncheckedDueToDate();
-              }
+            if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
+              this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(),
+                  thePerson.isUncheckedDueToDate());
               if ((canUseThis) && (!this.timeToQuit())) {
                 this.setDetailedProgress();
                 if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
@@ -323,17 +314,12 @@ export class BioCheckProfile extends BioChecker {
             let ancestorNum = 0;
             while ((ancestorNum < len) && (!this.timeToQuit())) {
               let profileObj = ancestorArray[ancestorNum];
-              let thePerson = new Person();
+              let thePerson = new BioCheckPerson();
               let canUseThis = thePerson.build(profileObj, this.getOpenOnly(),
                                                this.getIgnorePre1500(), this.getUserId(), 0);
-              if (!this.thePeopleManager.hasPerson(thePerson.person.profileId)) {
-                this.testResults.addToTotalProfileCount(1);
-                if (thePerson.person.uncheckedDueToPrivacy) {
-                  this.testResults.addUncheckedDueToPrivacy();
-                }
-                if (thePerson.person.uncheckedDueToDate) {
-                  this.testResults.addUncheckedDueToDate();
-                }
+              if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
+                this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(),
+                    thePerson.isUncheckedDueToDate());
                 if ((canUseThis) && (!this.timeToQuit())) {
                   this.setDetailedProgress();
                   if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
@@ -413,17 +399,12 @@ export class BioCheckProfile extends BioChecker {
           this.testResults.setProgressMessage("Examining " + len + " descendants");
           while ((descendantNum < len) && (!this.timeToQuit())) {
             let profileObj = descendantArray[descendantNum];
-            let thePerson = new Person();
+            let thePerson = new BioCheckPerson();
             let canUseThis = thePerson.build(profileObj, this.getOpenOnly(),
                                              this.getIgnorePre1500(), this.getUserId(), 0);
-            if (!this.thePeopleManager.hasPerson(thePerson.person.profileId)) {
-              this.testResults.addToTotalProfileCount(1);
-              if (thePerson.person.uncheckedDueToPrivacy) {
-                this.testResults.addUncheckedDueToPrivacy();
-              }
-                if (thePerson.person.uncheckedDueToDate) {
-                  this.testResults.addUncheckedDueToDate();
-                }
+            if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
+              this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(),
+                  thePerson.isUncheckedDueToDate());
               if ((canUseThis) && (!this.timeToQuit())) {
                 this.setDetailedProgress();
                 if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {

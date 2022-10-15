@@ -23,13 +23,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * Check biographies for profiles on Watchlist
  */
-import { Person } from "./Person.js"
+import { BioCheckPerson } from "./BioCheckPerson.js"
 import { BioChecker } from "./BioChecker.js"
 
 export class BioCheckWatchlist extends BioChecker {
 
-  static WATCHLIST_REQUEST_FIELDS = "&getPerson=1&getSpace=0";
-  static WATCHLIST_MAX_LIMIT = 200;
 
   /**
    * Constructor 
@@ -55,6 +53,8 @@ export class BioCheckWatchlist extends BioChecker {
      *           timeToQuit (results reportCount > maxReport or cancelPending)
      * otherwise a lot like getAncestors
      */
+    const WATCHLIST_REQUEST_FIELDS = "&getPerson=1&getSpace=0";
+    const WATCHLIST_MAX_LIMIT = 200;
     this.testResults.setStateMessage("Checking watchlist");
     let maxProfileCount = this.getMaxQuery();
     if (maxProfileCount > BioChecker.MAX_TO_CHECK) {
@@ -63,8 +63,8 @@ export class BioCheckWatchlist extends BioChecker {
       maxProfileCount = BioChecker.MAX_TO_CHECK;     // later make it max of this or watchlistCount
     }
     let limit = this.getSearchMax();
-    if (limit > this.WATCHLIST_MAX_LIMIT) {
-      limit = this.WATCHLIST_MAX_LIMIT;
+    if (limit > WATCHLIST_MAX_LIMIT) {
+      limit = WATCHLIST_MAX_LIMIT;
     }
     if (limit > maxProfileCount) {
       limit = maxProfileCount;
@@ -75,8 +75,7 @@ export class BioCheckWatchlist extends BioChecker {
     const urlbase = BioChecker.WIKI_TREE_URI + "?action=getWatchlist" + "&key="
                     + this.getInputWikiTreeId()
                     + "&fields=" + BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
-                    this.WATCHLIST_REQUEST_FIELDS + BioChecker.REDIRECT_KEY;
-
+                    WATCHLIST_REQUEST_FIELDS + BioChecker.REDIRECT_KEY;
     // start with a request for one profile to get the number of profiles on the watchlist
     let url = urlbase + "&offset=0&limit=1";
     this.pendingRequestCount++;
@@ -106,7 +105,7 @@ export class BioCheckWatchlist extends BioChecker {
                  + " must be less than the " + watchlistCount + " profiles on your watchlist");
             this.testResults.resetStateOnError();
           } else {
-            this.testResults.addToTotalProfileCount(maxProfileCount - this.getSearchStart());
+            this.testResults.countProfile(maxProfileCount - this.getSearchStart(), false, false);
             this.testResults.setStateMessage("Checking watchlist with " + watchlistCount + " profiles.");
             this.testResults.setProgressMessage("Gathering profiles on watchlist...");
             while ((start < maxProfileCount) && (totalProfileCount < watchlistCount) 
@@ -140,17 +139,13 @@ export class BioCheckWatchlist extends BioChecker {
                   while ((i < len)) {
                     // iterate returned profiles
                     let profileObj = watchlistArray[i];
-                    let thePerson = new Person();
+                    let thePerson = new BioCheckPerson();
                     let canUseThis = thePerson.build(profileObj, this.getOpenOnly(), 
                                                      this.getIgnorePre1500(),
                                                      this.getUserId(), 0);
-                    if (thePerson.person.uncheckedDueToPrivacy) {
-                      this.testResults.addUncheckedDueToPrivacy();
-                    }
-                    if (thePerson.person.uncheckedDueToDate) {
-                      this.testResults.addUncheckedDueToDate();
-                    }
-                    if ((canUseThis) && (!this.thePeopleManager.hasPerson(thePerson.person.profileId))
+                    this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
+                        thePerson.isUncheckedDueToDate());
+                    if ((canUseThis) && (!this.thePeopleManager.hasPerson(thePerson.getProfileId()))
                         && (!this.timeToQuit())) {
                       this.setDetailedProgress();
                       if (this.needToGetBio(thePerson)) {

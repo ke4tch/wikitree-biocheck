@@ -24,23 +24,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Contains information about a WikiTree Profile
  * only contains a subset of the complete set of data available
  */
-import { PersonDate } from "./PersonDate.js"
-export class Person extends PersonDate {
+import { Person } from "./Person.js"
+export class BioCheckPerson extends Person {
 
   person = {
-    profileId: 0,
-    wikiTreeId: "",
-    managerId: 0,
-    firstName: "",   // name for reporting
-    lastName: "",   // name for reporting if there is current use that else LNAB
-    hasBio: false,
-    bio: "",
-    requestedProfileId: 0,
-    verbose: false,
-    hasName: false,
-    privacyLevel: 0,
+    uncheckedDueToPrivacy: false,
+    uncheckedDueToDate: false,
   }
 
+  MIN_PRIVACY = 40;
+  OPEN_PRIVACY = 60;
 
   /**
    * constructor
@@ -60,45 +53,36 @@ export class Person extends PersonDate {
   /**
    * Initialize person
    * @param profileObj containing the profile as returned from WikiTree APIs
+   * @param mustBeOpen true if profile must be open privacy
+   * @param ingorePre1500 true to ignore Pre1500 profiles
+   * @param userId wikiTreeId of the person running the app
    * @param requestedId the Id used for getPerson 
-   * @return true if profile has minimum set of information to be processed
-   * such as a name (aka wikiTreeId)
+   * @return true if it was possible to build a bio else false (e.g., living person)
    */
-  initPerson(profileObj, requestedId) {
-    this.init(profileObj);         // initialize dates
-    let canUseThis = true;
-    this.person.profileId = profileObj.Id;
-    this.requestedProfileId = requestedId;
-    // Even if something returned, we can't process it without a Name
-    if (profileObj.Name != null) {
-      this.person.wikiTreeId = profileObj.Name;
-      this.person.hasName = true;
-      if (profileObj.Manager != null) {
-        this.person.managerId = profileObj.Manager;
-      }
-      if (profileObj.Privacy != null) {
-        this.person.privacyLevel = profileObj.Privacy;
-      }
-      if (profileObj.bio != null) {
-       this.person.bio = profileObj.bio;
-       this.person.hasBio = true;
-      }
-      if (profileObj.FirstName != null) {
-        this.person.firstName = profileObj.FirstName;
-      }
-      if (profileObj.LastNameCurrent != null) {
-        this.person.lastName = profileObj.LastNameCurrent;
-      } else {
-        if (profileObj.LastNameAtBirth != null) {
-          this.person.lastName = profileObj.LastNameAtBirth;
+  build(profileObj, mustBeOpen, ignorePre1500, userId, requestedId) {
+    let canUseThis = this.initPerson(profileObj, requestedId);
+    if (canUseThis) {
+      if (this.person.privacyLevel < this.MIN_PRIVACY) {
+        if (userId === 0) {            // user not logged in
+          canUseThis = false;
         }
       }
-    } else {
-      // this might be a living person or a deleted account or a space page
-      if (this.verbose) {
-        console.log("  Cannot test profile " + this.person.profileId + " does not have Name");
+      if ((mustBeOpen) && (this.person.privacyLevel < this.OPEN_PRIVACY)) {
+        canUseThis = false;
       }
-      canUseThis = false;
+      if (!canUseThis) {
+        this.person.uncheckedDueToPrivacy = true;
+        if (this.verbose) {
+          console.log("  Cannot test profile " + this.person.profileId + 
+                      " with Privacy " + this.person.privacyLevel);
+        }
+      } else {
+        // check for birth/death date before 1500
+        if ((ignorePre1500) && (this.isPersonPre1500())) {
+          canUseThis = false;
+          this.person.uncheckedDueToDate = true;
+        }
+      }
     } 
     return canUseThis;
   }
@@ -232,4 +216,19 @@ export class Person extends PersonDate {
     }
     return privacyString;
   }
+  /**
+   * Was profile not checked due to privacy
+   * @return true if profile could not be checked due to privacy
+   */
+  isUncheckedDueToPrivacy() {
+    return this.person.uncheckedDueToPrivacy;
+  } 
+  /**
+   * Was profile not checked due to date
+   * @return true if profile could not be checked due to date
+   */
+  isUncheckedDueToDate() {
+    return this.person.uncheckedDueToDate;
+  } 
+
 }

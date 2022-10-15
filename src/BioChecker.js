@@ -25,15 +25,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This is a base class for various types of checks to be performed
  */
 import { SourceRules } from "./SourceRules.js"
-import { PeopleManager } from "./PeopleManager.js"
-import { Person } from "./Person.js"
+import { BioCheckPeopleManager } from "./BioCheckPeopleManager.js"
+import { BioCheckPerson } from "./BioCheckPerson.js"
 import { Biography } from "./Biography.js"
 
 export class BioChecker {
 
   testResults = null;
   theSourceRules = new SourceRules();
-  thePeopleManager = new PeopleManager();
+  thePeopleManager = new BioCheckPeopleManager();
 
   relativesIncrement = 400;
   requestedProfileCount = 0;                 // total number of profiles examined
@@ -168,11 +168,11 @@ export class BioChecker {
   needToCheckRelatives() {
     let numUnsourced = 0;
     if ((!this.timeToQuit()) && (this.getNumRelatives() > 0)) {
-      numUnsourced = this.thePeopleManager.unmarkedProfileIds.length +
-                     this.thePeopleManager.markedProfileIds.length;
-
-      if (this.getCheckAllConnections()) {
-        numUnsourced = this.thePeopleManager.allProfileIds.length;
+      if (this.getCheckAllConnections()) { 
+        numUnsourced = this.thePeopleManager.getProfileCount();
+      } else {
+        numUnsourced = this.thePeopleManager.getUnmarkedProfileCount() +
+                       this.thePeopleManager.getMarkedProfileCount();
       }
     }
     return numUnsourced;
@@ -211,11 +211,11 @@ export class BioChecker {
       let checkNum = 0;
       while ((checkNum < this.getNumRelatives()) && (!this.timeToQuit())) {
         if (this.getCheckAllConnections()) {
-          this.thePeopleManager.allProfileIds.forEach(item => profileIdSet.add(item));
+          this.thePeopleManager.getAllProfileIds().forEach(item => profileIdSet.add(item));
         } else {
-          this.thePeopleManager.unmarkedProfileIds.forEach(item => profileIdSet.add(item));
-          this.thePeopleManager.markedProfileIds.forEach(item => profileIdSet.add(item))
-          this.thePeopleManager.styleProfileIds.forEach(item => profileIdSet.add(item));
+          this.thePeopleManager.getUnmarkedProfileIds().forEach(item => profileIdSet.add(item));
+          this.thePeopleManager.getMarkedProfileIds().forEach(item => profileIdSet.add(item))
+          this.thePeopleManager.getStyleProfileIds().forEach(item => profileIdSet.add(item));
         }
         let profilesToCheck = [];
         for (let profileId of profileIdSet) {
@@ -274,12 +274,13 @@ export class BioChecker {
    */
   needToGetBio(thePerson) {
     let needToCheckBio = false;
-    if (!this.thePeopleManager.hasPerson(thePerson.person.profileId)) {
-      this.thePeopleManager.addPerson(thePerson);
-      if (!thePerson.person.hasBio) {
+    if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
+      this.thePeopleManager.addPerson(thePerson.getProfileId(), 
+          thePerson.getWikiTreeId(), thePerson.getRequestedProfileId());
+      if (!thePerson.hasBio()) {
         needToCheckBio = true;
       } else {
-        this.checkBio(thePerson, thePerson.person.bio);
+        this.checkBio(thePerson, thePerson.getBio());
       }
     }
     return needToCheckBio;
@@ -292,7 +293,7 @@ export class BioChecker {
    * @return a promise to resolve when person finished
    */
   async checkPerson(thePerson) {
-    let url = BioChecker.WIKI_TREE_URI + "?action=getBio" + "&key=" + thePerson.person.profileId;
+    let url = BioChecker.WIKI_TREE_URI + "?action=getBio" + "&key=" + thePerson.getProfileId();
     this.pendingRequestCount++;
     let fetchResponse = await fetch(url, {
         credentials: "include",
@@ -305,17 +306,19 @@ export class BioChecker {
         let bioObj = theJson[0];
         if (bioObj.status === "Permission denied") {
           this.testResults.addUncheckedDueToPrivacy();
-          this.testResults.setProgressMessage("Profile " + thePerson.person.wikiTreeId + " privacy does not allow testing");
-          console.log("Get Bio for Profile " + thePerson.person.wikiTreeId + " privacy does not allow testing");
+          this.testResults.setProgressMessage("Profile " +
+              thePerson.getWikiTreeId() + " privacy does not allow testing");
+          console.log("Get Bio for Profile " + thePerson.getWikiTreeId() + " privacy does not allow testing");
         } else {
-          this.testResults.setProgressMessage("Examining profile for " + thePerson.person.wikiTreeId);
+          this.testResults.setProgressMessage("Examining profile for " + thePerson.getWikiTreeId());
           if (bioObj.bio != null) {
             let bioString = bioObj.bio;
             this.checkBio(thePerson, bioString);
           } else {
             this.testResults.addUncheckedDueToPrivacy();
-            this.testResults.setProgressMessage("Profile " + thePerson.person.wikiTreeId + " privacy does not allow testing");
-            console.log("Get Bio for Profile " + thePerson.person.wikiTreeId + " does not have a bio ");
+            this.testResults.setProgressMessage("Profile " + thePerson.getWikiTreeId() + 
+                " privacy does not allow testing");
+            console.log("Get Bio for Profile " + thePerson.getWikiTreeId() + " does not have a bio ");
           }
         }
       }
@@ -336,7 +339,7 @@ export class BioChecker {
    * @param bioString the bio
    */
   async checkBio(thePerson, bioString) {
-    this.testResults.setProgressMessage("Examining profile for " + thePerson.person.wikiTreeId);
+    this.testResults.setProgressMessage("Examining profile for " + thePerson.getWikiTreeId());
 
 //    let startTime = new Date();                    // timing instrumentation
 
@@ -345,7 +348,7 @@ export class BioChecker {
     let isPre1700 = thePerson.isPersonPre1700();
     let mustBeOpen = thePerson.mustBeOpen();
     let bioUndated = false;
-    if ((thePerson.isUndated()) && (thePerson.privacyLevel > 0)) {
+    if ((thePerson.isUndated()) && (thePerson.getPrivacy() > 0)) {
       bioUndated = true;
     }
 
@@ -359,13 +362,13 @@ export class BioChecker {
 
     // keep track of what you found
     if (biography.bioResults.style.bioHasStyleIssues) {
-      this.thePeopleManager.setProfileStyle(thePerson.person.profileId);
+      this.thePeopleManager.setProfileStyle(thePerson.getProfileId());
     }
     if (biography.bioResults.stats.bioIsMarkedUnsourced) {
-      this.thePeopleManager.setProfileMarked(thePerson.person.profileId);
+      this.thePeopleManager.setProfileMarked(thePerson.getProfileId());
     } else {
       if (!biography.bioResults.sources.sourcesFound) {
-        this.thePeopleManager.setProfileUnmarked(thePerson.person.profileId);
+        this.thePeopleManager.setProfileUnmarked(thePerson.getProfileId());
       }
     }
     // add person to report
@@ -381,7 +384,7 @@ export class BioChecker {
     // allow garbage collection
     //bioValidator = null;
     biography = null;
-    thePerson.person.bio = "";
+    thePerson.clearBio();
   }
 
   /*
@@ -453,21 +456,16 @@ export class BioChecker {
   gatherFamilyMembers(personArray, persons, relativesAlreadyChecked 
                            ) {
     for (let i = 0; i < personArray.length; i++) {
-      let thePerson = new Person(this.thePeopleManager);
+      let thePerson = new BioCheckPerson();
       let canUseThis = thePerson.build(personArray[i], this.getOpenOnly(), 
                                        this.getIgnorePre1500(), this.getUserId(), 0);
-      if ((!relativesAlreadyChecked.has(thePerson.person.profileId))
-           && (!this.thePeopleManager.hasPerson(thePerson.person.profileId))) {
-        this.testResults.addToTotalProfileCount(1);
-        if (thePerson.person.uncheckedDueToPrivacy) {
-          this.testResults.addUncheckedDueToPrivacy();
-        }
-        if (thePerson.person.uncheckedDueToDate) {
-          this.testResults.addUncheckedDueToDate();
-        }
+      if ((!relativesAlreadyChecked.has(thePerson.getProfileId()))
+           && (!this.thePeopleManager.hasPerson(thePerson.getProfileId()))) {
+        this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(),
+            thePerson.isUncheckedDueToDate());
         if (canUseThis) {
           persons.push(thePerson);
-          relativesAlreadyChecked.add(thePerson.person.profileId);
+          relativesAlreadyChecked.add(thePerson.getProfileId());
         }
       }
     }
