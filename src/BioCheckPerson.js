@@ -60,17 +60,18 @@ export class BioCheckPerson extends Person {
    * @return true if it was possible to build a bio else false (e.g., living person)
    */
   build(profileObj, mustBeOpen, ignorePre1500, userId, requestedId) {
-    let canUseThis = this.initPerson(profileObj, requestedId);
-    if (canUseThis) {
+    //let canUse = this.initPerson(profileObj, requestedId);
+    let canUse = this.initPerson(profileObj, requestedId);
+    if (canUse) {
       if (this.person.privacyLevel < this.MIN_PRIVACY) {
         if (userId === 0) {            // user not logged in
-          canUseThis = false;
+          canUse = false;
         }
       }
       if ((mustBeOpen) && (this.person.privacyLevel < this.OPEN_PRIVACY)) {
-        canUseThis = false;
+        canUse = false;
       }
-      if (!canUseThis) {
+      if (!canUse) {
         this.person.uncheckedDueToPrivacy = true;
         if (this.verbose) {
           console.log("  Cannot test profile " + this.person.profileId + 
@@ -79,143 +80,14 @@ export class BioCheckPerson extends Person {
       } else {
         // check for birth/death date before 1500
         if ((ignorePre1500) && (this.isPersonPre1500())) {
-          canUseThis = false;
+          canUse = false;
           this.person.uncheckedDueToDate = true;
         }
       }
     } 
-    return canUseThis;
+    return canUse;
   }
 
-  /**
-   * Does this person have a bio
-   * @return true if person has bio
-   */
-  hasBio() {
-    return this.person.hasBio;
-  }
-  /**
-   * Get bio string for this person
-   * @return bio string
-   */
-  getBio() {
-    return this.person.bio;
-  }
-  /**
-   * Clear bio for this person
-   * to allow for garbage collection
-   */
-  clearBio() {
-    this.person.bio = "";
-  }
-  /**
-   * Does this person have a name field?
-   * @return true if person has name
-   */
-  hasName() {
-    return this.person.hasName;
-  }
-  /**
-   * Get wikiTreeId for the person
-   * @return wikiTreeId
-   */
-  getWikiTreeId() {
-    return this.person.wikiTreeId;
-  }
-  /**
-   * Get profileId for the person
-   * @return profileId 
-   */
-  getProfileId() {
-    return this.person.profileId;
-  }
-  /**
-   * Get requested profile for the person
-   * This may differ from the profile id on a redirect
-   * @return requestedProfileId 
-   */
-  getRequestedProfileId() {
-    return this.person.requestedProfileId;
-  }
-  /**
-   * Get first name
-   * @return first name
-   */
-  getFirstName() {
-    return this.person.firstName;
-  }
-  /**
-   * Get last name to report
-   * @return last name to report
-   */
-  getLastName() {
-    return this.person.lastName;
-  }
-  /**
-   * Get name to report
-   * @return string with first and last name
-   */
-  getReportName() {
-    let reportName = this.getFirstName() + " " + this.getLastName();
-    return reportName;
-  }
-  /**
-   * Get manager Id for the person
-   * @return manager Id
-   */
-  getManagerId() {
-    return this.person.managerId;
-  }
-  /**
-   * Get WikiTree link
-   * @param wikiTreeId for the person
-   * @return link to the WikiTree person
-   */
-  getWikiTreeLink() {
-    const WIKI_TREE_URI = "https://www.wikitree.com/wiki/";
-    return WIKI_TREE_URI  + this.person.wikiTreeId;
-  }
-  /**
-   * Get the privacy
-   * @return numeric privacy level
-   */
-  getPrivacy() {
-    return this.person.privacyLevel;
-  }
-  /**
-   * Get the privacy as a string to be displayed to the user
-   * @return privacy string (i.e., the color)
-   */
-  getPrivacyString() {
-    let privacyString = "";
-    switch (this.person.privacyLevel) {
-      case 0:           // Not returned by API
-        privacyString = "Unknown";
-      break;
-      case 10:           // Unlisted
-        privacyString = "Black";
-      break;
-      case 20:           // Private
-        privacyString = "Red";
-      break;
-      case 30:           // Private, Public Bio
-        privacyString = "Orange";
-      break;
-      case 35:           // Private, Public Tree
-        privacyString = "Light Orange";
-      break;
-      case 40:          // Private, Public Bio & Tree
-        privacyString = "Yellow";
-      break;
-      case 50:         // Public
-        privacyString = "Green";
-      break;
-      case 60:         // Open
-        privacyString = " ";
-      break;
-    }
-    return privacyString;
-  }
   /**
    * Was profile not checked due to privacy
    * @return true if profile could not be checked due to privacy

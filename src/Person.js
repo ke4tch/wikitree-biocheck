@@ -69,6 +69,9 @@ export class Person extends PersonDate {
     let canUseThis = true;
     this.person.profileId = profileObj.Id;
     this.requestedProfileId = requestedId;
+    this.person.firstName = "";
+    this.person.lastName = "";
+    this.person.bio = "";
     // Even if something returned, we can't process it without a Name
     if (profileObj.Name != null) {
       this.person.wikiTreeId = profileObj.Name;

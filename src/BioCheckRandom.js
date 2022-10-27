@@ -43,6 +43,10 @@ export class BioCheckRandom extends BioChecker {
    */
   async check() {
 
+// TODO see what you can do with
+// https://www.wikitree.com/index.php?title=Special:NetworkFeed&showall=1&l=100&created=1
+// then getting the most recent and getting their id as the max rand
+
     const MAX_RANDOM = 32000000;                  // number of profiles about 1 Oct 2022 
     this.verbose = true;
     this.unnamedProfileCount = 0;
