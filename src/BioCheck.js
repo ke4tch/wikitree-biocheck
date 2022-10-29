@@ -24,17 +24,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Send inputs from gui onto the checker and ripple results back
  * in the bio test results
  */
-import { BioTestResults } from "./BioTestResults.js"
+import { BioTestResults } from "./BioTestResults.js";
 
-import { BioCheckProfile } from "./BioCheckProfile.js"
-import { BioCheckQueryResults } from "./BioCheckQueryResults.js"
-import { BioCheckWatchlist } from "./BioCheckWatchlist.js"
-import { BioCheckRandom } from "./BioCheckRandom.js"
+import { BioCheckProfile } from "./BioCheckProfile.js";
+import { BioCheckQueryResults } from "./BioCheckQueryResults.js";
+import { BioCheckWatchlist } from "./BioCheckWatchlist.js";
+import { BioCheckRandom } from "./BioCheckRandom.js";
 
 export class BioCheck {
-
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * check bio
@@ -43,7 +41,6 @@ export class BioCheck {
    * @param checkResults - the results returned to GUI
    */
   check(userArgs, checkStatus, checkResults) {
-
     // link the gui stuff into the results
     let testResults = new BioTestResults();
     testResults.setArgs(checkStatus, checkResults);

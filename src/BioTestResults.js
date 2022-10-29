@@ -28,7 +28,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * to ripple back to the userface
  */
 export class BioTestResults {
-
   /*
    * What the GUI expects in the result rows
    */
@@ -48,7 +47,7 @@ export class BioTestResults {
   EXTRA_EQUALS = "Extra =";
 
   // the results
-  /* 
+  /*
    * results are tied into the GUI via Vue
    * specifically, the checkStatus and checkResults are defined in the App
    * The checkStatus contains messages and state management
@@ -61,27 +60,28 @@ export class BioTestResults {
     checkStatus: null,
     checkResults: null,
     // totalProfileCount is good for number of profiles considered
-    totalProfileCount: 0,          // requested via API or WT+ query
-    requestedProfileCount: 0,     // ?? maybe bogus
+    totalProfileCount: 0, // requested via API or WT+ query
+    requestedProfileCount: 0, // ?? maybe bogus
     uncheckedDueToPrivacyCount: 0, // privacy does not allow checking
-    uncheckedDueToDateCount: 0,   // date does not allow checking (pre1500)
-    checkedProfileCount: 0,       // made it through privacy and redirect
-    redirectedProfileCount: 0,    // was a redirect (only for random test)
+    uncheckedDueToDateCount: 0, // date does not allow checking (pre1500)
+    checkedProfileCount: 0, // made it through privacy and redirect
+    redirectedProfileCount: 0, // was a redirect (only for random test)
     styleIssuesProfileCnt: 0,
     unsourcedProfileCnt: 0,
     unmarkedProfileCnt: 0,
-    reportCount: 0,                // added to results rows
+    reportCount: 0, // added to results rows
     sourcesReport: false,
     profileReviewReport: false,
     reportStatsOnly: false,
     startTime: null,
-    rowData: ([]),                 // a row in the results
-    sourcesRowData: ([]),          // a row of sources in the results
-    profilesRowData: ([]),         // a row of profiles in the results
-  }
+    rowData: [], // a row in the results
+    sourcesRowData: [], // a row of sources in the results
+    profilesRowData: [], // a row of profiles in the results
+    totalServerRequests: 0,     // logging and diagnostics
+    totalPromiseWaits: 0,  // number of times awaiting all promises
+  };
 
-  constructor() {
-  }
+  constructor() {}
 
   /*
    * set args for stuff from gui
@@ -114,7 +114,7 @@ export class BioTestResults {
    * @param dueToPrivacy true if not checked because of privacy
    * @param dueToDate true if not checked because of date
    */
-  countProfile(cnt, dueToPrivacy, dueToDate) { 
+  countProfile(cnt, dueToPrivacy, dueToDate) {
     if (cnt > 0) {
       this.results.totalProfileCount += cnt;
     }
@@ -154,9 +154,14 @@ export class BioTestResults {
    * @param number of profiles requested
    */
   setProgressMessageDetails(requestedProfileCount) {
-    let message = "Wait... Requested " + requestedProfileCount + " profiles. Examined "
-      + this.results.checkedProfileCount + " profiles. Reported "
-      + this.results.reportCount + " profiles";
+    let message =
+      "Wait... Requested " +
+      requestedProfileCount +
+      " profiles. Examined " +
+      this.results.checkedProfileCount +
+      " profiles. Reported " +
+      this.results.reportCount +
+      " profiles";
     this.results.checkStatus.progressMessageTitle = message;
   }
 
@@ -198,15 +203,27 @@ export class BioTestResults {
    * @param profileReviewReport true to generate profile review report
    * @param userId for testing nonManaged profiles
    */
-  addProfile(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName,
-      managerId, privacyString, birthDate, deathDate,
-      reportAllProfiles, reportNonManaged, sourcesReport,
-      profileReviewReport, reportStatsOnly, userId) {
-
+  addProfile(
+    bioResults,
+    profileId,
+    wikiTreeId,
+    wikiTreeLink,
+    reportName,
+    managerId,
+    privacyString,
+    birthDate,
+    deathDate,
+    reportAllProfiles,
+    reportNonManaged,
+    sourcesReport,
+    profileReviewReport,
+    reportStatsOnly,
+    userId
+  ) {
     this.results.sourcesReport = sourcesReport;
     this.results.profileReviewReport = profileReviewReport;
     this.results.reportStatsOnly = reportStatsOnly;
-    let profileStatus = this.SOURCED; 
+    let profileStatus = this.SOURCED;
     this.results.checkedProfileCount++;
     let profileShouldBeReported = false;
     if (reportAllProfiles) {
@@ -261,8 +278,17 @@ export class BioTestResults {
           this.reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
         } else {
           if (profileReviewReport) {
-            this.reportReviewProfile(bioResults, wikiTreeId, wikiTreeLink, reportName,
-                privacyString, managerId, birthDate, deathDate, profileStatus); 
+            this.reportReviewProfile(
+              bioResults,
+              wikiTreeId,
+              wikiTreeLink,
+              reportName,
+              privacyString,
+              managerId,
+              birthDate,
+              deathDate,
+              profileStatus
+            );
           } else {
             this.reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
           }
@@ -285,18 +311,18 @@ export class BioTestResults {
       profileId: 0,
       wikiTreeId: "",
       personName: "",
-      unsourcedStatus: "No",               // Sourced, Marked, Maybe
+      unsourcedStatus: "No", // Sourced, Marked, Maybe
       isEmpty: "",
       misplacedLineCnt: "",
-      missingEnd: "",                      // Comment, references, Span
-      bioHeading: "",                      // Missing, Mulitple, No Lines Follow
-      sourcesHeading: "",                  // Missing, Multiple, Extra =
-      referencesTag: "",                   // Missing, Multiple, ref following
-      acknowledgements: "",                // Before Sources, Extra =
-      bioLineCnt : "",
-      inlineRefCnt : "",
-      sourceLineCnt : "",
-    }
+      missingEnd: "", // Comment, references, Span
+      bioHeading: "", // Missing, Mulitple, No Lines Follow
+      sourcesHeading: "", // Missing, Multiple, Extra =
+      referencesTag: "", // Missing, Multiple, ref following
+      acknowledgements: "", // Before Sources, Extra =
+      bioLineCnt: "",
+      inlineRefCnt: "",
+      sourceLineCnt: "",
+    };
 
     rowDataItem.unsourcedStatus = profileStatus;
     rowDataItem.profileId = profileId;
@@ -323,7 +349,7 @@ export class BioTestResults {
     }
 
     // handle multiple style issues that compress into a single row data item
-    let missingEnd = ([]);
+    let missingEnd = [];
     if (bioResults.style.hasEndlessComment) {
       missingEnd.push(this.COMMENT);
     }
@@ -336,7 +362,7 @@ export class BioTestResults {
     if (missingEnd.length > 0) {
       rowDataItem.missingEnd = missingEnd.join(", ");
     }
-    let bioHeading = ([]);
+    let bioHeading = [];
     if (bioResults.style.bioIsMissingBiographyHeading) {
       bioHeading.push(this.MISSING);
     }
@@ -352,7 +378,7 @@ export class BioTestResults {
     if (bioHeading.length > 0) {
       rowDataItem.bioHeading = bioHeading.join(", ");
     }
-    let sourcesHeading = ([]);
+    let sourcesHeading = [];
     if (bioResults.style.bioIsMissingSourcesHeading) {
       sourcesHeading.push(this.MISSING);
     }
@@ -365,7 +391,7 @@ export class BioTestResults {
     if (sourcesHeading.length > 0) {
       rowDataItem.sourcesHeading = sourcesHeading.join(", ");
     }
-    let referencesTag = ([]);
+    let referencesTag = [];
     if (bioResults.style.bioIsMissingReferencesTag) {
       referencesTag.push(this.MISSING);
     }
@@ -378,7 +404,7 @@ export class BioTestResults {
     if (referencesTag.length > 0) {
       rowDataItem.referencesTag = referencesTag.join(", ");
     }
-    let acknowledgements = ([]);
+    let acknowledgements = [];
     if (bioResults.style.acknowledgementsHeadingHasExtraEqual) {
       acknowledgements.push(this.EXTRA_EQUALS);
     }
@@ -393,7 +419,7 @@ export class BioTestResults {
     this.results.checkResults.resultsRowData.push(rowDataItem);
   }
 
-  /* 
+  /*
    * Report sources for the profile
    * @param bioResults the results of checking
    * @param profileId to report
@@ -403,17 +429,22 @@ export class BioTestResults {
    * @param reportAllSources true to report all sources
    */
   reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
-    if ((bioResults.sources.invalidSource.length === 0) &&
-      (bioResults.sources.validSource.length === 0)) {
-        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, -1, "");
+    if (bioResults.sources.invalidSource.length === 0 && bioResults.sources.validSource.length === 0) {
+      this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, -1, "");
     } else {
       for (let i = 0; i < bioResults.sources.invalidSource.length; i++) {
         this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, 0, bioResults.sources.invalidSource[i]);
       }
       if (reportAllSources) {
         for (let i = 0; i < bioResults.sources.validSource.length; i++) {
-          this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName,
-                   i+1, bioResults.sources.validSource[i]);
+          this.reportSourceRow(
+            profileId,
+            wikiTreeId,
+            wikiTreeLink,
+            reportName,
+            i + 1,
+            bioResults.sources.validSource[i]
+          );
         }
       }
     }
@@ -437,13 +468,12 @@ export class BioTestResults {
       sourceCount: "-1",
       sourceLine: "",
       wikiTreeLink: "",
-    }
+    };
     rowDataItem.profileId = profileId;
     rowDataItem.wikiTreeId = wikiTreeId;
     rowDataItem.wikiTreeLink = wikiTreeLink;
     rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
-    rowDataItem.personName = reportName, 
-    rowDataItem.sourceCount = sourceNum;
+    (rowDataItem.personName = reportName), (rowDataItem.sourceCount = sourceNum);
     rowDataItem.sourceLine = sourceContent;
     this.results.checkResults.sourcesRowData.push(rowDataItem);
   }
@@ -460,8 +490,17 @@ export class BioTestResults {
    * @param deathDate to report
    * @param profileStatus the unsourced status
    */
-  reportReviewProfile(bioResults, wikiTreeId, wikiTreeLink, reportName,
-  privacyString, managerId, birthDate, deathDate, profileStatus) {
+  reportReviewProfile(
+    bioResults,
+    wikiTreeId,
+    wikiTreeLink,
+    reportName,
+    privacyString,
+    managerId,
+    birthDate,
+    deathDate,
+    profileStatus
+  ) {
     let rowDataItem = {
       wikiTreeId: "",
       wikiTreeHyperLink: "",
@@ -476,7 +515,7 @@ export class BioTestResults {
       birthDate: "",
       deathDate: "",
       wikiTreeLink: "",
-    }
+    };
     rowDataItem.wikiTreeId = wikiTreeId;
     rowDataItem.wikiTreeLink = wikiTreeLink;
     rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
@@ -504,47 +543,49 @@ export class BioTestResults {
    * @return the hyperlink text
    */
   getHyperLink(theUrl, displayText) {
-    let doubleQuote = "\"\"";
-    let hyperlink = "=HYPERLINK(" + doubleQuote + theUrl + doubleQuote + "," 
-                                  + doubleQuote + displayText + doubleQuote + ")";
+    let doubleQuote = '""';
+    let hyperlink =
+      "=HYPERLINK(" + doubleQuote + theUrl + doubleQuote + "," + doubleQuote + displayText + doubleQuote + ")";
     return hyperlink;
   }
 
   /**
-   * Report summary statistics 
+   * Report summary statistics
+   * duplicateProfileCount ignored profiles for logging metrics
    */
-  reportStatistics() {
-
+  reportStatistics(duplicateProfileCount) {
     this.setProgressMessage("Sorting results....");
     if (this.results.sourcesReport) {
       this.results.checkResults.sourcesRowData.sort(function (a, b) {
-        var nameA = a.wikiTreeId.toLowerCase(), nameB = b.wikiTreeId.toLowerCase()
-        if (nameA < nameB) //sort string ascending
-          return -1
-        if (nameA > nameB)
-          return 1
-        return 0 //default return value (no sorting)
-      })
+        var nameA = a.wikiTreeId.toLowerCase(),
+          nameB = b.wikiTreeId.toLowerCase();
+        if (nameA < nameB)
+          //sort string ascending
+          return -1;
+        if (nameA > nameB) return 1;
+        return 0; //default return value (no sorting)
+      });
     } else {
       this.results.checkResults.resultsRowData.sort(function (a, b) {
-        var nameA = a.wikiTreeId.toLowerCase(), nameB = b.wikiTreeId.toLowerCase()
-        if (nameA < nameB) //sort string ascending
-          return -1
-        if (nameA > nameB)
-          return 1
-        return 0 //default return value (no sorting)
-      })
+        var nameA = a.wikiTreeId.toLowerCase(),
+          nameB = b.wikiTreeId.toLowerCase();
+        if (nameA < nameB)
+          //sort string ascending
+          return -1;
+        if (nameA > nameB) return 1;
+        return 0; //default return value (no sorting)
+      });
     }
 
     // Reporting just to console for random check
     console.log("Redirected profile count " + this.results.redirectedProfileCount);
 
-    let msg = "Checked " + this.results.checkedProfileCount 
-      + " profiles: Found "
-      + this.results.reportCount + " profiles with "
-      + this.results.styleIssuesProfileCnt + " style issues; "
-      + this.results.unsourcedProfileCnt + " marked unsourced; "
-      + this.results.unmarkedProfileCnt + " possibly unsourced not marked";
+    let msg = "Checked " + this.results.checkedProfileCount +
+      " profiles: Found " + this.results.reportCount +
+      " profiles with " + this.results.styleIssuesProfileCnt +
+      " style issues; " + this.results.unsourcedProfileCnt +
+      " marked unsourced; " + this.results.unmarkedProfileCnt +
+      " possibly unsourced not marked";
     if (this.results.checkStatus.cancelPending) {
       msg = "Canceled. " + msg;
     }
@@ -553,9 +594,8 @@ export class BioTestResults {
     this.results.uncheckedDueToPrivacyCount + " profiles";
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;
-    if (otherCnt> 0) {
-      msg += " Privacy, date, or other reasons did not allow checking for " +
-              otherCnt + " profiles";
+    if (otherCnt > 0) {
+      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles";
     }
     this.setStateMessage(msg);
     this.results.checkStatus.progressMessageTitle = "";
@@ -565,11 +605,27 @@ export class BioTestResults {
     if (!this.results.reportStatsOnly) {
       this.results.checkStatus.exportDisabled = false;
     }
+    console.log('Total server requests ' + this.results.totalServerRequests);
+    console.log('Total promise waits ' + this.results.totalPromiseWaits);
+    console.log('Duplicate profiles ignored ' + duplicateProfileCount);
     this.getElapsedTime();
   }
 
-  /** 
-   * Get elapsed time 
+  /**
+   * Count a request to server. Instrumentation and diagnostics
+   */
+  countRequest() {
+    this.results.totalServerRequests++;
+  }
+  /**
+   * Count await all promises and delay. Instrumentation and diagnostics
+   */
+  countPromiseWait() {
+    this.results.totalPromiseWaits++;
+  }
+
+  /**
+   * Get elapsed time
    */
   getElapsedTime() {
     let endTime = new Date();

@@ -25,7 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * should be a singleton. 
 e*/
 export class PeopleManager {
-
   /*
    * keep all the persons who have not been checked
    * all the persons checked, sourced, but with style issues
@@ -38,15 +37,14 @@ export class PeopleManager {
    * wikiTreeId is the wikitree id (e.g., LNAB-####)
    */
 
-  wikiTreeIdToPersonIdMap = new Map();   // List of person id, accessed by wikitreeId
-  personIdToWikiTreeIdMap = new Map();   // list of wikitree id, accessed by person id
-  allProfileIds = [];                    // all profile ids
+  wikiTreeIdToPersonIdMap = new Map(); // List of person id, accessed by wikitreeId
+  personIdToWikiTreeIdMap = new Map(); // list of wikitree id, accessed by person id
+  allProfileIds = []; // all profile ids
   removedProfileIds = [];
   redirectedProfileIds = new Set();
   duplicateProfileCount = 0;
 
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Add person
@@ -61,7 +59,7 @@ export class PeopleManager {
       this.allProfileIds.push(profileId);
     }
     // Keep track of redirected profiles
-    if ((requestedProfileId > 0) && (requestedProfileId != profileId)) {
+    if (requestedProfileId > 0 && requestedProfileId != profileId) {
       this.redirectedProfileIds.add(requestedProfileId);
     }
   }
@@ -71,7 +69,7 @@ export class PeopleManager {
    * @return true if person has already been processed
    */
   hasPerson(profileId) {
-    if ((this.personIdToWikiTreeIdMap.has(profileId)) || (this.redirectedProfileIds.has(profileId))) {
+    if (this.personIdToWikiTreeIdMap.has(profileId) || this.redirectedProfileIds.has(profileId)) {
       this.duplicateProfileCount++;
       return true;
     } else {
@@ -96,7 +94,7 @@ export class PeopleManager {
    */
   removeProfile(profileId) {
     let id = this.personIdToWikiTreeIdMap.get(profileId);
-    id = null;  // force code not to execute
+    id = null; // force code not to execute
     if (id != null) {
       // this.wikiTreeIdToPersonIdMap.delete(person.wikiTreeId);
       // person = null;                 // allow gc
@@ -105,7 +103,7 @@ export class PeopleManager {
     }
   }
 
-  /* 
+  /*
    * Get the list of the profiles held by the manager
    * in alphabetical order
    * @return array of wikiTreeID
@@ -126,7 +124,7 @@ export class PeopleManager {
    */
   getProfileCount() {
     return this.allProfileIds.length;
-  } 
+  }
   /**
    * Get all profile IDs managed
    * @return array of profile Id

@@ -24,9 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Manages a collection of WikiTree profiles for BioCheck
  * should be a singleton. 
 e*/
-import { PeopleManager } from "./PeopleManager.js"
+import { PeopleManager } from "./PeopleManager.js";
 export class BioCheckPeopleManager extends PeopleManager {
-
   /*
    * keep all the persons who have not been checked
    * all the persons checked, sourced, but with style issues
@@ -58,7 +57,7 @@ export class BioCheckPeopleManager extends PeopleManager {
    */
   removeProfile(profileId) {
     let id = this.personIdToWikiTreeIdMap.get(profileId);
-    id = null;  // force code not to execute
+    id = null; // force code not to execute
     if (id != null) {
       // this.wikiTreeIdToPersonIdMap.delete(person.wikiTreeId);
       // person = null;                 // allow gc
@@ -82,10 +81,10 @@ export class BioCheckPeopleManager extends PeopleManager {
     this.markedProfileIds.push(profileId);
   }
   setProfileUnmarked(profileId) {
-  /**
-   * Add to list of profiles maybe unsourced, not marked
-   * @param profileId profile to add
-   */
+    /**
+     * Add to list of profiles maybe unsourced, not marked
+     * @param profileId profile to add
+     */
     this.unmarkedProfileIds.push(profileId);
   }
   /**
@@ -103,7 +102,7 @@ export class BioCheckPeopleManager extends PeopleManager {
     return this.markedProfileIds;
   }
   /**
-   * Get number of profiles unmarked 
+   * Get number of profiles unmarked
    * @return number of profiles not marked unsourced
    * that are possibly not sourced
    */

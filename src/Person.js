@@ -24,23 +24,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Contains information about a WikiTree Profile
  * only contains a subset of the complete set of data available
  */
-import { PersonDate } from "./PersonDate.js"
+import { PersonDate } from "./PersonDate.js";
 export class Person extends PersonDate {
-
   person = {
     profileId: 0,
     wikiTreeId: "",
     managerId: 0,
-    firstName: "",   // name for reporting
-    lastName: "",   // name for reporting if there is current use that else LNAB
+    firstName: "", // name for reporting
+    lastName: "", // name for reporting if there is current use that else LNAB
     hasBio: false,
     bio: "",
     requestedProfileId: 0,
     verbose: false,
     hasName: false,
     privacyLevel: 0,
-  }
-
+  };
 
   /**
    * constructor
@@ -60,12 +58,12 @@ export class Person extends PersonDate {
   /**
    * Initialize person
    * @param profileObj containing the profile as returned from WikiTree APIs
-   * @param requestedId the Id used for getPerson 
+   * @param requestedId the Id used for getPerson
    * @return true if profile has minimum set of information to be processed
    * such as a name (aka wikiTreeId)
    */
   initPerson(profileObj, requestedId) {
-    this.init(profileObj);         // initialize dates
+    this.init(profileObj); // initialize dates
     let canUseThis = true;
     this.person.profileId = profileObj.Id;
     this.requestedProfileId = requestedId;
@@ -83,8 +81,8 @@ export class Person extends PersonDate {
         this.person.privacyLevel = profileObj.Privacy;
       }
       if (profileObj.bio != null) {
-       this.person.bio = profileObj.bio;
-       this.person.hasBio = true;
+        this.person.bio = profileObj.bio;
+        this.person.hasBio = true;
       }
       if (profileObj.FirstName != null) {
         this.person.firstName = profileObj.FirstName;
@@ -102,7 +100,7 @@ export class Person extends PersonDate {
         console.log("  Cannot test profile " + this.person.profileId + " does not have Name");
       }
       canUseThis = false;
-    } 
+    }
     return canUseThis;
   }
 
@@ -143,7 +141,7 @@ export class Person extends PersonDate {
   }
   /**
    * Get profileId for the person
-   * @return profileId 
+   * @return profileId
    */
   getProfileId() {
     return this.person.profileId;
@@ -151,7 +149,7 @@ export class Person extends PersonDate {
   /**
    * Get requested profile for the person
    * This may differ from the profile id on a redirect
-   * @return requestedProfileId 
+   * @return requestedProfileId
    */
   getRequestedProfileId() {
     return this.person.requestedProfileId;
@@ -192,7 +190,7 @@ export class Person extends PersonDate {
    */
   getWikiTreeLink() {
     const WIKI_TREE_URI = "https://www.wikitree.com/wiki/";
-    return WIKI_TREE_URI  + this.person.wikiTreeId;
+    return WIKI_TREE_URI + this.person.wikiTreeId;
   }
   /**
    * Get the privacy
@@ -208,30 +206,30 @@ export class Person extends PersonDate {
   getPrivacyString() {
     let privacyString = "";
     switch (this.person.privacyLevel) {
-      case 0:           // Not returned by API
+      case 0: // Not returned by API
         privacyString = "Unknown";
-      break;
-      case 10:           // Unlisted
+        break;
+      case 10: // Unlisted
         privacyString = "Black";
-      break;
-      case 20:           // Private
+        break;
+      case 20: // Private
         privacyString = "Red";
-      break;
-      case 30:           // Private, Public Bio
+        break;
+      case 30: // Private, Public Bio
         privacyString = "Orange";
-      break;
-      case 35:           // Private, Public Tree
+        break;
+      case 35: // Private, Public Tree
         privacyString = "Light Orange";
-      break;
-      case 40:          // Private, Public Bio & Tree
+        break;
+      case 40: // Private, Public Bio & Tree
         privacyString = "Yellow";
-      break;
-      case 50:         // Public
+        break;
+      case 50: // Public
         privacyString = "Green";
-      break;
-      case 60:         // Open
+        break;
+      case 60: // Open
         privacyString = " ";
-      break;
+        break;
     }
     return privacyString;
   }

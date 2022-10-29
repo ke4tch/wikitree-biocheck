@@ -23,15 +23,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * Check biographies obtained via a WT+ query
  */
-import { BioCheckPerson } from "./BioCheckPerson.js"
-import { BioChecker } from "./BioChecker.js"
+import { BioCheckPerson } from "./BioCheckPerson.js";
+import { BioChecker } from "./BioChecker.js";
 
 export class BioCheckQueryResults extends BioChecker {
-
   static WIKI_TREE_PLUS_URI = "https://wikitree.sdms.si/function/WTWebProfileSearch/Profiles.json";
 
   /**
-   * Constructor 
+   * Constructor
    * @param theTestResults container for results
    * @param userArgs what to do
    */
@@ -43,12 +42,15 @@ export class BioCheckQueryResults extends BioChecker {
    * Check profiles found via a WikiTree+ Query
    */
   async check() {
-
     try {
-      let url = BioCheckQueryResults.WIKI_TREE_PLUS_URI + "?Query=" + this.getQueryArg()
-                               + "&format=JSON&maxProfiles=" + this.getMaxQuery();
+      let url =
+        BioCheckQueryResults.WIKI_TREE_PLUS_URI +
+        "?Query=" +
+        this.getQueryArg() +
+        "&format=JSON&maxProfiles=" +
+        this.getMaxQuery();
       if (this.getOpenOnly()) {
-        this.url =+ "&Privacy=Public";
+        this.url = +"&Privacy=Public";
       }
       this.testResults.setStateMessage("Please wait, searching via WikiTree+ ...");
       this.testResults.setProgressMessage("Examining profiles");
@@ -65,7 +67,7 @@ export class BioCheckQueryResults extends BioChecker {
         this.testResults.resetStateOnError();
         console.log("Error from WikiTree+ Query " + fetchResponse.status);
       } else {
-        const theJson = await (fetchResponse.json());
+        const theJson = await fetchResponse.json();
         let queryResponse = theJson.response;
         this.testResults.countProfile(queryResponse.found, false, false);
 
@@ -79,24 +81,32 @@ export class BioCheckQueryResults extends BioChecker {
         }
         let i = this.getSearchStart();
         let cnt = endIndex - i;
-        this.testResults.setStateMessage("Examining " + cnt + " of " +
-          queryResponse.found + " profiles found via search");
-        while ((i < endIndex) && (!this.timeToQuit())) {
+        this.testResults.setStateMessage(
+          "Examining " + cnt + " of " + queryResponse.found + " profiles found via search"
+        );
+        while (i < endIndex && !this.timeToQuit()) {
           let profileId = queryResponse.profiles[i];
           if (!this.thePeopleManager.hasPerson(profileId)) {
-            url = BioChecker.WIKI_TREE_URI + "?action=getPerson" + "&key=" + profileId
-                     + "&fields=" + BioChecker.BASIC_PROFILE_REQUEST_FIELDS + BioChecker.REDIRECT_KEY;
+            url =
+              BioChecker.WIKI_TREE_URI +
+              "?action=getPerson" +
+              "&key=" +
+              profileId +
+              "&fields=" +
+              BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
+              BioChecker.REDIRECT_KEY;
 
             this.setDetailedProgress();
             this.pendingRequestCount++;
             try {
-                const fetchResponse = await fetch(url, {
-                  credentials: "include",
-                });
+              this.testResults.countRequest();  // instrumentation
+              const fetchResponse = await fetch(url, {
+                credentials: "include",
+              });
               if (!fetchResponse.ok) {
                 console.log("Error from getPerson " + fetchResponse.status + " profileId " + profileId);
               }
-              let theJson = await (fetchResponse.json());
+              let theJson = await fetchResponse.json();
               let responseObj = theJson[0];
               let responseStatus = responseObj.status;
               if (responseStatus != 0) {
@@ -105,18 +115,26 @@ export class BioCheckQueryResults extends BioChecker {
                 if (responseObj.person != null) {
                   let profileObj = responseObj.person;
                   let thePerson = new BioCheckPerson();
-                  let canUseThis = thePerson.build(profileObj, this.getOpenOnly(), 
-                                                   this.getIgnorePre1500(), this.getUserId(), profileId);
+                  let canUseThis = thePerson.build(
+                    profileObj,
+                    this.getOpenOnly(),
+                    this.getIgnorePre1500(),
+                    this.getUserId(),
+                    profileId
+                  );
                   if (!canUseThis) {
-                    this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
-                        thePerson.isUncheckedDueToDate());
+                    this.testResults.countProfile(
+                      0,
+                      thePerson.isUncheckedDueToPrivacy(),
+                      thePerson.isUncheckedDueToDate()
+                    );
                   } else {
                     if (profileId != thePerson.getProfileId()) {
                       this.testResults.addRedirectedProfile();
                     }
-                    if ((!this.thePeopleManager.hasPerson(thePerson.getProfileId())) &&
-                        (!this.timeToQuit())) {
+                    if (!this.thePeopleManager.hasPerson(thePerson.getProfileId()) && !this.timeToQuit()) {
                       if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
+                        this.testResults.countPromiseWait();
                         await this.sleep(BioChecker.SYNC_DELAY_MS);
                         let promiseArray = await this.promiseCollection;
                         let allPromises = Promise.all(promiseArray);
@@ -136,8 +154,7 @@ export class BioCheckQueryResults extends BioChecker {
               }
             } catch (error) {
               console.log("Error from getPerson " + error + " profileId " + profileId);
-              this.testResults.setProgressMessage("Error getting profile " +
-                profileId + " " + error);
+              this.testResults.setProgressMessage("Error getting profile " + profileId + " " + error);
             }
           }
           i++;
@@ -151,14 +168,13 @@ export class BioCheckQueryResults extends BioChecker {
         if (this.needToCheckRelatives()) {
           this.checkUnsourcedRelatives();
         } else {
-          this.testResults.reportStatistics();
+          this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
           //console.log("totalValidateTime (milliseconds) " + BioChecker.totalValidateTime);
         }
       }
     } catch (error) {
       this.testResults.resetStateOnError();
-      this.testResults.setProgressMessage("Error from WikiTree+ query " +
-      this.getQueryArg() + " " + error);
+      this.testResults.setProgressMessage("Error from WikiTree+ query " + this.getQueryArg() + " " + error);
     }
   }
 }

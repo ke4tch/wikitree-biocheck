@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.4.2</h4>
+      <h4>Bio Check Version 1.4.3</h4>
     </div>
 
     <div class="flex-grid">
@@ -169,119 +169,71 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                min="0" max="5000" value="5000" >
             </div>
           </div>
-          <div class="user-input">
-            <div class="col">
-              <span v-bind:title="numRelativesTip">
-                <label for="userArgs.numRelatives" >Number of degrees of connection to check</label>
-              </span>
-            </div>
-            <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.numRelatives" type="number"
-               id="userArgs.numRelatives" name="userArgs.numRelatives" min="0"
-               max="25" value="0">
-            </div>
-          </div>
-          <div class="user-input">
-            <div class="col">
-              <span v-bind:title="connectionsTip">
-                <label for="userArgs.checkAllConnections" >Check connections for all profiles</label>
-              </span>
-            </div>
-            <div class="col">
-              <input class="vmodel-input" v-model="userArgs.checkAllConnections" type="checkbox"
-                     id="userArgs.checkAllConnections"
-                     name="userArgs.checkAllConnections" >
-            </div>
-          </div>
-          
         </template>
         <template v-if="isCheckWatchlist">
           <div class="user-input">
             <div class="col">
               <span v-bind:title="maxQueryTip">
-                <label for="userArgs.maxQuery" >Max search profiles</label> 
+                <label for="userArgs.maxWatchlistCount" >Max profiles</label> 
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.maxQuery" type="number"
+              <input class="vmodel-input" v-model.number="userArgs.maxWatchlistCount" type="number"
                :disabled="isCheckByProfile"
-               id="userArgs.maxQuery" name="userArgs.maxQuery" 
-               min="0" value="5000" > 
+               id="userArgs.maxWatchlistCount" name="userArgs.maxWatchlistCount" 
+               min="0" value="1000" > 
              </div>
           </div>
           <div class="user-input">
             <div class="col">
               <span v-bind:title="searchStartTip">
-                <label for="userArgs.searchStart" >Check starting at</label>
+                <label for="userArgs.searchStartWatchlist" >Check starting at</label>
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchStart" type="number"
+              <input class="vmodel-input" v-model.number="userArgs.searchStartWatchlist" type="number"
                :disabled="isCheckByProfile"
-               id="userArgs.searchStart" name="userArgs.searchStart" 
+               id="userArgs.searchStartWatchlist" name="userArgs.searchStartWatchlist" 
                min="0" value="0" >
             </div>
           </div>
           <div class="user-input">
             <div class="col">
               <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMax" >Max to check</label> 
+                <label for="userArgs.searchMaxWatchlist" >Max to check</label> 
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
-               min="0" max="5000" value="5000" >
-            </div>
-          </div>
-          <div class="user-input">
-            <div class="col">
-              <span v-bind:title="numRelativesTip">
-                <label for="userArgs.numRelatives" >Number of degrees of connection to check</label>
-              </span>
-            </div>
-            <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.numRelatives" type="number"
-               id="userArgs.numRelatives" name="userArgs.numRelatives" min="0"
-               max="25" value="0">
-            </div>
-          </div>
-          <div class="user-input">
-            <div class="col">
-              <span v-bind:title="connectionsTip">
-                <label for="userArgs.checkAllConnections" >Check connections for all profiles</label>
-              </span>
-            </div>
-            <div class="col">
-              <input class="vmodel-input" v-model="userArgs.checkAllConnections" type="checkbox"
-                     id="userArgs.checkAllConnections"
-                     name="userArgs.checkAllConnections" >
+              <input class="vmodel-input" v-model.number="userArgs.searchMaxWatchlist" type="number"
+              id="userArgs.searchMax.Watchlist" name="userArgs.searchMaxWatchlist" 
+               min="0" max="200" value="200" >
             </div>
           </div>
         </template>
         <template v-if="isCheckRandom">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchStartTip">
-                <label for="userArgs.searchStart" >Min random number</label>
+              <span v-bind:title="minRandomTip">
+                <label for="userArgs.minRandom" >Min random number</label>
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchStart" type="number"
+              <input class="vmodel-input" v-model.number="userArgs.minRandom" type="number"
                :disabled="isCheckByProfile"
-               id="userArgs.searchStart" name="userArgs.searchStart" 
+               id="userArgs.minRandom" name="userArgs.searchStart" 
                min="0" value="0" >
             </div>
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="maxQueryTip">
-                <label for="userArgs.maxQuery" >Max random number</label> 
+              <span v-bind:title="maxRandomTip">
+                <label for="userArgs.maxRandom" >Max random number</label> 
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.maxQuery" type="number"
+              <input class="vmodel-input" v-model.number="userArgs.maxRandom" type="number"
                :disabled="isCheckByProfile"
-               id="userArgs.maxQuery" name="userArgs.maxQuery" 
+               id="userArgs.maxQuery" name="userArgs.maxRandom" 
                min="0" value="5000" > 
             </div>
           </div>
@@ -543,6 +495,8 @@ export default {
         numDescendantsGenTip: "If you have set How to Find Profiles as Profile Id, enter the number of generations of descendants to check for the profile",
         queryArgTip: "If you have set How to Find Profiles as WikiTree+ search results, enter the text to use in a WikiTree+ search to find profiles to check)",
         maxQueryTip: "Enter the maximum number profiles to return from the WikiTree+ search or your watchlist. Use this to limit the number of profiles returned to Bio Check",
+        maxRandomTip: "Enter the highest random number profile to check",
+        minRandomTip: "Enter the lowest random number profile to check",
         searchStartTip: "Enter the offset to start checking returned profiles.  Start at 0. See the Help for more details",
         searchMaxTip: "Enter maximum number of profiles to check from the WikiTree+ search results or your watchlist. The check will complete when this number is reached",
 
@@ -584,6 +538,11 @@ export default {
           userId: 0,
           userName: "",
           loggedIn: false,
+          maxWatchlistCount: 5000,
+          searchStartWatchlist: 0,
+          searchMaxWatchlist: 200,
+          minRandom: 0,
+          maxRandom: 36000000,
         },
         checkStatus: { 
           stateMessage: " ",
@@ -788,9 +747,9 @@ export default {
               }
               break;
             case "checkWatchlist":
-                if (this.userArgs.maxQuery > 5000) {
-                  this.userArgs.maxQuery = 5000;
-                  this.checkStatus.progressMessage = "Max search profiles has been changed to maximum of 5000";
+                if (this.userArgs.maxWatchlistCount > 5000) {
+                  this.userArgs.maxWatchlistCount = 5000;
+                  this.checkStatus.progressMessage = "Max profiles has been changed to maximum of 5000";
                 }
                 this.setTools(true, this.userContext.userName);
               break;
@@ -958,8 +917,8 @@ export default {
               } else {
                 if (checkType === "checkWatchlist") {
                   this.userArgs.selectedCheckType = "checkWatchlist";
-                  this.userArgs.maxQuery = 5000;
-                  this.userArgs.searchMax = 5000;
+                  this.userArgs.maxWatchlistCount = 5000;
+                  this.userArgs.searchMax = 200;
                   this.userArgs.maxReport = 5000;
                 }
               }
@@ -1002,7 +961,7 @@ export default {
               } else {
                 if (checkType === "checkWatchlist") {
                   this.userArgs.selectedCheckType = "checkWatchlist";
-                  this.userArgs.maxQuery = 5000;
+                  this.userArgs.maxWatchlistCount = 5000;
                   this.userArgs.searchMax = 5000;
                   this.userArgs.maxReport = 5000;
                 } else {

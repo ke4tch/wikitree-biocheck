@@ -21,18 +21,17 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 export class BioResultsExport {
-
   // TODO any other char besides # that makes it barf?
 
   constructor() {
-console.log("BioResultsExport");
+    console.log("BioResultsExport");
   }
 
-  /* 
+  /*
    * export results rows as CSV
    */
   exportResultsRowCsv(userArgs, resultsRowData) {
-console.log("exportResultsRowCsv"); 
+    console.log("exportResultsRowCsv");
     let filename = this.buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
     let headerRow = resultsRowData[0];
@@ -44,7 +43,7 @@ console.log("exportResultsRowCsv");
       let resultRow = resultsRowData[i];
       let rda = [];
       for (let key in resultRow) {
-        let val = "\"" + resultRow[key] + "\"";
+        let val = '"' + resultRow[key] + '"';
         val = val.replace(/#/g, "");
         rda.push(val);
       }
@@ -61,7 +60,7 @@ console.log("exportResultsRowCsv");
     //            document.body.removeChild(link);
   }
 
-  /* 
+  /*
    * export sources rows as CSV
    */
   exportSourcesRowCsv(userArgs, sourcesRowData) {
@@ -80,7 +79,7 @@ console.log("exportResultsRowCsv");
         let val = sourcesRow[key].toString();
         val = val.replace(/\u201C/g, '"');
         val = val.replace(/\u201D/g, '"');
-        val = val.replace(/\t/g, ' ');
+        val = val.replace(/\t/g, " ");
         if (key != "wikiTreeHyperLink") {
           val = val.replace(/"/g, '""');
           val = val.replace(/#/g, "");
@@ -103,7 +102,7 @@ console.log("exportResultsRowCsv");
     //            document.body.removeChild(link);
   }
 
-  /* 
+  /*
    * export review rows as CSV
    */
   exportReviewRowCsv(userArgs, profilesRowData) {
@@ -119,7 +118,7 @@ console.log("exportResultsRowCsv");
       let rda = [];
       for (let key in resultRow) {
         if (key != "wikiTreeLink") {
-          let val = "\"" + resultRow[key] + "\"";
+          let val = '"' + resultRow[key] + '"';
           val = val.replace(/#/g, "");
           rda.push(val);
         }
@@ -137,7 +136,7 @@ console.log("exportResultsRowCsv");
     //            document.body.removeChild(link);
   }
 
-  /** 
+  /**
    * Build filename to reflect what was used for report
    */
   buildFilename(userArgs) {
@@ -181,11 +180,11 @@ console.log("exportResultsRowCsv");
       sourcesHeading: "Sources Heading",
       referencesTag: "references tag",
       acknowledgements: "Acknowledgements",
-      bioLineCnt : "Bio Lines",
-      inlineRefCnt : "Inline ref",
-      sourceLineCnt : "Source Line Count",
-      wikiTreeHyperLink: "Link"
-    }
+      bioLineCnt: "Bio Lines",
+      inlineRefCnt: "Inline ref",
+      sourceLineCnt: "Source Line Count",
+      wikiTreeHyperLink: "Link",
+    };
     let headings = [];
     for (let prop in firstRow) {
       headings.push(headerText[prop]);
@@ -206,7 +205,7 @@ console.log("exportResultsRowCsv");
       sourceCount: "Count",
       sourceLine: "Source",
       wikiTreeLink: "URL",
-    }
+    };
     let headings = [];
     for (let prop in firstRow) {
       headings.push(headerText[prop]);
@@ -232,7 +231,7 @@ console.log("exportResultsRowCsv");
       profileIsOrphan: "Orphan",
       birthDate: "Birth Date",
       deathDate: "Death Date",
-    }
+    };
     let headings = [];
     for (let prop in firstRow) {
       headings.push(headerText[prop]);

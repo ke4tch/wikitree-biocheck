@@ -24,13 +24,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Contains information about a WikiTree Profile
  * only contains a subset of the complete set of data available
  */
-import { Person } from "./Person.js"
+import { Person } from "./Person.js";
 export class BioCheckPerson extends Person {
-
   person = {
     uncheckedDueToPrivacy: false,
     uncheckedDueToDate: false,
-  }
+  };
 
   MIN_PRIVACY = 40;
   OPEN_PRIVACY = 60;
@@ -56,7 +55,7 @@ export class BioCheckPerson extends Person {
    * @param mustBeOpen true if profile must be open privacy
    * @param ingorePre1500 true to ignore Pre1500 profiles
    * @param userId wikiTreeId of the person running the app
-   * @param requestedId the Id used for getPerson 
+   * @param requestedId the Id used for getPerson
    * @return true if it was possible to build a bio else false (e.g., living person)
    */
   build(profileObj, mustBeOpen, ignorePre1500, userId, requestedId) {
@@ -64,27 +63,27 @@ export class BioCheckPerson extends Person {
     let canUse = this.initPerson(profileObj, requestedId);
     if (canUse) {
       if (this.person.privacyLevel < this.MIN_PRIVACY) {
-        if (userId === 0) {            // user not logged in
+        if (userId === 0) {
+          // user not logged in
           canUse = false;
         }
       }
-      if ((mustBeOpen) && (this.person.privacyLevel < this.OPEN_PRIVACY)) {
+      if (mustBeOpen && this.person.privacyLevel < this.OPEN_PRIVACY) {
         canUse = false;
       }
       if (!canUse) {
         this.person.uncheckedDueToPrivacy = true;
         if (this.verbose) {
-          console.log("  Cannot test profile " + this.person.profileId + 
-                      " with Privacy " + this.person.privacyLevel);
+          console.log("  Cannot test profile " + this.person.profileId + " with Privacy " + this.person.privacyLevel);
         }
       } else {
         // check for birth/death date before 1500
-        if ((ignorePre1500) && (this.isPersonPre1500())) {
+        if (ignorePre1500 && this.isPersonPre1500()) {
           canUse = false;
           this.person.uncheckedDueToDate = true;
         }
       }
-    } 
+    }
     return canUse;
   }
 
@@ -94,13 +93,12 @@ export class BioCheckPerson extends Person {
    */
   isUncheckedDueToPrivacy() {
     return this.person.uncheckedDueToPrivacy;
-  } 
+  }
   /**
    * Was profile not checked due to date
    * @return true if profile could not be checked due to date
    */
   isUncheckedDueToDate() {
     return this.person.uncheckedDueToDate;
-  } 
-
+  }
 }
