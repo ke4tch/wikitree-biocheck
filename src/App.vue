@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.4.3</h4>
+      <h4>Bio Check Version 1.4.4</h4>
     </div>
 
     <div class="flex-grid">
@@ -665,6 +665,7 @@ export default {
   },
 
   created() {
+console.log('App.vue created');
     // Override default values with those from URL, if any
     let userAgent = navigator.userAgent;
     this.isInternetExplorer = userAgent.indexOf("MSIE ") > -1 || userAgent.indexOf("Trident/") > -1;
@@ -680,6 +681,7 @@ export default {
   },
 
   mounted() {
+console.log('App.vue mounted');
     this.$nextTick(function () {
       // Code that will run only after the
       // entire view has been rendered

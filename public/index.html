@@ -45,22 +45,14 @@
       }
     </style>
 
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="./jquery.cookie.js"></script>
-<script src="./wikitree.js"></script>
 <script type="text/javascript">
-
-
-  window.theDollar = $;
-  window.wts = wikitree;
-  myCookie = $.cookie("biocheck_state");
 
   // User wants to skip login
   function startTheApp() {
     document.getElementById("need_login").style.display = "none";
     document.getElementById("logged_in").style.display = "block";
-    $.cookie("biocheck_state", "skip");
-    window.location.reload(false);
+    document.cookie = 'biocheck_state=skip';
+    window.location.reload();
   }
 
 </script>
@@ -68,7 +60,7 @@
   </head>
   <body>
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong>We're sorry but this app doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
     <!-- This div is shown if the user is not logged in. -->
@@ -76,9 +68,8 @@
       <p>You are not currently logged in to apps.wikitree.com.<br/>
          Login with the same information that you use for WikiTree.
         <form action="https://api.wikitree.com/api.php" method="POST">
-        <form action="https://apps.wikitree.com/api.php" method="POST">
         <input type="hidden" name="action" value="clientLogin">
-        <input type="hidden" name="returnURL" value="https://apps.wikitree.com/apps/sands1865/biocheck/index.html">
+        <input type="hidden" id="returnURL" name="returnURL" value="window.location.href">
         <input type="submit" class="button" value="Client Login">
         </form>
       </p>

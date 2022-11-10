@@ -186,6 +186,7 @@ export class Biography extends BiographyResults {
     if (this.bioResults.style.bioHasRefWithoutEnd) {
       this.bioResults.style.bioHasStyleIssues = true;
     }
+
     return;
   }
 
@@ -824,18 +825,18 @@ export class Biography extends BiographyResults {
    * @return true if on the standalone list of invalid sources
    */
   isInvalidStandAloneSource(line) {
-    let isInvalidStandAloneSource = this.sourceRules.isInvalidSource(line);
-    if (!isInvalidStandAloneSource && this.tooOldToRemember) {
-      isInvalidStandAloneSource = this.sourceRules.isInvalidSourceTooOld(line);
+    let isInvalidStandAlone = this.sourceRules.isInvalidSource(line);
+    if (!isInvalidStandAlone && this.tooOldToRemember) {
+      isInvalidStandAlone = this.sourceRules.isInvalidSourceTooOld(line);
 
-      if ((this.isPre1700 || this.treatAsPre1700) && !isInvalidStandAloneSource) {
-        isInvalidStandAloneSource = this.sourceRules.isInvalidSourcePre1700(line);
+      if ((this.isPre1700 || this.treatAsPre1700) && !isInvalidStandAlone) {
+        isInvalidStandAlone = this.sourceRules.isInvalidSourcePre1700(line);
       }
-      if (this.bioResults.isPre1500 && !isInvalidStandAloneSource) {
+      if (this.bioResults.isPre1500 && !isInvalidStandAlone) {
         // TODO add more pre1500 validation
       }
     }
-    return isInvalidStandAloneSource;
+    return isInvalidStandAlone;
   }
 
   /*
