@@ -665,7 +665,6 @@ export default {
   },
 
   created() {
-console.log('App.vue created');
     // Override default values with those from URL, if any
     let userAgent = navigator.userAgent;
     this.isInternetExplorer = userAgent.indexOf("MSIE ") > -1 || userAgent.indexOf("Trident/") > -1;
@@ -681,7 +680,6 @@ console.log('App.vue created');
   },
 
   mounted() {
-console.log('App.vue mounted');
     this.$nextTick(function () {
       // Code that will run only after the
       // entire view has been rendered
