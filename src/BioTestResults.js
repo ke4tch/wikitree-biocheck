@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /**
  * Contains data from testing that needs to ripple up from the test logic
- * for display in the GUI
+ * for display in the GUI.
  *
  * So the initial content must ripple down from the GUI then content changes
  * to ripple back to the userface
@@ -85,8 +85,8 @@ export class BioTestResults {
 
   /*
    * set args for stuff from gui
-   * @param checkStatus the result status
-   * @param checkResults the results
+   * @param {String} checkStatus the result status
+   * @param {String} checkResults the results
    */
   setArgs(checkStatus, checkResults) {
     this.results.checkStatus = checkStatus;
@@ -97,22 +97,22 @@ export class BioTestResults {
   }
 
   /**
-   * Set count of number of profiles requested
+   * Set count of number of profiles requested.
    * This can include by query, or returned via watchlist,
-   * ancestors, or relatives
-   * @param cnt number of profiles to add to total
+   * ancestors, or relatives.
+   * @param {Number} cnt number of profiles to add to total
    */
   addToTotalProfileCount(cnt) {
     this.results.totalProfileCount += cnt;
   }
 
   /**
-   * Count profile
+   * Count profile.
    * This can include by query, or returned via watchlist,
    * ancestors, or relatives
-   * @param cnt number of profiles to add to total
-   * @param dueToPrivacy true if not checked because of privacy
-   * @param dueToDate true if not checked because of date
+   * @param {Number} cnt number of profiles to add to total
+   * @param {Boolean} dueToPrivacy true if not checked because of privacy
+   * @param {Boolean} dueToDate true if not checked because of date
    */
   countProfile(cnt, dueToPrivacy, dueToDate) {
     if (cnt > 0) {
@@ -127,8 +127,8 @@ export class BioTestResults {
   }
 
   /**
-   * Add to number of unchecked profiles due to privacy
-   * typically just used by countProfile but also for random
+   * Add to number of unchecked profiles due to privacy.
+   * Typically just used by countProfile but also for random
    */
   addUncheckedDueToPrivacy() {
     this.results.uncheckedDueToPrivacyCount++;
@@ -143,7 +143,7 @@ export class BioTestResults {
 
   /**
    * Set whatIsHappening
-   * @param current progress message
+   * @param {String} current progress message
    */
   setProgressMessage(message) {
     this.results.checkStatus.progressMessage = message;
@@ -151,7 +151,7 @@ export class BioTestResults {
 
   /**
    * Set detailed progress (hover text)
-   * @param number of profiles requested
+   * @param {String} number of profiles requested
    */
   setProgressMessageDetails(requestedProfileCount) {
     let message =
@@ -167,6 +167,7 @@ export class BioTestResults {
 
   /**
    * Get count of reported rows
+   * @returns {Number} count of reported rows
    */
   getReportCount() {
     return this.results.reportCount;
@@ -174,6 +175,7 @@ export class BioTestResults {
 
   /*
    * Set state message - more detailed than progress
+   * @param {String} message to set
    */
   setStateMessage(message) {
     this.results.checkStatus.stateMessage = message;
@@ -181,6 +183,7 @@ export class BioTestResults {
 
   /**
    * Has the user requested cancel?
+   * @returns {Boolean} true if there is a cancel pending
    */
   isCancelPending() {
     return this.results.checkStatus.cancelPending;
@@ -188,20 +191,20 @@ export class BioTestResults {
 
   /**
    * Add a profile to the results
-   * @param bioResults results of parsing and validating profile
-   * @param profileId to report
-   * @param wikiTreeId to report
-   * @param wikiTreeLink to report
-   * @param reportName name to report
-   * @param managerId for the person
-   * @param privacyString to report
-   * @param birthDate to report
-   * @param deathDate to report
-   * @param reportAllProfiles true to report all profiles
-   * @param reportNonManaged true to report profiles not managed by user
-   * @param sourcesReport true to report sources for profile
-   * @param profileReviewReport true to generate profile review report
-   * @param userId for testing nonManaged profiles
+   * @param {BiographyResults} bioResults results of parsing and validating profile
+   * @param {String} profileId to report
+   * @param {String} wikiTreeId to report
+   * @param {String} wikiTreeLink to report
+   * @param {String} reportName name to report
+   * @param {String} managerId for the person
+   * @param {String} privacyString to report
+   * @param {String} birthDate to report
+   * @param {String} deathDate to report
+   * @param {Boolean} reportAllProfiles true to report all profiles
+   * @param {Boolean} reportNonManaged true to report profiles not managed by user
+   * @param {Boolean} sourcesReport true to report sources for profile
+   * @param {Boolean} profileReviewReport true to generate profile review report
+   * @param {String} userId for testing nonManaged profiles
    */
   addProfile(
     bioResults,
@@ -299,12 +302,12 @@ export class BioTestResults {
 
   /*
    * Report unsourced and style for profile (the default)
-   * @param bioResults the results of checking
-   * @param profileId to report
-   * @param wikiTreeId to report
-   * @param wikiTreeLink to report
-   * @param reportName name to report
-   * @param profileStatus the unsourced status
+   * @param {BiographyResults} bioResults the results of checking
+   * @param {String} profileId to report
+   * @param {String} wikiTreeId to report
+   * @param {String} wikiTreeLink to report
+   * @param {String} reportName name to report
+   * @param {String} profileStatus the unsourced status
    */
   reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus) {
     let rowDataItem = {
@@ -421,12 +424,12 @@ export class BioTestResults {
 
   /*
    * Report sources for the profile
-   * @param bioResults the results of checking
-   * @param profileId to report
-   * @param wikiTreeId to report
-   * @param wikiTreeLink to report
-   * @param reportName name to report
-   * @param reportAllSources true to report all sources
+   * @param {BiographyResults} bioResults the results of checking
+   * @param {String} profileId to report
+   * @param {String} wikiTreeId to report
+   * @param {String} wikiTreeLink to report
+   * @param {String} reportName name to report
+   * @param {Boolean} reportAllSources true to report all sources
    */
   reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
     if (bioResults.sources.invalidSource.length === 0 && bioResults.sources.validSource.length === 0) {
@@ -452,12 +455,12 @@ export class BioTestResults {
 
   /*
    * Report one source row
-   * @param profileId to report
-   * @param wikiTreeId to report
-   * @param wikiTreeLink to report
-   * @param reportName name to report
-   * @param sourceNum the source number
-   * @param sourceContent the source content
+   * @param {String} profileId to report
+   * @param {String} wikiTreeId to report
+   * @param {String} wikiTreeLink to report
+   * @param {String} reportName name to report
+   * @param {Number} sourceNum the source number
+   * @param {String} sourceContent the source content
    */
   reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, sourceNum, sourceContent) {
     let rowDataItem = {
@@ -478,17 +481,17 @@ export class BioTestResults {
     this.results.checkResults.sourcesRowData.push(rowDataItem);
   }
 
-  /**
+  /*
    * Report profile for review
-   * @param bioResults the results of checking
-   * @param wikiTreeId to report
-   * @param wikiTreeLink to report
-   * @param reportName name to report
-   * @param privacyString to report
-   * @param managerId for the person
-   * @param birthDate to report
-   * @param deathDate to report
-   * @param profileStatus the unsourced status
+   * @param {BiographyResults} bioResults the results of checking
+   * @param {String} wikiTreeId to report
+   * @param {String} wikiTreeLink to report
+   * @param {String} reportName name to report
+   * @param {String} privacyString to report
+   * @param {String} managerId for the person
+   * @param {String} birthDate to report
+   * @param {String} deathDate to report
+   * @param {String} profileStatus the unsourced status
    */
   reportReviewProfile(
     bioResults,
@@ -538,9 +541,9 @@ export class BioTestResults {
 
   /**
    * Get Hyperlink
-   * @param theUrl the URL
-   * @param displayTest display text for URL
-   * @return the hyperlink text
+   * @param {String} theUrl the URL
+   * @param {String} displayTest display text for URL
+   * @returns {String} the hyperlink text
    */
   getHyperLink(theUrl, displayText) {
     let doubleQuote = '""';
@@ -551,7 +554,7 @@ export class BioTestResults {
 
   /**
    * Report summary statistics
-   * duplicateProfileCount ignored profiles for logging metrics
+   * @param {Number} duplicateProfileCount ignored profiles for logging metrics
    */
   reportStatistics(duplicateProfileCount) {
     this.setProgressMessage("Sorting results....");
@@ -625,7 +628,7 @@ export class BioTestResults {
   }
 
   /**
-   * Get elapsed time
+   * Get elapsed time and report to console
    */
   getElapsedTime() {
     let endTime = new Date();

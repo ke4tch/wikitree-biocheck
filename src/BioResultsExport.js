@@ -20,6 +20,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+/**
+ * Export BioResults as CSV
+ */
 export class BioResultsExport {
   // TODO any other char besides # that makes it barf?
 
@@ -27,8 +31,10 @@ export class BioResultsExport {
     console.log("BioResultsExport");
   }
 
-  /*
+  /**
    * export results rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} resultsRowData row data to export
    */
   exportResultsRowCsv(userArgs, resultsRowData) {
     console.log("exportResultsRowCsv");
@@ -60,8 +66,10 @@ export class BioResultsExport {
     //            document.body.removeChild(link);
   }
 
-  /*
+  /**
    * export sources rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} sourcesRowData row data to export
    */
   exportSourcesRowCsv(userArgs, sourcesRowData) {
     let filename = this.buildFilename(userArgs);
@@ -102,8 +110,10 @@ export class BioResultsExport {
     //            document.body.removeChild(link);
   }
 
-  /*
+  /**
    * export review rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} profilesRowData row data to export
    */
   exportReviewRowCsv(userArgs, profilesRowData) {
     let filename = this.buildFilename(userArgs);
@@ -138,6 +148,7 @@ export class BioResultsExport {
 
   /**
    * Build filename to reflect what was used for report
+   * @param {Object} userArgs input user args
    */
   buildFilename(userArgs) {
     let filename = "bioCheck";
@@ -193,7 +204,7 @@ export class BioResultsExport {
     return headerData;
   }
 
-  /**
+  /*
    * get headers for sources report
    */
   getSourcesRowHeaderData(firstRow) {

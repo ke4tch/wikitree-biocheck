@@ -20,19 +20,20 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/*
- * Check biographies obtained via a WT+ query
- */
 import { BioCheckPerson } from "./BioCheckPerson.js";
 import { BioChecker } from "./BioChecker.js";
 
+/**
+ * Check biographies obtained via a WT+ query
+ * @extends BioChecker
+ */
 export class BioCheckQueryResults extends BioChecker {
   static WIKI_TREE_PLUS_URI = "https://wikitree.sdms.si/function/WTWebProfileSearch/Profiles.json";
 
   /**
    * Constructor
-   * @param theTestResults container for results
-   * @param userArgs what to do
+   * @param {BioTestResults} theTestResults container for results 
+   * @param {Object} userArgs what to do pushed from the Vue
    */
   constructor(theTestResults, theUserArgs) {
     super(theTestResults, theUserArgs);

@@ -21,9 +21,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /** 
- * Manages a collection of WikiTree profiles
- * should be a singleton. 
-e*/
+ * Manages a collection of WikiTree profiles.
+ * Should be a singleton. 
+ * profileId is the unique id number
+ * wikiTreeId is the wikitree id (e.g., LNAB-####)
+*/
 export class PeopleManager {
   /*
    * keep all the persons who have not been checked
@@ -48,9 +50,9 @@ export class PeopleManager {
 
   /**
    * Add person
-   * @param profileId the unique id for the person
-   * @param wikiTreeId the wikiTree id for the person
-   * @param requestedProfileId id to track redirects
+   * @param {String} profileId the unique id for the person (e.g., 12345678)
+   * @param {String} wikiTreeId the wikiTree id for the person (e.g., Doe-100)
+   * @param {String} requestedProfileId id to track redirects
    */
   addPerson(profileId, wikiTreeId, requestedProfileId) {
     if (!this.personIdToWikiTreeIdMap.has(profileId)) {
@@ -66,7 +68,8 @@ export class PeopleManager {
 
   /**
    * Has the person already been processed?
-   * @return true if person has already been processed
+   * @param {String} profileId unique id number for the person
+   * @returns {Boolean} true if person has already been processed
    */
   hasPerson(profileId) {
     if (this.personIdToWikiTreeIdMap.has(profileId) || this.redirectedProfileIds.has(profileId)) {
@@ -79,15 +82,17 @@ export class PeopleManager {
 
   /**
    * Get count of duplicate profiles ignored
+   * @returns {Number} count of duplicate profiles ignored
    */
   getDuplicateProfileCount() {
     return this.duplicateProfileCount;
   }
 
-  /**
+  /*
    * Remove profile
    * Don't do this or you double check when iterating relatives
    * side effect set person null so it can be garbage collected
+   * @param {String} profileId unique id number for the person
    *
    * TODO
    * Can you figure out a way around this to allow some garbage collection?
@@ -103,10 +108,10 @@ export class PeopleManager {
     }
   }
 
-  /*
+  /**
    * Get the list of the profiles held by the manager
    * in alphabetical order
-   * @return array of wikiTreeID
+   * @returns {Array} array of wikiTreeID
    */
   getProfileNames() {
     let profileNames = [];
@@ -120,14 +125,14 @@ export class PeopleManager {
 
   /**
    * Get total number of profiles managed
-   * @return number of profiles managed
+   * @returns {Number} number of profiles managed
    */
   getProfileCount() {
     return this.allProfileIds.length;
   }
   /**
    * Get all profile IDs managed
-   * @return array of profile Id
+   * @returns {Array} array of profile Id
    */
   getAllProfileIds() {
     return this.allProfileIds;

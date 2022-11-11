@@ -20,11 +20,12 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/** 
- * Manages a collection of WikiTree profiles for BioCheck
- * should be a singleton. 
-e*/
 import { PeopleManager } from "./PeopleManager.js";
+/** 
+ * Manages a collection of WikiTree profiles for BioCheck.
+ * Should be a singleton. 
+ * @extends PeopleManager
+*/
 export class BioCheckPeopleManager extends PeopleManager {
   /*
    * keep all the persons who have not been checked
@@ -47,7 +48,7 @@ export class BioCheckPeopleManager extends PeopleManager {
     super();
   }
 
-  /**
+  /*
    * Remove profile
    * Don't do this or you double check when iterating relatives
    * side effect set person null so it can be garbage collected
@@ -68,18 +69,22 @@ export class BioCheckPeopleManager extends PeopleManager {
 
   /**
    * Add to list of profiles with style issues
-   * @param profileId profile to add
+   * @param {String} profileId profile to add
    */
   setProfileStyle(profileId) {
     this.styleProfileIds.push(profileId);
   }
   /**
    * Add to list of profiles marked unsourced
-   * @param profileId profile to add
+   * @param {String} profileId profile to add
    */
   setProfileMarked(profileId) {
     this.markedProfileIds.push(profileId);
   }
+  /**
+   * Add to list of profiles maybe unsourced, not marked
+   * @param {String} profileId profile to add
+   */
   setProfileUnmarked(profileId) {
     /**
      * Add to list of profiles maybe unsourced, not marked
@@ -89,21 +94,21 @@ export class BioCheckPeopleManager extends PeopleManager {
   }
   /**
    * Get number of profiles marked unsourced
-   * @return number of profiles marked unsourced
+   * @returns {Number} number of profiles marked unsourced
    */
   getMarkedProfileCount() {
     return this.markedProfileIds.length;
   }
   /**
    * Get all profiles IDs marked unsourced
-   * @return array of profile Id
+   * @returns {Array} array of profile Id
    */
   getMarkedProfileIds() {
     return this.markedProfileIds;
   }
   /**
    * Get number of profiles unmarked
-   * @return number of profiles not marked unsourced
+   * @returns {Number} number of profiles not marked unsourced
    * that are possibly not sourced
    */
   getUnmarkedProfileCount() {
@@ -111,7 +116,7 @@ export class BioCheckPeopleManager extends PeopleManager {
   }
   /**
    * Get all profiles IDs not marked unsourced
-   * @return array of profile Id not marked unsourced
+   * @returns {Array} array of profile Id not marked unsourced
    * that are possibly not sourced
    */
   getUnmarkedProfileIds() {
@@ -119,14 +124,14 @@ export class BioCheckPeopleManager extends PeopleManager {
   }
   /**
    * Get number of profiles with style issues
-   * @return number of profiles with style issues
+   * @returns {Number} number of profiles with style issues
    */
   getStyleProfileCount() {
     return this.styleProfileIds.length;
   }
   /**
    * Get all profiles IDs with style issues
-   * @return array of profile Id with style issues
+   * @returns {Array} array of profile Id with style issues
    */
   getStyleProfileIds() {
     return this.styleProfileIds;

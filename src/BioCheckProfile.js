@@ -20,13 +20,12 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/**
- * Check biography for a profile, and optionally ancestors
- */
-
 import { BioCheckPerson } from "./BioCheckPerson.js";
 import { BioChecker } from "./BioChecker.js";
-
+/**
+ * Check biography for a profile, and optionally ancestors
+ * @extends BioChecker
+ */
 export class BioCheckProfile extends BioChecker {
   sourcesReport = false;
 
@@ -36,8 +35,8 @@ export class BioCheckProfile extends BioChecker {
 
   /**
    * Constructor
-   * @param theTestResults container for results
-   * @param userArgs what to do
+   * @param {BioTestResults} theTestResults container for results 
+   * @param {Object} userArgs what to do pushed from the Vue
    */
   constructor(theTestResults, theUserArgs) {
     super(theTestResults, theUserArgs);
@@ -152,7 +151,7 @@ export class BioCheckProfile extends BioChecker {
 
   /*
    * Check ancestors
-   * @param numAncestorGen number of generations to check
+   * @param {Number} numAncestorGen number of generations to check
    */
   async #checkAncestors(numAncestorGen) {
     let remainingAncestorGenerations = 0;
@@ -263,8 +262,8 @@ export class BioCheckProfile extends BioChecker {
 
   /*
    * Save parents for an ancestor
-   * @param profileObj the profile
-   * @param ancestoryParents collection of the parents
+   * @param {Object} profileObj the profile
+   * @param {Array} ancestorParents collection of the parents
    */
   saveAncestorParents(profileObj, ancestorParents) {
     let id = 0;
@@ -284,8 +283,8 @@ export class BioCheckProfile extends BioChecker {
 
   /*
    * Add more ancestor generations (11-20)
-   * @param remainingAncestorGenerations how many
-   * @param ancestorsParents for whom
+   * @param {Number} remainingAncestorGenerations how many
+   * @param {Array} ancestorsParents for whom
    */
   async checkMoreAncestors(remainingAncestorGenerations, ancestorParents) {
     // only get the ancestors if either the mother/father for this person are not already checked
@@ -390,7 +389,7 @@ export class BioCheckProfile extends BioChecker {
 
   /*
    * Check descendants
-   * @param numDescendant number of generations
+   * @param {Number} numDescendant number of generations
    */
   async checkDescendants(numDescendantGen) {
     let depth = numDescendantGen;

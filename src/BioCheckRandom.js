@@ -20,17 +20,18 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/**
- * Check biographies for a random set of profiles
- */
 import { BioCheckPerson } from "./BioCheckPerson.js";
 import { BioChecker } from "./BioChecker.js";
 
+/**
+ * Check biographies for a random set of profiles
+ * @extends BioChecker
+ */
 export class BioCheckRandom extends BioChecker {
   /**
    * Constructor
-   * @param theTestResults container for results
-   * @param userArgs what to do
+   * @param {BioTestResults} theTestResults container for results 
+   * @param {Object} userArgs what to do pushed from the Vue
    */
   constructor(theTestResults, theUserArgs) {
     super(theTestResults, theUserArgs);
@@ -38,7 +39,6 @@ export class BioCheckRandom extends BioChecker {
 
   /**
    * Check profiles found via random number generator
-   * @param minRand minimum random number
    */
   async check() {
     // TODO see what you can do with
@@ -213,9 +213,9 @@ export class BioCheckRandom extends BioChecker {
 
   /*
    * Get random number
-   * @param min random number
-   * @param max max random number
-   * @return random generated between min and max
+   * @param {Number} min random number
+   * @param {Number} max max random number
+   * @return {Number} random generated between min and max
    */
   getRandomNumber(min, max) {
     min = Math.ceil(min);

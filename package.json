@@ -6,7 +6,8 @@
     "dev": "vite",
     "serve": "vite preview",
     "build": "vite build",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src",
+    "docs": "jsdoc -c jsdoc.conf.js src/*.js"
   },
   "dependencies": {
     "vue": "^2.6.11"
