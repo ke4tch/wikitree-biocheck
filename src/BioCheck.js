@@ -20,25 +20,26 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/**
- * Send inputs from gui onto the checker and ripple results back
- * in the bio test results
- */
 import { BioTestResults } from "./BioTestResults.js";
-
 import { BioCheckProfile } from "./BioCheckProfile.js";
 import { BioCheckQueryResults } from "./BioCheckQueryResults.js";
 import { BioCheckWatchlist } from "./BioCheckWatchlist.js";
 import { BioCheckRandom } from "./BioCheckRandom.js";
+/**
+ * Send inputs from gui onto the checker and ripple results back
+ * in the bio test results
+ */
 
 export class BioCheck {
   constructor() {}
 
   /**
-   * check bio
-   * @param userArgs user args pushed from GUI
-   * @param checkStatus - the progress returned to GUI
-   * @param checkResults - the results returned to GUI
+   * Check bio.
+   * By using Vue the checkStatus and check Results will be reflected 
+   * in the GUI whenever the value of the string is changed
+   * @param {Object} userArgs user args pushed from GUI
+   * @param {String} checkStatus - the progress returned to GUI
+   * @param {String} checkResults - the results returned to GUI
    */
   check(userArgs, checkStatus, checkResults) {
     // link the gui stuff into the results

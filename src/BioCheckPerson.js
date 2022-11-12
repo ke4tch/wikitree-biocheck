@@ -20,11 +20,12 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/**
- * Contains information about a WikiTree Profile
- * only contains a subset of the complete set of data available
- */
 import { Person } from "./Person.js";
+/**
+ * Contains information about a WikiTree Profile.
+ * Only contains a subset of the complete set of data available
+ * @extends Person
+ */
 export class BioCheckPerson extends Person {
   person = {
     uncheckedDueToPrivacy: false,
@@ -43,7 +44,7 @@ export class BioCheckPerson extends Person {
 
   /**
    * Set verbose logging
-   * @param isVerbose true for logging
+   * @param {Boolean} isVerbose true for logging
    */
   setVerbose(isVerbose) {
     this.verbose = isVerbose;
@@ -51,12 +52,12 @@ export class BioCheckPerson extends Person {
 
   /**
    * Initialize person
-   * @param profileObj containing the profile as returned from WikiTree APIs
-   * @param mustBeOpen true if profile must be open privacy
-   * @param ingorePre1500 true to ignore Pre1500 profiles
-   * @param userId wikiTreeId of the person running the app
-   * @param requestedId the Id used for getPerson
-   * @return true if it was possible to build a bio else false (e.g., living person)
+   * @param {Object} profileObj containing the profile as returned from WikiTree APIs
+   * @param {Boolean} mustBeOpen true if profile must be open privacy
+   * @param {Boolean} ingorePre1500 true to ignore Pre1500 profiles
+   * @param {String} userId wikiTreeId of the person running the app
+   * @param {String} requestedId the Id used for getPerson
+   * @returns {Boolean} true if it was possible to build a bio else false (e.g., living person)
    */
   build(profileObj, mustBeOpen, ignorePre1500, userId, requestedId) {
     //let canUse = this.initPerson(profileObj, requestedId);
@@ -89,14 +90,14 @@ export class BioCheckPerson extends Person {
 
   /**
    * Was profile not checked due to privacy
-   * @return true if profile could not be checked due to privacy
+   * @returns {Boolean} true if profile could not be checked due to privacy
    */
   isUncheckedDueToPrivacy() {
     return this.person.uncheckedDueToPrivacy;
   }
   /**
    * Was profile not checked due to date
-   * @return true if profile could not be checked due to date
+   * @returns {Boolean} true if profile could not be checked due to date
    */
   isUncheckedDueToDate() {
     return this.person.uncheckedDueToDate;

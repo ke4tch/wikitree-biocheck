@@ -22,71 +22,52 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import Vue from "vue";
 import App from "./App.vue";
+import WikiTreeAuth from './WikiTreeAuth.js'
 
 Vue.config.productionTip = false;
 
-let myContext = {
+let myUserContext = {
   urlParamString: "",
   loggedIn: false,
   userName: "",
   userId: 0,
 };
 
-// a hack to pass in from index.html
-var $ = window.theDollar;
-var wikitree = window.wts;
-var myCookie = $.cookie("biocheck_state");
+let wtAuth = new WikiTreeAuth;
 
-// In the ready() function we run some code when the DOM is ready to go.
-$(document).ready(function () {
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("logged_in").style.display = "none";
+  document.getElementById("need_login").style.display = "none";
   // See if user wants to skip login
+  let myCookie = wtAuth.cookie('biocheck_state');
   if (myCookie === "skip") {
-    $.removeCookie("biocheck_state");
+    wtAuth.cookie('biocheck_state', 'null');
     startAppNow();
   } else {
-    wikitree.init({});
-
-    wikitree.session.checkLogin({}).then(function () {
-      if (wikitree.session.loggedIn) {
-        /* We're already logged in and have a valid session. */
-        $("#need_login").hide();
-        $("#logged_in").show();
-        myContext.loggedIn = true;
-        myContext.userName = $.cookie("wikitree_wtb_UserName");
-        myContext.userId = $.cookie("wikitree_wtb_UserID");
-        startAppNow();
-      } else {
-        /* We're not yet logged in, but maybe we've been returned-to with an auth-code */
-        var x = window.location.href.split("?");
-        var queryParams = new URLSearchParams(x[1]);
-        if (queryParams.has("authcode")) {
-          var authcode = queryParams.get("authcode");
-          wikitree.session.clientLogin({ authcode: authcode }).then(function () {
-            if (wikitree.session.loggedIn) {
-              /* If the auth-code was good, redirect back to ourselves without the authcode in the URL
-               * (don't want it bookmarked, etc).  but do include the args
-               */
-              window.location = localStorage.getItem("biocheck_url");
-            } else {
-              $("#need_login").show();
-              $("#logged_in").hide();
-            }
-          });
-        } else {
-          localStorage.setItem("biocheck_url", window.location.href);
-          $("#need_login").show();
-          $("#logged_in").hide();
-        }
-      }
-    });
+    const wikiTreeAuth = new WikiTreeAuth (
+      ({
+        onLoggedIn: () => {
+          myUserContext.loggedIn = true;
+          myUserContext.userName = wikiTreeAuth.getUserName();
+          myUserContext.userId = wikiTreeAuth.getUserId();
+          startAppNow();
+        },
+        onUnlogged: () => {
+          document.getElementById("logged_in").style.display = "none";
+          document.getElementById("need_login").style.display = "block";
+          document.getElementById('returnURL').value = window.location.href;
+        },
+      }));
+    wikiTreeAuth.login();
   }
 });
 
-function startAppNow() {
-  $("#need_login").hide();
-  $("#logged_in").show();
-  $.removeCookie("biocheck_state");
 
+function startAppNow() {
+  document.getElementById("need_login").style.display = "none";
+  document.getElementById("logged_in").style.display = "block";
+  wtAuth.cookie('biocheck_state', 'null');
+  myUserContext.urlParamString = window.location;
   new Vue({
     el: "#app",
 
@@ -94,9 +75,8 @@ function startAppNow() {
 
     created() {
       // send args to the App
-      myContext.urlParamString = window.location;
+      myUserContext.urlParamString = window.location;
     },
-
-    render: (h) => h("app", { props: { userContext: myContext } }),
+    render: (h) => h("app", { props: { userContext: myUserContext } }),
   }).$mount("#app");
 }

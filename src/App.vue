@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.4.3</h4>
+      <h4>Bio Check Version 1.4.4</h4>
     </div>
 
     <div class="flex-grid">
@@ -1018,7 +1018,7 @@ export default {
   flex-direction: row;
   border: 1px solid black;
 }
-.flex-grid .col {
+.col {
   flex: 1;
 }
 .flex-center {

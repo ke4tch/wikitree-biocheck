@@ -20,11 +20,15 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/**
- * Contains information about a WikiTree Profile
- * only contains a subset of the complete set of data available
- */
+
 import { PersonDate } from "./PersonDate.js";
+/**
+ * Contains information about a WikiTree Profile.
+ * Only contains a subset of the complete set of data available.
+ * profileId is the unique id number;
+ * wikiTreeId is the wikitree id (e.g., LNAB-####)
+ * @extends PersonDate
+ */
 export class Person extends PersonDate {
   person = {
     profileId: 0,
@@ -49,7 +53,7 @@ export class Person extends PersonDate {
 
   /**
    * Set verbose logging
-   * @param isVerbose true for logging
+   * @param {Boolean} isVerbose true for logging
    */
   setVerbose(isVerbose) {
     this.verbose = isVerbose;
@@ -57,9 +61,9 @@ export class Person extends PersonDate {
 
   /**
    * Initialize person
-   * @param profileObj containing the profile as returned from WikiTree APIs
-   * @param requestedId the Id used for getPerson
-   * @return true if profile has minimum set of information to be processed
+   * @param {Object} profileObj containing the profile as returned from WikiTree APIs
+   * @param {String} requestedId the Id used for getPerson
+   * @returns {Boolean} true if profile has minimum set of information to be processed
    * such as a name (aka wikiTreeId)
    */
   initPerson(profileObj, requestedId) {
@@ -106,14 +110,14 @@ export class Person extends PersonDate {
 
   /**
    * Does this person have a bio
-   * @return true if person has bio
+   * @returns {Boolean} true if person has bio
    */
   hasBio() {
     return this.person.hasBio;
   }
   /**
    * Get bio string for this person
-   * @return bio string
+   * @returns {String} bio string
    */
   getBio() {
     return this.person.bio;
@@ -127,21 +131,21 @@ export class Person extends PersonDate {
   }
   /**
    * Does this person have a name field?
-   * @return true if person has name
+   * @returns {Boolean} true if person has name
    */
   hasName() {
     return this.person.hasName;
   }
   /**
    * Get wikiTreeId for the person
-   * @return wikiTreeId
+   * @returns {String} wikiTreeId (e.g., Doe-100)
    */
   getWikiTreeId() {
     return this.person.wikiTreeId;
   }
   /**
    * Get profileId for the person
-   * @return profileId
+   * @returns {String} profileId (e.g., 12345678)
    */
   getProfileId() {
     return this.person.profileId;
@@ -149,28 +153,29 @@ export class Person extends PersonDate {
   /**
    * Get requested profile for the person
    * This may differ from the profile id on a redirect
-   * @return requestedProfileId
+   * @returns {String} requestedProfileId
    */
   getRequestedProfileId() {
     return this.person.requestedProfileId;
   }
   /**
    * Get first name
-   * @return first name
+   * @returns {String} first name
    */
   getFirstName() {
     return this.person.firstName;
   }
   /**
    * Get last name to report
-   * @return last name to report
+   * @returns {String} last name to report - lastNameCurrent if available
+   * else lastNameAtBirth
    */
   getLastName() {
     return this.person.lastName;
   }
   /**
    * Get name to report
-   * @return string with first and last name
+   * @returns {String} string with first and last name
    */
   getReportName() {
     let reportName = this.getFirstName() + " " + this.getLastName();
@@ -178,15 +183,14 @@ export class Person extends PersonDate {
   }
   /**
    * Get manager Id for the person
-   * @return manager Id
+   * @returns {String} manager Id
    */
   getManagerId() {
     return this.person.managerId;
   }
   /**
    * Get WikiTree link
-   * @param wikiTreeId for the person
-   * @return link to the WikiTree person
+   * @returns {String} link to the WikiTree person
    */
   getWikiTreeLink() {
     const WIKI_TREE_URI = "https://www.wikitree.com/wiki/";
@@ -194,14 +198,14 @@ export class Person extends PersonDate {
   }
   /**
    * Get the privacy
-   * @return numeric privacy level
+   * @returns {Number} numeric privacy level
    */
   getPrivacy() {
     return this.person.privacyLevel;
   }
   /**
    * Get the privacy as a string to be displayed to the user
-   * @return privacy string (i.e., the color)
+   * @returns {String} privacy string (i.e., the color)
    */
   getPrivacyString() {
     let privacyString = "";

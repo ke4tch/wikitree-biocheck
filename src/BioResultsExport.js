@@ -20,6 +20,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+/**
+ * Export BioResults as CSV
+ */
 export class BioResultsExport {
   // TODO any other char besides # that makes it barf?
 
@@ -27,15 +31,17 @@ export class BioResultsExport {
     console.log("BioResultsExport");
   }
 
-  /*
+  /**
    * export results rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} resultsRowData row data to export
    */
   exportResultsRowCsv(userArgs, resultsRowData) {
     console.log("exportResultsRowCsv");
-    let filename = this.buildFilename(userArgs);
+    let filename = this.#buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
     let headerRow = resultsRowData[0];
-    let headerData = this.getResultsRowHeaderData(headerRow);
+    let headerData = this.#getResultsRowHeaderData(headerRow);
     csvData += headerData;
     csvData += "\n";
     // surround with " to handle entries with a ,
@@ -60,14 +66,16 @@ export class BioResultsExport {
     //            document.body.removeChild(link);
   }
 
-  /*
+  /**
    * export sources rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} sourcesRowData row data to export
    */
   exportSourcesRowCsv(userArgs, sourcesRowData) {
-    let filename = this.buildFilename(userArgs);
+    let filename = this.#buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
     let headerRow = sourcesRowData[0];
-    let headerData = this.getSourcesRowHeaderData(headerRow);
+    let headerData = this.#getSourcesRowHeaderData(headerRow);
     csvData += headerData;
     csvData += "\n";
     // surround with " to handle entries with a ,
@@ -102,14 +110,16 @@ export class BioResultsExport {
     //            document.body.removeChild(link);
   }
 
-  /*
+  /**
    * export review rows as CSV
+   * @param {Object} userArgs input user args
+   * @param {Array} profilesRowData row data to export
    */
   exportReviewRowCsv(userArgs, profilesRowData) {
-    let filename = this.buildFilename(userArgs);
+    let filename = this.#buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
     let headerRow = profilesRowData[0];
-    let headerData = this.getReviewRowHeaderData(headerRow);
+    let headerData = this.#getReviewRowHeaderData(headerRow);
     csvData += headerData;
     csvData += "\n";
     // surround with " to handle entries with a ,
@@ -136,10 +146,11 @@ export class BioResultsExport {
     //            document.body.removeChild(link);
   }
 
-  /**
+  /*
    * Build filename to reflect what was used for report
+   * @param {Object} userArgs input user args
    */
-  buildFilename(userArgs) {
+  #buildFilename(userArgs) {
     let filename = "bioCheck";
     if (userArgs.selectedCheckType === "checkByQuery") {
       filename = userArgs.queryArg;
@@ -164,10 +175,10 @@ export class BioResultsExport {
     return filename;
   }
 
-  /**
+  /*
    * headers for default report
    */
-  getResultsRowHeaderData(firstRow) {
+  #getResultsRowHeaderData(firstRow) {
     let headerText = {
       profileId: "Profile Id",
       wikiTreeId: "WikiTree Id",
@@ -193,10 +204,10 @@ export class BioResultsExport {
     return headerData;
   }
 
-  /**
+  /*
    * get headers for sources report
    */
-  getSourcesRowHeaderData(firstRow) {
+  #getSourcesRowHeaderData(firstRow) {
     let headerText = {
       profileId: "Profile Id",
       wikiTreeId: "WikiTree Id",
@@ -217,7 +228,7 @@ export class BioResultsExport {
   /**
    * get headers for review report
    */
-  getReviewRowHeaderData(firstRow) {
+  #getReviewRowHeaderData(firstRow) {
     let headerText = {
       wikiTreeId: "WikiTree Id",
       wikiTreeHyperLink: "Link",
