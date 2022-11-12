@@ -36,6 +36,22 @@ used in the WikiTree Dynamic Tree.
 * PersonDate.js
 * SourceRules.js
 
+Example use:
+```
+import { theSourceRules } from "./SourceRules.js";
+import { PersonDate } from "./PersonDate.js";
+import { Biography } from "./Biography.js";
+  let thePerson = new PersonDate();
+  // get the bio text and person dates to check
+  thePerson.initWithDates(birthDate, deathDate);
+  let biography = new Biography(theSourceRules);
+  biography.parse(bioString, thePerson.isPersonPre1500(), thePerson.isPersonPre1700(),
+    thePerson.mustBeOpen(), thePerson.isUndated(), false
+  );
+  let bioStatus = biography.validate(); // true if appears sourced and no style issues, else false
+  // now report from biography.bioResults as desired
+```
+
 ## Software Status
 Needs review to consider viablity of migrating to Vue 3.x. 
 
