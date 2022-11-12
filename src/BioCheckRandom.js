@@ -95,7 +95,7 @@ export class BioCheckRandom extends BioChecker {
         console.log("random check starting at " + minRand + " for up to " + maxRand + " xxxxxxxxxxxxxxxxxxxxxxxxxxx");
         while (i < maxToCheck && i <= maxRand && !this.timeToQuit()) {
           // get a profileId from random number generator
-          let profileId = this.getRandomNumber(min, maxRand);
+          let profileId = this.#getRandomNumber(min, maxRand);
           if (this.verbose) {
             console.log("check random " + i + " profileId " + profileId);
           }
@@ -217,7 +217,7 @@ export class BioCheckRandom extends BioChecker {
    * @param {Number} max max random number
    * @return {Number} random generated between min and max
    */
-  getRandomNumber(min, max) {
+  #getRandomNumber(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min);

@@ -24,7 +24,7 @@ import { PeopleManager } from "./PeopleManager.js";
 /** 
  * Manages a collection of WikiTree profiles for BioCheck.
  * Should be a singleton. 
- * @extends PeopleManager
+ * @extends PeopleManager which is a singleton
 */
 export class BioCheckPeopleManager extends PeopleManager {
   /*

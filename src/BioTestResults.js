@@ -191,7 +191,7 @@ export class BioTestResults {
 
   /**
    * Add a profile to the results
-   * @param {BiographyResults} bioResults results of parsing and validating profile
+   * @param {Biography} biography with results of parsing and validating profile
    * @param {String} profileId to report
    * @param {String} wikiTreeId to report
    * @param {String} wikiTreeLink to report
@@ -207,7 +207,7 @@ export class BioTestResults {
    * @param {String} userId for testing nonManaged profiles
    */
   addProfile(
-    bioResults,
+    biography,
     profileId,
     wikiTreeId,
     wikiTreeLink,
@@ -247,27 +247,27 @@ export class BioTestResults {
      * (for now always report marked, but might want this in future)
      * An unsourced unmarked profile is always needed.
      */
-    if (bioResults.stats.bioIsUncertainExistance) {
+    if (biography.isUncertainExistance()) {
       console.log("Profile " + wikiTreeId + " is Uncertain Existance, not reported");
     } else {
-      if (bioResults.style.bioHasStyleIssues) {
+      if (biography.hasStyleIssues()) {
         this.results.styleIssuesProfileCnt++;
         profileShouldBeReported = true;
       }
-      if (bioResults.stats.bioIsEmpty) {
+      if (biography.isEmpty()) {
         profileShouldBeReported = true;
       }
-      if (bioResults.stats.bioIsMarkedUnsourced) {
+      if (biography.isMarkedUnsourced()) {
         this.results.unsourcedProfileCnt++;
         profileStatus = this.MARKED;
         profileShouldBeReported = true;
       } else {
-        if (!bioResults.sources.sourcesFound) {
+        if (!biography.hasSources()) {
           this.results.unmarkedProfileCnt++;
           profileStatus = this.POSSIBLY_UNSOURCED;
           profileShouldBeReported = true;
         } else {
-          if (bioResults.stats.bioIsUndated) {
+          if (biography.isUndated()) {
             profileShouldBeReported = true;
           }
         }
@@ -278,11 +278,11 @@ export class BioTestResults {
       this.results.reportCount++;
       if (!reportStatsOnly) {
         if (sourcesReport) {
-          this.reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
+          this.reportSources(biography, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
         } else {
           if (profileReviewReport) {
             this.reportReviewProfile(
-              bioResults,
+              biography,
               wikiTreeId,
               wikiTreeLink,
               reportName,
@@ -293,7 +293,7 @@ export class BioTestResults {
               profileStatus
             );
           } else {
-            this.reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
+            this.reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
           }
         }
       }
@@ -302,14 +302,14 @@ export class BioTestResults {
 
   /*
    * Report unsourced and style for profile (the default)
-   * @param {BiographyResults} bioResults the results of checking
+   * @param {Biography} biography contains the results of checking
    * @param {String} profileId to report
    * @param {String} wikiTreeId to report
    * @param {String} wikiTreeLink to report
    * @param {String} reportName name to report
    * @param {String} profileStatus the unsourced status
    */
-  reportUnsourcedStyle(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus) {
+  reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus) {
     let rowDataItem = {
       profileId: 0,
       wikiTreeId: "",
@@ -334,84 +334,84 @@ export class BioTestResults {
     rowDataItem.wikiTreeLink = wikiTreeLink;
     rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
     rowDataItem.personName = reportName;
-    if (bioResults.stats.totalBioLines > 0) {
-      rowDataItem.bioLineCnt = bioResults.stats.totalBioLines;
+    if (biography.getTotalBioLines() > 0) {
+      rowDataItem.bioLineCnt = biography.getTotalBioLines();
     }
-    if (bioResults.stats.inlineReferencesCount > 0) {
-      rowDataItem.inlineRefCnt = bioResults.stats.inlineReferencesCount;
+    if (biography.getInlineRefCount() > 0) {
+      rowDataItem.inlineRefCnt = biography.getInlineRefCount();
     }
-    if (bioResults.stats.possibleSourcesLineCount > 0) {
-      rowDataItem.sourceLineCnt = bioResults.stats.possibleSourcesLineCount;
+    if (biography.getPossibleSourcesLineCount() > 0) {
+      rowDataItem.sourceLineCnt = biography.getPossibleSourcesLineCount();
     }
-    if (bioResults.style.misplacedLineCount > 0) {
-      rowDataItem.misplacedLineCnt = bioResults.style.misplacedLineCount;
+    if (biography.getMisplacedLineCount() > 0) {
+      rowDataItem.misplacedLineCnt = biography.getMisplacedLineCount();
     }
 
-    if (bioResults.stats.bioIsEmpty) {
+    if (biography.isEmpty()) {
       rowDataItem.isEmpty = "Yes";
     }
 
     // handle multiple style issues that compress into a single row data item
     let missingEnd = [];
-    if (bioResults.style.hasEndlessComment) {
+    if (biography.hasEndlessComment()) {
       missingEnd.push(this.COMMENT);
     }
-    if (bioResults.style.bioHasRefWithoutEnd) {
+    if (biography.hasRefWithoutEnd()) {
       missingEnd.push(this.REF);
     }
-    if (bioResults.style.bioHasSpanWithoutEndingSpan) {
+    if (biography.hasSpanWithoutEndingSpan()) {
       missingEnd.push(this.SPAN);
     }
     if (missingEnd.length > 0) {
       rowDataItem.missingEnd = missingEnd.join(", ");
     }
     let bioHeading = [];
-    if (bioResults.style.bioIsMissingBiographyHeading) {
+    if (biography.isMissingBiographyHeading()) {
       bioHeading.push(this.MISSING);
     }
-    if (bioResults.style.bioHasMultipleBioHeadings) {
+    if (biography.hasMultipleBioHeadings()) {
       bioHeading.push(this.MULTIPLE);
     }
-    if (bioResults.style.bioHeadingWithNoLinesFollowing) {
+    if (biography.hasHeadingWithNoLinesFollowing()) {
       bioHeading.push(this.NO_LINES_FOLLOW);
     }
-    if (bioResults.style.bioIsAutoGenerated) {
+    if (biography.isAutoGenerated()) {
       bioHeading.push(this.AUTO_GENERATED);
     }
     if (bioHeading.length > 0) {
       rowDataItem.bioHeading = bioHeading.join(", ");
     }
     let sourcesHeading = [];
-    if (bioResults.style.bioIsMissingSourcesHeading) {
+    if (biography.isMissingSourcesHeading()) {
       sourcesHeading.push(this.MISSING);
     }
-    if (bioResults.style.bioHasMultipleSourceHeadings) {
+    if (biography.hasMultipleSourceHeadings()) {
       sourcesHeading.push(this.MULTIPLE);
     }
-    if (bioResults.style.sourcesHeadingHasExtraEqual) {
+    if (biography.sourcesHeadingHasExtraEqual()) {
       sourcesHeading.push(this.EXTRA_EQUALS);
     }
     if (sourcesHeading.length > 0) {
       rowDataItem.sourcesHeading = sourcesHeading.join(", ");
     }
     let referencesTag = [];
-    if (bioResults.style.bioIsMissingReferencesTag) {
+    if (biography.isMissingReferencesTag()) {
       referencesTag.push(this.MISSING);
     }
-    if (bioResults.style.bioHasMultipleReferencesTags) {
+    if (biography.hasMultipleReferencesTags()) {
       referencesTag.push(this.MULTIPLE);
     }
-    if (bioResults.style.bioHasRefAfterReferences) {
+    if (biography.hasRefAfterReferences()) {
       referencesTag.push(this.REF_FOLLOWING);
     }
     if (referencesTag.length > 0) {
       rowDataItem.referencesTag = referencesTag.join(", ");
     }
     let acknowledgements = [];
-    if (bioResults.style.acknowledgementsHeadingHasExtraEqual) {
+    if (biography.acknowledgementsHeadingHasExtraEqual()) {
       acknowledgements.push(this.EXTRA_EQUALS);
     }
-    if (bioResults.style.bioHasAcknowledgementsBeforeSources) {
+    if (biography.hasAcknowledgementsBeforeSources()) {
       acknowledgements.push(this.BEFORE_SOURCES);
     }
     if (acknowledgements.length > 0) {
@@ -424,29 +424,29 @@ export class BioTestResults {
 
   /*
    * Report sources for the profile
-   * @param {BiographyResults} bioResults the results of checking
+   * @param {Biography} biography contains the results of checking
    * @param {String} profileId to report
    * @param {String} wikiTreeId to report
    * @param {String} wikiTreeLink to report
    * @param {String} reportName name to report
    * @param {Boolean} reportAllSources true to report all sources
    */
-  reportSources(bioResults, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
-    if (bioResults.sources.invalidSource.length === 0 && bioResults.sources.validSource.length === 0) {
+  reportSources(biography, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
+    if (biography.getInvalidSources().length === 0 && biography.getValidSources().length === 0) {
       this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, -1, "");
     } else {
-      for (let i = 0; i < bioResults.sources.invalidSource.length; i++) {
-        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, 0, bioResults.sources.invalidSource[i]);
+      for (let i = 0; i < biography.getInvalidSources().length; i++) {
+        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, 0, biography.getInvalidSources()[i]);
       }
       if (reportAllSources) {
-        for (let i = 0; i < bioResults.sources.validSource.length; i++) {
+        for (let i = 0; i < biography.getValidSources().length; i++) {
           this.reportSourceRow(
             profileId,
             wikiTreeId,
             wikiTreeLink,
             reportName,
             i + 1,
-            bioResults.sources.validSource[i]
+            biography.getValidSources()[i]
           );
         }
       }
@@ -483,7 +483,7 @@ export class BioTestResults {
 
   /*
    * Report profile for review
-   * @param {BiographyResults} bioResults the results of checking
+   * @param {Biography} biography contains the results of checking
    * @param {String} wikiTreeId to report
    * @param {String} wikiTreeLink to report
    * @param {String} reportName name to report
@@ -494,7 +494,7 @@ export class BioTestResults {
    * @param {String} profileStatus the unsourced status
    */
   reportReviewProfile(
-    bioResults,
+    biography,
     wikiTreeId,
     wikiTreeLink,
     reportName,
@@ -527,7 +527,7 @@ export class BioTestResults {
     rowDataItem.reviewStatus = " ";
     rowDataItem.reviewComments = " ";
     rowDataItem.profileStatus = profileStatus;
-    if (bioResults.style.bioHasStyleIssues) {
+    if (biography.hasStyleIssues()) {
       rowDataItem.hasStyleIssues = "X";
     }
     rowDataItem.profilePrivacy = privacyString;

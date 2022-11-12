@@ -213,7 +213,7 @@ export class BioCheckProfile extends BioChecker {
               0
             );
             if (canUseThis) {
-              this.saveAncestorParents(profileObj, ancestorParents);
+              this.#saveAncestorParents(profileObj, ancestorParents);
             }
             if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
               this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(), thePerson.isUncheckedDueToDate());
@@ -240,7 +240,7 @@ export class BioCheckProfile extends BioChecker {
           }
           // Check for more than 10 generations of ancestors
           if (remainingAncestorGenerations > 0) {
-            let promise = this.checkMoreAncestors(remainingAncestorGenerations, ancestorParents);
+            let promise = this.#checkMoreAncestors(remainingAncestorGenerations, ancestorParents);
             await promise;
           }
         }
@@ -265,7 +265,7 @@ export class BioCheckProfile extends BioChecker {
    * @param {Object} profileObj the profile
    * @param {Array} ancestorParents collection of the parents
    */
-  saveAncestorParents(profileObj, ancestorParents) {
+  #saveAncestorParents(profileObj, ancestorParents) {
     let id = 0;
     if (profileObj.Mother != null) {
       id = profileObj.Mother;
@@ -286,7 +286,7 @@ export class BioCheckProfile extends BioChecker {
    * @param {Number} remainingAncestorGenerations how many
    * @param {Array} ancestorsParents for whom
    */
-  async checkMoreAncestors(remainingAncestorGenerations, ancestorParents) {
+  async #checkMoreAncestors(remainingAncestorGenerations, ancestorParents) {
     // only get the ancestors if either the mother/father for this person are not already checked
     let ancestorsToCheck = new Set();
     for (let profileId of ancestorParents) {

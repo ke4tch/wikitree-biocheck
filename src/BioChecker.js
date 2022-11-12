@@ -478,19 +478,19 @@ export class BioChecker {
     //    this.totalValidateTime = this.totalValidateTime + timeDiff;
 
     // keep track of what you found
-    if (biography.bioResults.style.bioHasStyleIssues) {
+    if (biography.hasStyleIssues()) {
       this.thePeopleManager.setProfileStyle(thePerson.getProfileId());
     }
-    if (biography.bioResults.stats.bioIsMarkedUnsourced) {
+    if (biography.isMarkedUnsourced()) {
       this.thePeopleManager.setProfileMarked(thePerson.getProfileId());
     } else {
-      if (!biography.bioResults.sources.sourcesFound) {
+      if (!biography.hasSources()) {
         this.thePeopleManager.setProfileUnmarked(thePerson.getProfileId());
       }
     }
     // add person to report
     this.testResults.addProfile(
-      biography.bioResults,
+      biography,
       thePerson.getProfileId(),
       thePerson.getWikiTreeId(),
       thePerson.getWikiTreeLink(),

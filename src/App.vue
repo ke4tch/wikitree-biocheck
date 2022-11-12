@@ -1018,7 +1018,7 @@ export default {
   flex-direction: row;
   border: 1px solid black;
 }
-.flex-grid .col {
+.col {
   flex: 1;
 }
 .flex-center {

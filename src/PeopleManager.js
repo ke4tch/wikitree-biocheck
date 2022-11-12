@@ -39,6 +39,7 @@ export class PeopleManager {
    * wikiTreeId is the wikitree id (e.g., LNAB-####)
    */
 
+
   wikiTreeIdToPersonIdMap = new Map(); // List of person id, accessed by wikitreeId
   personIdToWikiTreeIdMap = new Map(); // list of wikitree id, accessed by person id
   allProfileIds = []; // all profile ids
@@ -46,7 +47,7 @@ export class PeopleManager {
   redirectedProfileIds = new Set();
   duplicateProfileCount = 0;
 
-  constructor() {}
+  constructor() { }
 
   /**
    * Add person

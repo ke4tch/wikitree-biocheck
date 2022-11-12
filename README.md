@@ -32,7 +32,6 @@ The following are identical classes found in the Bio Check app and in the
 WikiTree Browser Extension Bio Check feature. They may, in the future, be
 used in the WikiTree Dynamic Tree.
 * Biography.js
-* BiographyResults.js
 * PersonDate.js
 * SourceRules.js
 
@@ -41,6 +40,7 @@ Example use:
 import { theSourceRules } from "./SourceRules.js";
 import { PersonDate } from "./PersonDate.js";
 import { Biography } from "./Biography.js";
+
   let thePerson = new PersonDate();
   // get the bio text and person dates to check
   thePerson.initWithDates(birthDate, deathDate);
@@ -48,8 +48,8 @@ import { Biography } from "./Biography.js";
   biography.parse(bioString, thePerson.isPersonPre1500(), thePerson.isPersonPre1700(),
     thePerson.mustBeOpen(), thePerson.isUndated(), false
   );
-  let bioStatus = biography.validate(); // true if appears sourced and no style issues, else false
-  // now report from biography.bioResults as desired
+  let hasSources = biography.validate(); 
+  // now report from biography (use getters) as desired or just the boolean return 
 ```
 
 ## Software Status
