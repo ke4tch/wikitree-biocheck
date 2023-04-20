@@ -63,10 +63,16 @@ export class BioCheckPerson extends Person {
     //let canUse = this.initPerson(profileObj, requestedId);
     let canUse = this.initPerson(profileObj, requestedId);
     if (canUse) {
+      // can use if logged in user is the same as Manager
+      // test with Nelson-3486
       if (this.person.privacyLevel < this.MIN_PRIVACY) {
         if (userId === 0) {
           // user not logged in
           canUse = false;
+        } else {
+          if (this.person.managerId !== userId) {
+            canUse = false;
+          }
         }
       }
       if (mustBeOpen && this.person.privacyLevel < this.OPEN_PRIVACY) {

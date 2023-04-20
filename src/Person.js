@@ -87,9 +87,20 @@ export class Person extends PersonDate {
       if (profileObj.bio != null) {
         this.person.bio = profileObj.bio;
         this.person.hasBio = true;
+        // TODO this is a HACK 
+        // to see if resolveRedirect was not honored by the API
+        // look for a bio content that starts with 
+        // and if so set hasBio false to force a call to the getBio API
+        if (profileObj.bio.startsWith('#REDIRECT')) {
+          this.person.hasBio = false;
+        }
       }
       if (profileObj.FirstName != null) {
         this.person.firstName = profileObj.FirstName;
+      } else {
+        if (profileObj.RealName != null) {
+          this.person.firstName = profileObj.RealName;
+        }
       }
       if (profileObj.LastNameCurrent != null) {
         this.person.lastName = profileObj.LastNameCurrent;

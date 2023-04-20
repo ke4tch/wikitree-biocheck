@@ -1,7 +1,7 @@
 App to check a WikiTree biography
 
 ## Dependencies
-Makes use of Vue version 2.x
+Makes use of Vue version 3.x
 
 Uses Vite to compile the Vue templates and build project
 

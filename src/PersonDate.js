@@ -1,4 +1,8 @@
 /*
+Created By: Kay Knight (Sands-1865)
+*/
+
+/*
 The MIT License (MIT)
 
 Copyright (c) 2022 Kathryn J Knight
@@ -58,6 +62,8 @@ export class PersonDate {
     if (bDay != null && bDay.length > 0) {
       this.personDate.birthDateString = bDay;
       this.personDate.birthDate = this.getDate(this.personDate.birthDateString);
+    } else {
+      this.personDate.hasBirthDate = false;
     }
     if (this.personDate.lastDateCheckedEmpty) {
       this.personDate.hasBirthDate = false;
@@ -65,6 +71,8 @@ export class PersonDate {
     if (dDay != null && dDay.length > 0) {
       this.personDate.deathDateString = dDay;
       this.personDate.deathDate = this.getDate(this.personDate.deathDateString);
+    } else {
+      this.personDate.hasDeathDate = false;
     }
     if (this.personDate.lastDateCheckedEmpty) {
       this.personDate.hasDeathDate = false;
@@ -135,7 +143,9 @@ export class PersonDate {
     if (len >= 2) {
       day = splitString[2];
     }
-    if (year + month + day === 0) {
+    // very important the test below should be == and not ===
+    // because you want to test for all dates of 0
+    if (year + month + day == 0) {
       this.personDate.lastDateCheckedEmpty = true;
     }
     if (year === 0) {

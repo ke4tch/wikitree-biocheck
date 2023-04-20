@@ -81,6 +81,15 @@ export class PeopleManager {
     }
   }
 
+  /** 
+   * Get ProfileId for WikiTreeId 
+   * @param wikiTreeId {String} the wikitree id
+   * @returns {String} the profileId
+   */
+  getProfileId(wikiTreeId) {
+    return this.wikiTreeIdToPersonIdMap.get(wikiTreeId);
+  }
+
   /**
    * Get count of duplicate profiles ignored
    * @returns {Number} count of duplicate profiles ignored

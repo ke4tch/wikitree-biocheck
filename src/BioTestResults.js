@@ -79,6 +79,7 @@ export class BioTestResults {
     profilesRowData: [], // a row of profiles in the results
     totalServerRequests: 0,     // logging and diagnostics
     totalPromiseWaits: 0,  // number of times awaiting all promises
+    errorMessage: "",     // errorMessage for reporting
   };
 
   constructor() {}
@@ -93,6 +94,7 @@ export class BioTestResults {
     this.results.checkResults = checkResults;
     this.results.checkStatus.stateMessage = "";
     this.results.checkStatus.progressMessage = "";
+    this.errorMessage = "";
     this.startTime = new Date();
   }
 
@@ -179,6 +181,14 @@ export class BioTestResults {
    */
   setStateMessage(message) {
     this.results.checkStatus.stateMessage = message;
+  }
+
+  /**
+   * Set error message for reporting
+   * @param {String} message to set
+   */
+  setErrorMessage(message) {
+    this.errorMessage = message;
   }
 
   /**
@@ -273,7 +283,6 @@ export class BioTestResults {
         }
       }
     }
-
     if (profileShouldBeReported) {
       this.results.reportCount++;
       if (!reportStatsOnly) {
@@ -555,8 +564,9 @@ export class BioTestResults {
   /**
    * Report summary statistics
    * @param {Number} duplicateProfileCount ignored profiles for logging metrics
+   * @param maxProfilesReached {Boolean} true if max number of profiles exceeded
    */
-  reportStatistics(duplicateProfileCount) {
+  reportStatistics(duplicateProfileCount, maxProfilesReached) {
     this.setProgressMessage("Sorting results....");
     if (this.results.sourcesReport) {
       this.results.checkResults.sourcesRowData.sort(function (a, b) {
@@ -594,12 +604,18 @@ export class BioTestResults {
     }
     this.setProgressMessage(msg);
     msg = "Check completed. Examined " + this.results.totalProfileCount + " unique profiles.";
-    this.results.uncheckedDueToPrivacyCount + " profiles";
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;
     if (otherCnt > 0) {
-      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles";
+      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles. ";
     }
+    if (maxProfilesReached) {
+      msg += "Reached maximum number of profiles. ";
+    }
+    if (this.errorMessage.length > 0) {
+      msg += this.errorMessage;
+    }
+
     this.setStateMessage(msg);
     this.results.checkStatus.progressMessageTitle = "";
     this.results.checkStatus.cancelPending = false;

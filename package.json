@@ -1,6 +1,6 @@
 {
   "name": "biocheck",
-  "version": "1.4.2",
+  "version": "1.5.2",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -10,15 +10,17 @@
     "docs": "jsdoc -c jsdoc.conf.js src/*.js"
   },
   "dependencies": {
-    "vue": "^2.6.11"
+    "node": "^19.3.0",
+    "vue": "^3.2.41"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^1.6.1",
-    "eslint": "^8.27.0",
-    "eslint-plugin-vue": "^9.7.0",
-    "vite": "^2.5.4",
-    "vite-plugin-vue2": "1.9.0",
-    "webpack-bundle-analyzer": "^4.3.0"
+    "@rushstack/eslint-patch": "^1.1.4",
+    "@vitejs/plugin-vue": "^3.1.2",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "eslint": "^8.22.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "prettier": "^2.7.1",
+    "vite": "^3.1.8"
   },
   "eslintConfig": {
     "root": true,

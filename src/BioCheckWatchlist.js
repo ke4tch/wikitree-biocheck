@@ -204,7 +204,8 @@ export class BioCheckWatchlist extends BioChecker {
             let allPromises = Promise.all(promiseArray);
             await allPromises;
             this.promiseCollection = new Array();
-            this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
+            this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(),
+                 this.reachedMaxProfiles);
           }
         }
       }
