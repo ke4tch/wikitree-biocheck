@@ -1,4 +1,8 @@
 /*
+Created By: Kay Knight (Sands-1865)
+*/
+
+/*
 The MIT License (MIT)
 
 Copyright (c) 2022 Kathryn J Knight
@@ -298,6 +302,9 @@ export class Biography {
     this.#isPre1700 = isPre1700;
     this.#tooOldToRemember = mustBeOpen;
     let isValid = this.#validateReferenceStrings(false);
+    if (isValid) {
+      this.#sources.sourcesFound = true;
+    }
     return isValid;
   }
 
