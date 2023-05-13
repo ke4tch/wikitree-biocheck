@@ -215,6 +215,8 @@ export class BioTestResults {
    * @param {Boolean} sourcesReport true to report sources for profile
    * @param {Boolean} profileReviewReport true to generate profile review report
    * @param {String} userId for testing nonManaged profiles
+   * @param {Date} birthDateDate for sorting
+   * @param {Date} deathDateDate for sorting
    */
   addProfile(
     biography,
@@ -231,7 +233,9 @@ export class BioTestResults {
     sourcesReport,
     profileReviewReport,
     reportStatsOnly,
-    userId
+    userId,
+    birthDateDate,
+    deathDateDate
   ) {
     this.results.sourcesReport = sourcesReport;
     this.results.profileReviewReport = profileReviewReport;
@@ -299,7 +303,9 @@ export class BioTestResults {
               managerId,
               birthDate,
               deathDate,
-              profileStatus
+              profileStatus, 
+              birthDateDate,
+              deathDateDate
             );
           } else {
             this.reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
@@ -485,7 +491,8 @@ export class BioTestResults {
     rowDataItem.wikiTreeId = wikiTreeId;
     rowDataItem.wikiTreeLink = wikiTreeLink;
     rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
-    (rowDataItem.personName = reportName), (rowDataItem.sourceCount = sourceNum);
+    rowDataItem.personName = reportName;
+    rowDataItem.sourceCount = sourceNum;
     rowDataItem.sourceLine = sourceContent;
     this.results.checkResults.sourcesRowData.push(rowDataItem);
   }
@@ -501,6 +508,8 @@ export class BioTestResults {
    * @param {String} birthDate to report
    * @param {String} deathDate to report
    * @param {String} profileStatus the unsourced status
+   * @param {Date} birthDateDate for sorting
+   * @param {Date} deathDateDate for sorting
    */
   reportReviewProfile(
     biography,
@@ -511,7 +520,9 @@ export class BioTestResults {
     managerId,
     birthDate,
     deathDate,
-    profileStatus
+    profileStatus,
+    birthDateDate,
+    deathDateDate
   ) {
     let rowDataItem = {
       wikiTreeId: "",
@@ -527,6 +538,8 @@ export class BioTestResults {
       birthDate: "",
       deathDate: "",
       wikiTreeLink: "",
+      birthDateDate: null,
+      deathDateDate: null
     };
     rowDataItem.wikiTreeId = wikiTreeId;
     rowDataItem.wikiTreeLink = wikiTreeLink;
@@ -545,6 +558,17 @@ export class BioTestResults {
     }
     rowDataItem.birthDate = birthDate;
     rowDataItem.deathDate = deathDate;
+    // if date null or invalid, make it today for sorting
+    // TODO is this putting in Jan 1, 1970 by some chance?
+    if (birthDateDate == null || birthDateDate == 'Invalid Date') {
+      //birthDateDate = new Date(0);
+      birthDateDate = new Date();
+    }
+    if (deathDateDate == null || deathDateDate == 'Invalid Date') {
+      deathDateDate = new Date();
+    }
+    rowDataItem.birthDateDate = birthDateDate;
+    rowDataItem.deathDateDate = deathDateDate;
     this.results.checkResults.profilesRowData.push(rowDataItem);
   }
 
@@ -607,10 +631,10 @@ export class BioTestResults {
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;
     if (otherCnt > 0) {
-      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles. ";
+      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles.";
     }
     if (maxProfilesReached) {
-      msg += "Reached maximum number of profiles. ";
+      msg += " Reached maximum number of profiles. ";
     }
     if (this.errorMessage.length > 0) {
       msg += this.errorMessage;

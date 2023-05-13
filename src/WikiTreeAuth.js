@@ -87,6 +87,7 @@ class WikiTreeAuth {
     for (var key in loginData) {
       formData.append(key, loginData[key]);
     }
+    formData.append('appId', 'bioCheck');
     let options = {
       method: "POST",
       credentials: "include",

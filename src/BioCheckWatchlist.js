@@ -80,6 +80,7 @@ export class BioCheckWatchlist extends BioChecker {
       "&fields=" +
       BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
       WATCHLIST_REQUEST_FIELDS +
+      BioChecker.MY_ID_KEY + 
       BioChecker.REDIRECT_KEY;
     // start with a request for one profile to get the number of profiles on the watchlist
     let url = urlbase + "&offset=0&limit=1";

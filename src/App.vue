@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.5.2 beta</h4>
+      <h4>Bio Check Version 1.5.2</h4>
     </div>
 
     <div class="flex-grid">
@@ -449,8 +449,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            <th class = "colIsEmpty" id = "isEmpty" scope="col" @click="sortBy('isEmpty')" >Empty</th>
            <th class = "colMisplacedLineCnt" id = "misplacedLineCnt" scope="col" @click="sortBy('misplacedLineCnt')" >Misplaced Lines</th>
            <th class = "colMissingEnd" id = "missingEnd" scope="col" @click="sortBy('missingEnd')" >Missing end</th>
-           <th class = "colBioHeading" id = "bioHeading" scope="col"
-           @click="sortBy('bioHeading')" >Biography Heading</th>
+           <th class = "colBioHeading" id = "bioHeading" scope="col" @click="sortBy('bioHeading')" >Biography Heading</th>
            <th class = "colSourcesHeading" id = "sourcesHeading" scope="col" @click="sortBy('sourcesHeading')" >Sources Heading</th>
            <th class = "colReferencesTag" id = "referencesTag" scope="col" @click="sortBy('referencesTag')" >references tag</th>
            <th class = "colAcknowledgements" id = "acknowledgements" scope="col" @click="sortBy('acknowledgements')" >Ack...</th>
@@ -569,7 +568,7 @@ export default {
           searchStartWatchlist: 0,
           searchMaxWatchlist: 200,
           minRandom: 0,
-          maxRandom: 36000000,
+          maxRandom: 38506714,
         },
         checkStatus: { 
           stateMessage: " ",
@@ -720,8 +719,32 @@ export default {
             sortData = this.checkResults.profilesRowData;
           }
         }
-        //this.checkResults.resultsRowData.sort( (a, b) => {
+        if (sortKey === 'birthDate') {
+          sortKey = 'birthDateDate';
+        }
+        if (sortKey === 'deathDate') {
+          sortKey = 'deathDateDate';
+        }
         sortData.sort( (a, b) => {
+          //  numeric sort
+          //if (typeof a[sortKey] === 'number'){
+            //return a[sortKey] - b[sortKey];
+          //}
+          if (typeof a[sortKey] === 'string') {
+            //  alphanumeric sort
+            const aa = a[sortKey];
+            const bb = b[sortKey];
+            return aa < bb ? -1 : aa > bb ?  1 : 0;
+          } else {   // number or object such as Date
+            return a[sortKey] - b[sortKey];
+          }
+        } );
+        this.reverse = (this.sortKey === sortKey) ? !this.reverse : false;
+        if (this.reverse) sortData.reverse();
+        this.sortKey = sortKey;
+      },
+
+        /*
           //  numeric sort
           if (typeof a[sortKey] === 'number'){
             return a[sortKey] - b[sortKey];
@@ -732,9 +755,9 @@ export default {
           return aa < bb ? -1 : aa > bb ?  1 : 0;
           } );
           this.reverse = (this.sortKey === sortKey) ? !this.reverse : false;
-          if (this.reverse) this.checkResults.resultsRowData.reverse();
+          if (this.reverse) sortData.reverse();
           this.sortKey = sortKey;
-        },
+        */
 
       checkProfiles: function () {
         let isValidUserInput = true;

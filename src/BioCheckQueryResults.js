@@ -84,7 +84,7 @@ export class BioCheckQueryResults extends BioChecker {
           let cnt = endIndex - i;
           this.testResults.setStateMessage("Examining " + cnt + " of " + queryResponse.found + 
                                          " profiles found via search");
-          await this.checkPeople(queryResponse.profiles.slice(this.getSearchStart(), endIndex), 0, 0, 0, 0);
+          await this.checkPeople(queryResponse.profiles.slice(this.getSearchStart(), endIndex), 0, 0, 0, 0, 1000, 0);
           this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
                      this.reachedMaxProfiles);
         } else {

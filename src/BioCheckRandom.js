@@ -45,8 +45,8 @@ export class BioCheckRandom extends BioChecker {
     // https://www.wikitree.com/index.php?title=Special:NetworkFeed&showall=1&l=100&created=1
     // then getting the most recent and getting their id as the max rand
 
-    // max captured as of 28 Oct 2022
-    const MAX_RANDOM = 36331670;
+    // max captured as of 13 May 2023
+    const MAX_RANDOM = 38667932;
     this.verbose = false;
 
     let minRand = this.getMinRandom();
@@ -104,7 +104,7 @@ export class BioCheckRandom extends BioChecker {
         }
         i++;
       }
-      await this.checkPeople(profileIdArray, 0, 0, 0, 0);
+      await this.pageThroughPeople(profileIdArray, 0, 0, 0);
       this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
                  this.reachedMaxProfiles);
 
