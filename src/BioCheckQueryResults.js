@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +29,6 @@ import { BioChecker } from "./BioChecker.js";
  */
 export class BioCheckQueryResults extends BioChecker {
   static WIKI_TREE_PLUS_URI = "https://plus.wikitree.com/function/WTWebProfileSearch/Profiles.json";
-  static MAX_API_PROFILES = 100;
 
   /**
    * Constructor
@@ -45,15 +44,13 @@ export class BioCheckQueryResults extends BioChecker {
    */
   async check() {
     try {
-      let url =
-        BioCheckQueryResults.WIKI_TREE_PLUS_URI +
-        "?Query=" +
+      let url = BioCheckQueryResults.WIKI_TREE_PLUS_URI +
+        "?appId=bioCheck" +
+        //"?Query=" +
+        "&Query=" +
         this.getQueryArg() +
         "&format=JSON&maxProfiles=" +
         this.getMaxQuery();
-      if (this.getOpenOnly()) {
-        this.url = +"&Privacy=Public";
-      }
       this.testResults.setStateMessage("Please wait, searching via WikiTree+ ...");
       this.testResults.setProgressMessage("Examining profiles");
       let maxToCheck = this.getSearchMax();

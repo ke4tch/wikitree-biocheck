@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -180,6 +180,7 @@ export class BioResultsExport {
    */
   #getResultsRowHeaderData(firstRow) {
     let headerText = {
+      /*
       profileId: "Profile Id",
       wikiTreeId: "WikiTree Id",
       personName: "Name",
@@ -191,6 +192,17 @@ export class BioResultsExport {
       sourcesHeading: "Sources Heading",
       referencesTag: "references tag",
       acknowledgements: "Acknowledgements",
+      bioLineCnt: "Bio Lines",
+      inlineRefCnt: "Inline ref",
+      sourceLineCnt: "Source Line Count",
+      wikiTreeHyperLink: "Link",
+      */
+      profileId: "Profile Id",
+      wikiTreeId: "WikiTree Id",
+      personName: "Name",
+      unsourcedStatus: "Sourced?",
+      requiredSections: "Required Sections",
+      styleDetails: "Style Issues",
       bioLineCnt: "Bio Lines",
       inlineRefCnt: "Inline ref",
       sourceLineCnt: "Source Line Count",

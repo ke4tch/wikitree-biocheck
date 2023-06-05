@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -212,6 +212,7 @@ export class BioTestResults {
    * @param {String} deathDate to report
    * @param {Boolean} reportAllProfiles true to report all profiles
    * @param {Boolean} reportNonManaged true to report profiles not managed by user
+   * @param {Boolean} reportStyleDetails true to report style details
    * @param {Boolean} sourcesReport true to report sources for profile
    * @param {Boolean} profileReviewReport true to generate profile review report
    * @param {String} userId for testing nonManaged profiles
@@ -230,6 +231,7 @@ export class BioTestResults {
     deathDate,
     reportAllProfiles,
     reportNonManaged,
+    reportStyleDetails,
     sourcesReport,
     profileReviewReport,
     reportStatsOnly,
@@ -242,18 +244,8 @@ export class BioTestResults {
     this.results.reportStatsOnly = reportStatsOnly;
     let profileStatus = this.SOURCED;
     this.results.checkedProfileCount++;
-    let profileShouldBeReported = false;
-    if (reportAllProfiles) {
-      profileShouldBeReported = true;
-    }
-    if (reportNonManaged) {
-      if (userId != managerId) {
-        profileShouldBeReported = true;
-      }
-    }
 
     /*
-     * A profile with uncertain existance is not needed.
      * The manager profile is only needed if it has style issues and we are reporting style.
      * A sourced profile is needed only if we are reporting style.
      * An empty profile is considered marked unsourced and has a line count of 0.
@@ -261,32 +253,51 @@ export class BioTestResults {
      * (for now always report marked, but might want this in future)
      * An unsourced unmarked profile is always needed.
      */
-    if (biography.isUncertainExistance()) {
-      console.log("Profile " + wikiTreeId + " is Uncertain Existance, not reported");
+    let profileShouldBeReported = false;
+    if (reportAllProfiles) {
+      profileShouldBeReported = true;
+    }
+    if ((reportNonManaged) && (userId != managerId)) {
+      profileShouldBeReported = true;
+    }
+    if (biography.isEmpty()) {
+      profileShouldBeReported = true;
+    }
+    if (biography.isMarkedUnsourced()) {
+      this.results.unsourcedProfileCnt++;
+      profileStatus = this.MARKED;
+      profileShouldBeReported = true;
     } else {
-      if (biography.hasStyleIssues()) {
+    if (!biography.hasSources()) {
+      this.results.unmarkedProfileCnt++;
+       profileStatus = this.POSSIBLY_UNSOURCED;
+       profileShouldBeReported = true;
+    } 
+    }
+    if (biography.isUndated()) {
+      profileShouldBeReported = true;
+    } 
+    if (biography.hasSearchString()) {
+      profileShouldBeReported = true;
+    }
+    // TODO bug bug but when profile is sourced with no style issues
+    // is getting reported?
+    // don't see it today.
+
+    if (biography.hasStyleIssues()) {
+      // let user turn off detailed style messages
+      // but not the section level messages
+      if (reportStyleDetails) {
+        profileShouldBeReported = true;
         this.results.styleIssuesProfileCnt++;
-        profileShouldBeReported = true;
-      }
-      if (biography.isEmpty()) {
-        profileShouldBeReported = true;
-      }
-      if (biography.isMarkedUnsourced()) {
-        this.results.unsourcedProfileCnt++;
-        profileStatus = this.MARKED;
-        profileShouldBeReported = true;
       } else {
-        if (!biography.hasSources()) {
-          this.results.unmarkedProfileCnt++;
-          profileStatus = this.POSSIBLY_UNSOURCED;
+        if (biography.getSectionMessages().length > 0) {
           profileShouldBeReported = true;
-        } else {
-          if (biography.isUndated()) {
-            profileShouldBeReported = true;
-          }
+          this.results.styleIssuesProfileCnt++;
         }
       }
     }
+
     if (profileShouldBeReported) {
       this.results.reportCount++;
       if (!reportStatsOnly) {
@@ -294,19 +305,8 @@ export class BioTestResults {
           this.reportSources(biography, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
         } else {
           if (profileReviewReport) {
-            this.reportReviewProfile(
-              biography,
-              wikiTreeId,
-              wikiTreeLink,
-              reportName,
-              privacyString,
-              managerId,
-              birthDate,
-              deathDate,
-              profileStatus, 
-              birthDateDate,
-              deathDateDate
-            );
+            this.reportReviewProfile(biography, wikiTreeId, wikiTreeLink, reportName, privacyString, managerId,
+              birthDate, deathDate, profileStatus, birthDateDate, deathDateDate);
           } else {
             this.reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
           }
@@ -330,13 +330,8 @@ export class BioTestResults {
       wikiTreeId: "",
       personName: "",
       unsourcedStatus: "No", // Sourced, Marked, Maybe
-      isEmpty: "",
-      misplacedLineCnt: "",
-      missingEnd: "", // Comment, references, Span
-      bioHeading: "", // Missing, Mulitple, No Lines Follow
-      sourcesHeading: "", // Missing, Multiple, Extra =
-      referencesTag: "", // Missing, Multiple, ref following
-      acknowledgements: "", // Before Sources, Extra =
+      requiredSections: "",
+      styleDetails: "",
       bioLineCnt: "",
       inlineRefCnt: "",
       sourceLineCnt: "",
@@ -358,79 +353,15 @@ export class BioTestResults {
     if (biography.getPossibleSourcesLineCount() > 0) {
       rowDataItem.sourceLineCnt = biography.getPossibleSourcesLineCount();
     }
-    if (biography.getMisplacedLineCount() > 0) {
-      rowDataItem.misplacedLineCnt = biography.getMisplacedLineCount();
-    }
 
-    if (biography.isEmpty()) {
-      rowDataItem.isEmpty = "Yes";
+    // Get the list of issues to report and put as an item in the result
+    let messages = biography.getSectionMessages(); 
+    if (messages.length > 0) {
+      rowDataItem.requiredSections = messages.join('\n');
     }
-
-    // handle multiple style issues that compress into a single row data item
-    let missingEnd = [];
-    if (biography.hasEndlessComment()) {
-      missingEnd.push(this.COMMENT);
-    }
-    if (biography.hasRefWithoutEnd()) {
-      missingEnd.push(this.REF);
-    }
-    if (biography.hasSpanWithoutEndingSpan()) {
-      missingEnd.push(this.SPAN);
-    }
-    if (missingEnd.length > 0) {
-      rowDataItem.missingEnd = missingEnd.join(", ");
-    }
-    let bioHeading = [];
-    if (biography.isMissingBiographyHeading()) {
-      bioHeading.push(this.MISSING);
-    }
-    if (biography.hasMultipleBioHeadings()) {
-      bioHeading.push(this.MULTIPLE);
-    }
-    if (biography.hasHeadingWithNoLinesFollowing()) {
-      bioHeading.push(this.NO_LINES_FOLLOW);
-    }
-    if (biography.isAutoGenerated()) {
-      bioHeading.push(this.AUTO_GENERATED);
-    }
-    if (bioHeading.length > 0) {
-      rowDataItem.bioHeading = bioHeading.join(", ");
-    }
-    let sourcesHeading = [];
-    if (biography.isMissingSourcesHeading()) {
-      sourcesHeading.push(this.MISSING);
-    }
-    if (biography.hasMultipleSourceHeadings()) {
-      sourcesHeading.push(this.MULTIPLE);
-    }
-    if (biography.sourcesHeadingHasExtraEqual()) {
-      sourcesHeading.push(this.EXTRA_EQUALS);
-    }
-    if (sourcesHeading.length > 0) {
-      rowDataItem.sourcesHeading = sourcesHeading.join(", ");
-    }
-    let referencesTag = [];
-    if (biography.isMissingReferencesTag()) {
-      referencesTag.push(this.MISSING);
-    }
-    if (biography.hasMultipleReferencesTags()) {
-      referencesTag.push(this.MULTIPLE);
-    }
-    if (biography.hasRefAfterReferences()) {
-      referencesTag.push(this.REF_FOLLOWING);
-    }
-    if (referencesTag.length > 0) {
-      rowDataItem.referencesTag = referencesTag.join(", ");
-    }
-    let acknowledgements = [];
-    if (biography.acknowledgementsHeadingHasExtraEqual()) {
-      acknowledgements.push(this.EXTRA_EQUALS);
-    }
-    if (biography.hasAcknowledgementsBeforeSources()) {
-      acknowledgements.push(this.BEFORE_SOURCES);
-    }
-    if (acknowledgements.length > 0) {
-      rowDataItem.acknowledgements = acknowledgements.join(", ");
+    messages = biography.getStyleMessages();
+    if (messages.length > 0) {
+      rowDataItem.styleDetails = messages.join('\n');
     }
 
     // And add the item to the row data
@@ -455,14 +386,7 @@ export class BioTestResults {
       }
       if (reportAllSources) {
         for (let i = 0; i < biography.getValidSources().length; i++) {
-          this.reportSourceRow(
-            profileId,
-            wikiTreeId,
-            wikiTreeLink,
-            reportName,
-            i + 1,
-            biography.getValidSources()[i]
-          );
+          this.reportSourceRow( profileId, wikiTreeId, wikiTreeLink, reportName, i + 1, biography.getValidSources()[i]);
         }
       }
     }
@@ -511,18 +435,8 @@ export class BioTestResults {
    * @param {Date} birthDateDate for sorting
    * @param {Date} deathDateDate for sorting
    */
-  reportReviewProfile(
-    biography,
-    wikiTreeId,
-    wikiTreeLink,
-    reportName,
-    privacyString,
-    managerId,
-    birthDate,
-    deathDate,
-    profileStatus,
-    birthDateDate,
-    deathDateDate
+  reportReviewProfile(biography, wikiTreeId, wikiTreeLink, reportName, privacyString, managerId, birthDate, deathDate, 
+                      profileStatus, birthDateDate, deathDateDate
   ) {
     let rowDataItem = {
       wikiTreeId: "",
@@ -559,9 +473,7 @@ export class BioTestResults {
     rowDataItem.birthDate = birthDate;
     rowDataItem.deathDate = deathDate;
     // if date null or invalid, make it today for sorting
-    // TODO is this putting in Jan 1, 1970 by some chance?
     if (birthDateDate == null || birthDateDate == 'Invalid Date') {
-      //birthDateDate = new Date(0);
       birthDateDate = new Date();
     }
     if (deathDateDate == null || deathDateDate == 'Invalid Date') {
