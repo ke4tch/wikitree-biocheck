@@ -25,18 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * BioCheck Template Manager
  */
 
-/*
- * Note: duplicate class. Differs between app and browser extension
- * The class in the BioCheck app
- *   loads the data from "https://plus.wikitree.com/chrome/templatesExp.json";
- *   to get the jsonData.templates 
- *   and then calls theSourceRules.loadTemplates
- * The class in the BioCheck WikiTree Browser extension
- *   imports { dataTables, dataTableTemplateFindByName, dataTablesLoad } from "../../core/API/wtPlusData";
- *   and then calls dataTablesLoad() 
- *   and then calls theSourceRules.loadTemplates(jsonData.templates)
- */
-
 import { theSourceRules } from "./SourceRules.js";
 
 export class BioCheckTemplateManager {
@@ -51,7 +39,6 @@ export class BioCheckTemplateManager {
    * and it should only be called once
    */
   async load() {
-    //console.log('BioCheckTemplateManager load');
     try {
       let url = "https://plus.wikitree.com/chrome/templatesExp.json?appid=bioCheck";
       const fetchResponse = await fetch(url);

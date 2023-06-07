@@ -26,8 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * and look like what could be read from database tables
  */
 
-import { BioCheckTemplateManager } from "./BioCheckTemplateManager.js";
-
 class SourceRules {
   #isInit = false;
 
@@ -729,8 +727,6 @@ class SourceRules {
   // make this a singleton
   constructor() {
     if (!SourceRules.theSourceRules) {
-      let bioCheckTemplateManager = new BioCheckTemplateManager();
-      bioCheckTemplateManager.load();
       SourceRules.theSourceRules = this;
     }
     return SourceRules.theSourceRules;
@@ -738,10 +734,6 @@ class SourceRules {
 
   /* 
    * Load template rules from JSON data
-   * this is screwy but seems to work. theload method in BioCheckTemplateManger calls theSourceRules.loadTemplates
-   * and this load method is called from theSourceRules constructor
-   * avoids issues with no async in constructor
-   * but remains a singleton
    */
   loadTemplates(templates) {
     if (!this.#isInit) {

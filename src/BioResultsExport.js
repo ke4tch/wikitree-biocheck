@@ -180,29 +180,13 @@ export class BioResultsExport {
    */
   #getResultsRowHeaderData(firstRow) {
     let headerText = {
-      /*
-      profileId: "Profile Id",
-      wikiTreeId: "WikiTree Id",
-      personName: "Name",
-      unsourcedStatus: "Sourced",
-      isEmpty: "Empty",
-      misplacedLineCnt: "Misplaced Lines",
-      missingEnd: "Missing End",
-      bioHeading: "Bio Heading",
-      sourcesHeading: "Sources Heading",
-      referencesTag: "references tag",
-      acknowledgements: "Acknowledgements",
-      bioLineCnt: "Bio Lines",
-      inlineRefCnt: "Inline ref",
-      sourceLineCnt: "Source Line Count",
-      wikiTreeHyperLink: "Link",
-      */
       profileId: "Profile Id",
       wikiTreeId: "WikiTree Id",
       personName: "Name",
       unsourcedStatus: "Sourced?",
       requiredSections: "Required Sections",
       styleDetails: "Style Issues",
+      searchPhrase: "Search",
       bioLineCnt: "Bio Lines",
       inlineRefCnt: "Inline ref",
       sourceLineCnt: "Source Line Count",

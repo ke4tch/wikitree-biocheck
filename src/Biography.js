@@ -1186,10 +1186,6 @@ export class Biography {
       this.#style.bioHasStyleIssues = true;
       this.#messages.styleMessages.push('Biography may contain email address');
     }
-    if (this.#style.bioHasSearchString) {
-      this.#style.bioHasStyleIssues = true;
-      this.#messages.styleMessages.push('Biography contains search string: ' + this.#bioSearchString);
-    }
   }
 
   /*

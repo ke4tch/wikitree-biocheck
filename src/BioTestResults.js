@@ -332,6 +332,7 @@ export class BioTestResults {
       unsourcedStatus: "No", // Sourced, Marked, Maybe
       requiredSections: "",
       styleDetails: "",
+      sourcePhrase: "",
       bioLineCnt: "",
       inlineRefCnt: "",
       sourceLineCnt: "",
@@ -349,6 +350,10 @@ export class BioTestResults {
     }
     if (biography.getInlineRefCount() > 0) {
       rowDataItem.inlineRefCnt = biography.getInlineRefCount();
+    }
+    rowDataItem.searchPhrase = ""; // needed for column sort
+    if (biography.hasSearchString()) {
+      rowDataItem.searchPhrase = "Found";
     }
     if (biography.getPossibleSourcesLineCount() > 0) {
       rowDataItem.sourceLineCnt = biography.getPossibleSourcesLineCount();

@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.0 test</h4>
+      <h4>Bio Check Version 1.6.0</h4>
     </div>
 
     <div class="flex-grid">
@@ -459,6 +459,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            <th class = "colUnsourcedStatus" id = "unsourcedStatus" scope="col" @click="sortBy('unsourcedStatus')" >Sourced?</th>
            <th class = "colRequiredSections" id = "requiredSections" scope="col" @click="sortBy('requiredSections')" >Required Sections</th>
            <th class = "colStyleDetails" id = "styleDetails" scope="col" @click="sortBy('styleDetails')" >Style Issues</th>
+           <th class = "colSearchPhrase" id = "searchPhrase" scope="col" @click="sortBy('searchPhrase')" >Search?</th>
            <th class = "colInlineRefCnt" id = "inlineRefCnt" scope="col" @click="sortBy('inlineRefCnt')" >Inline ref Count</th>
         </tr>
         </thead>
@@ -472,6 +473,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             <td class = "colUnsourcedStatus">{{ item.unsourcedStatus }} </td>
             <td class = "colRequiredSections">{{ item.requiredSections }} </td>
             <td class = "colStyleDetails">{{ item.styleDetails}} </td> 
+            <td class = "colSearchPhrase">{{ item.searchPhrase}} </td> 
             <td class = "colInlineRefCnt">{{ item.inlineRefCnt }} </td>
           </tr>
         </tbody>
@@ -504,6 +506,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import { nextTick } from 'vue'
 import { BioCheck } from "./BioCheck.js"
 import { BioResultsExport } from "./BioResultsExport.js"
+import { BioCheckTemplateManager } from "./BioCheckTemplateManager.js";
 
 export default {
   name: 'App',
@@ -708,12 +711,16 @@ export default {
         this.userArgs.reportAllProfiles = false;
         this.checkProfiles();
       }
+      // This is to just load from WT+ once per browser session
+      let bioCheckTemplateManager = new BioCheckTemplateManager();
+      bioCheckTemplateManager.load();
     })
   },
 
     methods: {
 
       sortBy: function(sortKey) {
+console.log('sort by ' + sortKey);
         let sortData = this.checkResults.resultsRowData;
         if (this.userArgs.sourcesReport) {
           sortData = this.checkResults.sourcesRowData;
@@ -1115,7 +1122,8 @@ td {
 .colDeathDate { width : 7% }
 
 .colRequiredSections { width : 14% }
-.colStyleDetails { width : 30% }
+.colStyleDetails { width : 26% }
+.colSearchPhrase { width : 4% }
 
 td {
   text-align: center;
