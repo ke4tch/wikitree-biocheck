@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.0</h4>
+      <h4>Bio Check Version 1.6.1</h4>
     </div>
 
     <div class="flex-grid">
@@ -373,7 +373,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     <div class="button-panel">
       <div class="left-button">
-        <button v-on:click="checkProfiles"
+        <button class="check-button" v-on:click="checkProfiles"
               :disabled="checkStatus.checkDisabled">Check Profiles</button>
         <button v-on:click="cancelCheck" 
               :disabled="checkStatus.cancelDisabled">Cancel</button>
@@ -392,11 +392,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <div class="feedback-state">
         {{ checkStatus.stateMessage }} 
       </div>
-      <div class="feedback-progress">
-        <span v-bind:title="checkStatus.progressMessageTitle">
-          {{ checkStatus.progressMessage }}
-        </span>
-      </div>
+      <template v-if="isAfterFirstCheck">
+        <div class="feedback-progress">
+          <span v-bind:title="checkStatus.progressMessageTitle">
+          {{ checkStatus.progressMessage }} 
+          </span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="feedback-start">
+          <span v-bind:title="checkStatus.progressMessageTitle">
+            <span v-html="checkStatus.progressMessage" style="font-weight: bolder"></span>
+          </span>
+        </div>
+      </template>
     </div>
 
     <div class="tableContainer">
@@ -577,8 +586,10 @@ export default {
           bioSearchString: "",
         },
         checkStatus: { 
-          stateMessage: " ",
-          progressMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, then select Check Profiles",
+          //stateMessage: " ",
+          //progressMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, then select Check Profiles",
+          stateMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...",
+          progressMessage: "select Check Profiles",
           progressMessageTitle: "",
           cancelPending: false,
 
@@ -586,6 +597,7 @@ export default {
           cancelDisabled: true,
           exportDisabled: true,
           toolsDisabled: true,
+          checkStarted: false,
         },
         checkResults: {
           key: "",
@@ -598,6 +610,7 @@ export default {
         loginMessage: "",
         toolsLabel: "Tools not available",
         toolsUserId: "",
+      
       }
     },
 
@@ -620,6 +633,10 @@ export default {
 
     watchlistSelected: function() {
       return (this.userArgs.selectedCheckType === "checkWatchlist");
+    },
+  
+    isAfterFirstCheck: function() {
+      return (this.checkStatus.checkStarted);
     },
 
     isCheckByProfile: function() {
@@ -720,7 +737,6 @@ export default {
     methods: {
 
       sortBy: function(sortKey) {
-console.log('sort by ' + sortKey);
         let sortData = this.checkResults.resultsRowData;
         if (this.userArgs.sourcesReport) {
           sortData = this.checkResults.sourcesRowData;
@@ -751,6 +767,7 @@ console.log('sort by ' + sortKey);
       },
 
       checkProfiles: function () {
+        this.checkStatus.checkStarted = true;
         let isValidUserInput = true;
         if (this.userArgs.searchStart > this.userArgs.maxQuery) {
           this.checkStatus.progressMessage = "Check starting at cannot be greater than Max search profiles";
@@ -830,6 +847,7 @@ console.log('sort by ' + sortKey);
           this.checkStatus.checkDisabled = true;
           this.checkStatus.cancelDisabled = false;
           this.checkStatus.exportDisabled = true;
+          this.checkStatus.checkStarted = true;
           this.checkStatus.stateMessage = "";
           this.checkStatus.progressMessage = "Examining profiles";
           this.userArgs.userId = this.userContext.userId;
@@ -962,9 +980,10 @@ console.log('sort by ' + sortKey);
         }
         // Do not want to start automatically in case someone is
         // trying to overload 
-        //if (args.has("checkStart")) {
-        //  this.checkStart = args.get("checkStart");
-        //}
+        // or maybe we just want smalled numbers?
+        if (args.has("checkStart")) {
+          this.checkStart = args.get("checkStart");
+        }
       }
     }
 }
@@ -1037,6 +1056,12 @@ button {
   font-size: 100%;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
+.check-button {
+  margin: .5em;
+  font-size: 100%;
+  box-shadow: 2px 2px 2px 1px black;
+  font-weight: 'bold';
+}
 .button-panel {
   display: flex;
   flex-wrap: wrap;
@@ -1058,6 +1083,8 @@ button {
 .feedback-progress {
 }
 .feedback-state {
+}
+.feedback-start {
 }
 .tableContainer {
   clear: both;

@@ -186,7 +186,7 @@ export class BioResultsExport {
       unsourcedStatus: "Sourced?",
       requiredSections: "Required Sections",
       styleDetails: "Style Issues",
-      searchPhrase: "Search",
+      searchPhrase: "Search?",
       bioLineCnt: "Bio Lines",
       inlineRefCnt: "Inline ref",
       sourceLineCnt: "Source Line Count",

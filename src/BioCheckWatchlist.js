@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -159,12 +159,11 @@ export class BioCheckWatchlist extends BioChecker {
                     // iterate returned profiles
                     let profileObj = watchlistArray[i];
                     let thePerson = new BioCheckPerson();
-                    let canUseThis = thePerson.build(
+                    let canUseThis = thePerson.canUse(
                       profileObj,
                       this.getOpenOnly(),
                       this.getIgnorePre1500(),
-                      this.getUserId(),
-                      0
+                      this.getUserId()
                     );
                     this.testResults.countProfile(
                       0,

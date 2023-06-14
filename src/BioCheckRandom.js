@@ -46,7 +46,7 @@ export class BioCheckRandom extends BioChecker {
     // then getting the most recent and getting their id as the max rand
 
     // max captured as of 13 May 2023
-    const MAX_RANDOM = 38667932;
+    const MAX_RANDOM = 38917282;
     this.verbose = false;
 
     let minRand = this.getMinRandom();

@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -44,7 +44,6 @@ export class PeopleManager {
   personIdToWikiTreeIdMap = new Map(); // list of wikitree id, accessed by person id
   allProfileIds = []; // all profile ids
   removedProfileIds = [];
-  redirectedProfileIds = new Set();
   duplicateProfileCount = 0;
 
   constructor() { }
@@ -53,17 +52,12 @@ export class PeopleManager {
    * Add person
    * @param {String} profileId the unique id for the person (e.g., 12345678)
    * @param {String} wikiTreeId the wikiTree id for the person (e.g., Doe-100)
-   * @param {String} requestedProfileId id to track redirects
    */
-  addPerson(profileId, wikiTreeId, requestedProfileId) {
+  addPerson(profileId, wikiTreeId) {
     if (!this.personIdToWikiTreeIdMap.has(profileId)) {
       this.personIdToWikiTreeIdMap.set(profileId, wikiTreeId);
       this.wikiTreeIdToPersonIdMap.set(wikiTreeId, profileId);
       this.allProfileIds.push(profileId);
-    }
-    // Keep track of redirected profiles
-    if (requestedProfileId > 0 && requestedProfileId != profileId) {
-      this.redirectedProfileIds.add(requestedProfileId);
     }
   }
 
@@ -73,7 +67,7 @@ export class PeopleManager {
    * @returns {Boolean} true if person has already been processed
    */
   hasPerson(profileId) {
-    if (this.personIdToWikiTreeIdMap.has(profileId) || this.redirectedProfileIds.has(profileId)) {
+    if (this.personIdToWikiTreeIdMap.has(profileId)) {
       this.duplicateProfileCount++;
       return true;
     } else {
@@ -104,8 +98,7 @@ export class PeopleManager {
    * side effect set person null so it can be garbage collected
    * @param {String} profileId unique id number for the person
    *
-   * TODO
-   * Can you figure out a way around this to allow some garbage collection?
+   * TODO Can you figure out a way around this to allow some garbage collection?
    */
   removeProfile(profileId) {
     let id = this.personIdToWikiTreeIdMap.get(profileId);

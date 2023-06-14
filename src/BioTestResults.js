@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * So the initial content must ripple down from the GUI then content changes
  * to ripple back to the userface
  */
+import { BioCheckPerson } from "./BioCheckPerson.js";
 export class BioTestResults {
   /*
    * What the GUI expects in the result rows
@@ -65,7 +66,6 @@ export class BioTestResults {
     uncheckedDueToPrivacyCount: 0, // privacy does not allow checking
     uncheckedDueToDateCount: 0, // date does not allow checking (pre1500)
     checkedProfileCount: 0, // made it through privacy and redirect
-    redirectedProfileCount: 0, // was a redirect (only for random test)
     styleIssuesProfileCnt: 0,
     unsourcedProfileCnt: 0,
     unmarkedProfileCnt: 0,
@@ -135,14 +135,6 @@ export class BioTestResults {
   addUncheckedDueToPrivacy() {
     this.results.uncheckedDueToPrivacyCount++;
   }
-
-  /*
-   * Add to number of redirected profiles (random check only)
-   */
-  addRedirectedProfile() {
-    this.results.redirectedProfileCount++;
-  }
-
   /**
    * Set whatIsHappening
    * @param {String} current progress message
@@ -157,12 +149,9 @@ export class BioTestResults {
    */
   setProgressMessageDetails(requestedProfileCount) {
     let message =
-      "Wait... Requested " +
-      requestedProfileCount +
-      " profiles. Examined " +
-      this.results.checkedProfileCount +
-      " profiles. Reported " +
-      this.results.reportCount +
+      "Wait... Requested " + requestedProfileCount +
+      " profiles. Examined " + this.results.checkedProfileCount +
+      " profiles. Reported " + this.results.reportCount +
       " profiles";
     this.results.checkStatus.progressMessageTitle = message;
   }
@@ -202,43 +191,18 @@ export class BioTestResults {
   /**
    * Add a profile to the results
    * @param {Biography} biography with results of parsing and validating profile
-   * @param {String} profileId to report
-   * @param {String} wikiTreeId to report
-   * @param {String} wikiTreeLink to report
-   * @param {String} reportName name to report
-   * @param {String} managerId for the person
-   * @param {String} privacyString to report
-   * @param {String} birthDate to report
-   * @param {String} deathDate to report
+   * @param {BioCheckPerson} person to report
    * @param {Boolean} reportAllProfiles true to report all profiles
    * @param {Boolean} reportNonManaged true to report profiles not managed by user
    * @param {Boolean} reportStyleDetails true to report style details
    * @param {Boolean} sourcesReport true to report sources for profile
    * @param {Boolean} profileReviewReport true to generate profile review report
    * @param {String} userId for testing nonManaged profiles
-   * @param {Date} birthDateDate for sorting
-   * @param {Date} deathDateDate for sorting
    */
-  addProfile(
-    biography,
-    profileId,
-    wikiTreeId,
-    wikiTreeLink,
-    reportName,
-    managerId,
-    privacyString,
-    birthDate,
-    deathDate,
-    reportAllProfiles,
-    reportNonManaged,
-    reportStyleDetails,
-    sourcesReport,
-    profileReviewReport,
-    reportStatsOnly,
-    userId,
-    birthDateDate,
-    deathDateDate
-  ) {
+  addProfile(biography, thePerson,
+             reportAllProfiles, reportNonManaged, reportStyleDetails, sourcesReport,
+             profileReviewReport, reportStatsOnly, userId) {
+
     this.results.sourcesReport = sourcesReport;
     this.results.profileReviewReport = profileReviewReport;
     this.results.reportStatsOnly = reportStatsOnly;
@@ -257,7 +221,7 @@ export class BioTestResults {
     if (reportAllProfiles) {
       profileShouldBeReported = true;
     }
-    if ((reportNonManaged) && (userId != managerId)) {
+    if ((reportNonManaged) && (userId != thePerson.getManagerId())) {
       profileShouldBeReported = true;
     }
     if (biography.isEmpty()) {
@@ -268,11 +232,11 @@ export class BioTestResults {
       profileStatus = this.MARKED;
       profileShouldBeReported = true;
     } else {
-    if (!biography.hasSources()) {
-      this.results.unmarkedProfileCnt++;
-       profileStatus = this.POSSIBLY_UNSOURCED;
-       profileShouldBeReported = true;
-    } 
+      if (!biography.hasSources()) {
+        this.results.unmarkedProfileCnt++;
+        profileStatus = this.POSSIBLY_UNSOURCED;
+        profileShouldBeReported = true;
+      }
     }
     if (biography.isUndated()) {
       profileShouldBeReported = true;
@@ -280,10 +244,6 @@ export class BioTestResults {
     if (biography.hasSearchString()) {
       profileShouldBeReported = true;
     }
-    // TODO bug bug but when profile is sourced with no style issues
-    // is getting reported?
-    // don't see it today.
-
     if (biography.hasStyleIssues()) {
       // let user turn off detailed style messages
       // but not the section level messages
@@ -302,13 +262,12 @@ export class BioTestResults {
       this.results.reportCount++;
       if (!reportStatsOnly) {
         if (sourcesReport) {
-          this.reportSources(biography, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllProfiles);
+          this.reportSources(biography, thePerson);
         } else {
           if (profileReviewReport) {
-            this.reportReviewProfile(biography, wikiTreeId, wikiTreeLink, reportName, privacyString, managerId,
-              birthDate, deathDate, profileStatus, birthDateDate, deathDateDate);
+            this.reportReviewProfile(biography, thePerson, profileStatus);
           } else {
-            this.reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus);
+            this.reportUnsourcedStyle(biography, thePerson, profileStatus);
           }
         }
       }
@@ -318,13 +277,10 @@ export class BioTestResults {
   /*
    * Report unsourced and style for profile (the default)
    * @param {Biography} biography contains the results of checking
-   * @param {String} profileId to report
-   * @param {String} wikiTreeId to report
-   * @param {String} wikiTreeLink to report
-   * @param {String} reportName name to report
+   * @param {BioCheckPerson} person to report
    * @param {String} profileStatus the unsourced status
    */
-  reportUnsourcedStyle(biography, profileId, wikiTreeId, wikiTreeLink, reportName, profileStatus) {
+  reportUnsourcedStyle(biography, thePerson, profileStatus) {
     let rowDataItem = {
       profileId: 0,
       wikiTreeId: "",
@@ -332,26 +288,23 @@ export class BioTestResults {
       unsourcedStatus: "No", // Sourced, Marked, Maybe
       requiredSections: "",
       styleDetails: "",
-      sourcePhrase: "",
+      searchPhrase: "",
       bioLineCnt: "",
       inlineRefCnt: "",
       sourceLineCnt: "",
     };
-
     rowDataItem.unsourcedStatus = profileStatus;
-    rowDataItem.profileId = profileId;
-    rowDataItem.wikiTreeId = wikiTreeId;
-    // HYPERLINK format should work in Excel, LibreOffice and Google Sheets
-    rowDataItem.wikiTreeLink = wikiTreeLink;
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
-    rowDataItem.personName = reportName;
+    rowDataItem.profileId = thePerson.getProfileId();
+    rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
+    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
+    rowDataItem.personName = thePerson.getReportName();
     if (biography.getTotalBioLines() > 0) {
       rowDataItem.bioLineCnt = biography.getTotalBioLines();
     }
     if (biography.getInlineRefCount() > 0) {
       rowDataItem.inlineRefCnt = biography.getInlineRefCount();
     }
-    rowDataItem.searchPhrase = ""; // needed for column sort
     if (biography.hasSearchString()) {
       rowDataItem.searchPhrase = "Found";
     }
@@ -376,37 +329,28 @@ export class BioTestResults {
   /*
    * Report sources for the profile
    * @param {Biography} biography contains the results of checking
-   * @param {String} profileId to report
-   * @param {String} wikiTreeId to report
-   * @param {String} wikiTreeLink to report
-   * @param {String} reportName name to report
-   * @param {Boolean} reportAllSources true to report all sources
+   * @param {BioCheckPerson} person to report
    */
-  reportSources(biography, profileId, wikiTreeId, wikiTreeLink, reportName, reportAllSources) {
+  reportSources(biography, thePerson) {
     if (biography.getInvalidSources().length === 0 && biography.getValidSources().length === 0) {
-      this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, -1, "");
+      this.reportSourceRow(thePerson, -1, "");
     } else {
       for (let i = 0; i < biography.getInvalidSources().length; i++) {
-        this.reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, 0, biography.getInvalidSources()[i]);
+        this.reportSourceRow(thePerson, 0, biography.getInvalidSources()[i]);
       }
-      if (reportAllSources) {
-        for (let i = 0; i < biography.getValidSources().length; i++) {
-          this.reportSourceRow( profileId, wikiTreeId, wikiTreeLink, reportName, i + 1, biography.getValidSources()[i]);
-        }
+      for (let i = 0; i < biography.getValidSources().length; i++) {
+        this.reportSourceRow(thePerson, i + 1, biography.getValidSources()[i]);
       }
     }
   }
 
   /*
    * Report one source row
-   * @param {String} profileId to report
-   * @param {String} wikiTreeId to report
-   * @param {String} wikiTreeLink to report
-   * @param {String} reportName name to report
+   * @param {BioCheckPerson} person to report
    * @param {Number} sourceNum the source number
    * @param {String} sourceContent the source content
    */
-  reportSourceRow(profileId, wikiTreeId, wikiTreeLink, reportName, sourceNum, sourceContent) {
+  reportSourceRow(thePerson, sourceNum, sourceContent) {
     let rowDataItem = {
       profileId: 0,
       wikiTreeId: "",
@@ -416,11 +360,11 @@ export class BioTestResults {
       sourceLine: "",
       wikiTreeLink: "",
     };
-    rowDataItem.profileId = profileId;
-    rowDataItem.wikiTreeId = wikiTreeId;
-    rowDataItem.wikiTreeLink = wikiTreeLink;
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
-    rowDataItem.personName = reportName;
+    rowDataItem.profileId = thePerson.getProfileId();
+    rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
+    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
+    rowDataItem.personName = thePerson.getReportName();
     rowDataItem.sourceCount = sourceNum;
     rowDataItem.sourceLine = sourceContent;
     this.results.checkResults.sourcesRowData.push(rowDataItem);
@@ -429,20 +373,10 @@ export class BioTestResults {
   /*
    * Report profile for review
    * @param {Biography} biography contains the results of checking
-   * @param {String} wikiTreeId to report
-   * @param {String} wikiTreeLink to report
-   * @param {String} reportName name to report
-   * @param {String} privacyString to report
-   * @param {String} managerId for the person
-   * @param {String} birthDate to report
-   * @param {String} deathDate to report
+   * @param {BioCheckPerson} the person
    * @param {String} profileStatus the unsourced status
-   * @param {Date} birthDateDate for sorting
-   * @param {Date} deathDateDate for sorting
    */
-  reportReviewProfile(biography, wikiTreeId, wikiTreeLink, reportName, privacyString, managerId, birthDate, deathDate, 
-                      profileStatus, birthDateDate, deathDateDate
-  ) {
+  reportReviewProfile(biography, thePerson, profileStatus) {
     let rowDataItem = {
       wikiTreeId: "",
       wikiTreeHyperLink: "",
@@ -460,10 +394,10 @@ export class BioTestResults {
       birthDateDate: null,
       deathDateDate: null
     };
-    rowDataItem.wikiTreeId = wikiTreeId;
-    rowDataItem.wikiTreeLink = wikiTreeLink;
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(wikiTreeLink, wikiTreeId);
-    rowDataItem.personName = reportName;
+    rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
+    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
+    rowDataItem.personName = thePerson.getReportName();
     rowDataItem.reviewerId = " ";
     rowDataItem.reviewStatus = " ";
     rowDataItem.reviewComments = " ";
@@ -471,12 +405,14 @@ export class BioTestResults {
     if (biography.hasStyleIssues()) {
       rowDataItem.hasStyleIssues = "X";
     }
-    rowDataItem.profilePrivacy = privacyString;
-    if (managerId === 0) {
+    rowDataItem.profilePrivacy = thePerson.getPrivacyString();
+    if (thePerson.getManagerId() === 0) {
       rowDataItem.profileIsOrphan = "X";
     }
-    rowDataItem.birthDate = birthDate;
-    rowDataItem.deathDate = deathDate;
+    rowDataItem.birthDate = thePerson.getReportDate(true);
+    rowDataItem.deathDate = thePerson.getReportDate(false);
+    let birthDateDate = thePerson.getBirthDate();
+    let deathDateDate = thePerson.getDeathDate();
     // if date null or invalid, make it today for sorting
     if (birthDateDate == null || birthDateDate == 'Invalid Date') {
       birthDateDate = new Date();
@@ -530,9 +466,6 @@ export class BioTestResults {
         return 0; //default return value (no sorting)
       });
     }
-
-    // Reporting just to console for random check
-    console.log("Redirected profile count " + this.results.redirectedProfileCount);
 
     let msg = "Checked " + this.results.checkedProfileCount +
       " profiles: Found " + this.results.reportCount +

@@ -60,7 +60,8 @@ export class BioChecker {
   //static WIKI_TREE_URI = "https://staging.wikitree.com/api.php";
   // staging.wikitree.com 
   static BASIC_PROFILE_REQUEST_FIELDS =
-    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,Bio";
+    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio";
+//    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,Bio";
   static REDIRECT_KEY = "&resolveRedirect=1";
   static MAX_API_PROFILES = 100;
   static LARGE_MAX_API_PROFILES = 1000;
@@ -386,7 +387,7 @@ export class BioChecker {
    * Determine if need to check bio
    * If the person does not have a bio, call the API to get it
    * and check it
-   * @param thePerson person to be checked
+   * @param {BioChecPerson} thePerson person to be checked
    * @returns {Boolean} true if need to get and check bio
    */
   needToGetBio(thePerson) {
@@ -394,8 +395,7 @@ export class BioChecker {
     if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
       this.thePeopleManager.addPerson(
         thePerson.getProfileId(),
-        thePerson.getWikiTreeId(),
-        thePerson.getRequestedProfileId()
+        thePerson.getWikiTreeId()
       );
       if (!thePerson.hasBio()) {
         needToCheckBio = true;
@@ -409,7 +409,7 @@ export class BioChecker {
   /*
    * Check person
    * Get the biography for the person and check it
-   * @param thePerson to be checked
+   * @param {BioChecPerson} thePerson person to be checked
    * @returns {Promise} a promise to resolve when person finished
    */
   async checkPerson(thePerson) {
@@ -468,16 +468,16 @@ export class BioChecker {
     //    let startTime = new Date();                    // timing instrumentation
 
     // get information about person dates
-    let isPre1500 = thePerson.isPersonPre1500();
-    let isPre1700 = thePerson.isPersonPre1700();
-    let mustBeOpen = thePerson.mustBeOpen();
+    let isPre1500 = thePerson.isPre1500();
+    let isPre1700 = thePerson.isPre1700();
     let bioUndated = false;
     if (thePerson.isUndated() && thePerson.getPrivacy() > 0) {
       bioUndated = true;
     }
 
     let biography = new Biography(theSourceRules);
-    biography.parse(bioString, isPre1500, isPre1700, mustBeOpen, bioUndated, this.getBioSearchString());
+    //biography.parse(bioString, thePerson, isPre1500, isPre1700, this.getOpenOnly(), bioUndated, this.getBioSearchString());
+    biography.parse(bioString, thePerson, this.getBioSearchString());
     biography.validate();
 
     //    let endTime = new Date();
@@ -497,31 +497,19 @@ export class BioChecker {
     }
     // add person to report
     this.testResults.addProfile(
-      biography,
-      thePerson.getProfileId(),
-      thePerson.getWikiTreeId(),
-      thePerson.getWikiTreeLink(),
-      thePerson.getReportName(),
-      thePerson.getManagerId(),
-      thePerson.getPrivacyString(),
-      thePerson.getReportDate(true),
-      thePerson.getReportDate(false),
+      biography, thePerson,
       this.getReportAllProfiles(),
       this.getReportNonManaged(),
       this.getReportStyleDetails(),
       this.getSourcesReport(),
       this.getProfileReviewReport(),
       this.getReportStatsOnly(),
-      this.getUserId(),
-      thePerson.getBirthDate(),
-      thePerson.getDeathDate()
-    );
+      this.getUserId());
 
     // allow garbage collection
     biography = null;
     thePerson.clearBio();
   }
-
 
   /*
    * Check people a chunk (page) at a time
@@ -673,8 +661,8 @@ export class BioChecker {
                     // check for duplicate nuclear you already have
                     if (!this.alreadyHaveRelatives.has(profileObj.Id)) {
                       let thePerson = new BioCheckPerson();
-                      let canUseThis = thePerson.build(profileObj, this.getOpenOnly(),
-                        this.getIgnorePre1500(), this.getUserId(), profileId);
+                      let canUseThis = thePerson.canUse(profileObj, this.getOpenOnly(),
+                        this.getIgnorePre1500(), this.getUserId());
                       if (!canUseThis) {
                         this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),
                           thePerson.isUncheckedDueToDate());
