@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.1</h4>
+      <h4>Bio Check Version 1.6.2 test</h4>
     </div>
 
     <div class="flex-grid">

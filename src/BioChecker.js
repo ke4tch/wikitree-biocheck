@@ -476,7 +476,6 @@ export class BioChecker {
     }
 
     let biography = new Biography(theSourceRules);
-    //biography.parse(bioString, thePerson, isPre1500, isPre1700, this.getOpenOnly(), bioUndated, this.getBioSearchString());
     biography.parse(bioString, thePerson, this.getBioSearchString());
     biography.validate();
 

@@ -390,9 +390,9 @@ export class BioTestResults {
       profileIsOrphan: "",
       birthDate: "",
       deathDate: "",
-      wikiTreeLink: "",
       birthDateDate: null,
-      deathDateDate: null
+      deathDateDate: null,
+      wikiTreeLink: ""
     };
     rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
     rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();

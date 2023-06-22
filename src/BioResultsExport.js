@@ -26,9 +26,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 export class BioResultsExport {
   // TODO any other char besides # that makes it barf?
+  // yea definately the " and maybe [ and ] perhaps more
 
   constructor() {
-    console.log("BioResultsExport");
   }
 
   /**
@@ -37,7 +37,6 @@ export class BioResultsExport {
    * @param {Array} resultsRowData row data to export
    */
   exportResultsRowCsv(userArgs, resultsRowData) {
-    console.log("exportResultsRowCsv");
     let filename = this.#buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
     let headerRow = resultsRowData[0];
@@ -49,8 +48,15 @@ export class BioResultsExport {
       let resultRow = resultsRowData[i];
       let rda = [];
       for (let key in resultRow) {
-        let val = '"' + resultRow[key] + '"';
+        //let val = '"' + resultRow[key] + '"';
+        let val = resultRow[key].toString();
         val = val.replace(/#/g, "");
+        val = val.replace(/\u005B/g, " ");  // [
+        val = val.replace(/\u005D/g, " ");  // ]
+        val = val.replace(/\u201C/g, '');
+        val = val.replace(/\u201D/g, '');
+        val = val.replace(/\u0022/g, "");  // "
+        val = '"' + val + '"';
         rda.push(val);
       }
       csvData += rda.join(",");
@@ -61,9 +67,7 @@ export class BioResultsExport {
     link.setAttribute("href", data);
     link.setAttribute("target", "_blank");
     link.setAttribute("download", filename);
-    //                  document.body.appendChild(link);
     link.click();
-    //            document.body.removeChild(link);
   }
 
   /**
@@ -105,9 +109,7 @@ export class BioResultsExport {
     link.setAttribute("href", data);
     link.setAttribute("target", "_blank");
     link.setAttribute("download", filename);
-    //                  document.body.appendChild(link);
     link.click();
-    //            document.body.removeChild(link);
   }
 
   /**
@@ -127,7 +129,7 @@ export class BioResultsExport {
       let resultRow = profilesRowData[i];
       let rda = [];
       for (let key in resultRow) {
-        if (key != "wikiTreeLink") {
+        if ((key != "wikiTreeLink") && (key != "birthDateDate") && (key != "deathDateDate")) {
           let val = '"' + resultRow[key] + '"';
           val = val.replace(/#/g, "");
           rda.push(val);
@@ -141,9 +143,7 @@ export class BioResultsExport {
     link.setAttribute("href", data);
     link.setAttribute("target", "_blank");
     link.setAttribute("download", filename);
-    //                  document.body.appendChild(link);
     link.click();
-    //            document.body.removeChild(link);
   }
 
   /*
@@ -151,19 +151,23 @@ export class BioResultsExport {
    * @param {Object} userArgs input user args
    */
   #buildFilename(userArgs) {
-    let filename = "bioCheck";
+    let filename = "bioCheck_";
     if (userArgs.selectedCheckType === "checkByQuery") {
-      filename = userArgs.queryArg;
+      filename += userArgs.queryArg;
     } else {
-      filename = userArgs.inputWikiTreeId;
-      if (userArgs.selectedCheckType === "checkWatchlist") {
-        filename += "_Watchlist";
+      if (userArgs.selectedCheckType === 'checkRandom') {
+        filename += "Random";
       } else {
-        if (userArgs.numAncestorGen > 0) {
-          filename += "_" + userArgs.numAncestorGen + "AncestorGenerations";
-        }
-        if (userArgs.numDescendantGen > 0) {
-          filename += "_" + userArgs.numDescendantGen + "DescendantGenerations";
+        filename = userArgs.inputWikiTreeId;
+        if (userArgs.selectedCheckType === "checkWatchlist") {
+          filename += "_Watchlist";
+        } else {
+          if (userArgs.numAncestorGen > 0) {
+            filename += "_" + userArgs.numAncestorGen + "AncestorGenerations";
+          }
+          if (userArgs.numDescendantGen > 0) {
+            filename += "_" + userArgs.numDescendantGen + "DescendantGenerations";
+          }
         }
       }
     }
@@ -190,11 +194,14 @@ export class BioResultsExport {
       bioLineCnt: "Bio Lines",
       inlineRefCnt: "Inline ref",
       sourceLineCnt: "Source Line Count",
+      wikiTreeLink: "URL",
       wikiTreeHyperLink: "Link",
     };
     let headings = [];
-    for (let prop in firstRow) {
-      headings.push(headerText[prop]);
+    for (let key in firstRow) {
+      if (key in headerText) {
+        headings.push('"' + headerText[key] + '"');
+      }
     }
     let headerData = headings.join(",");
     return headerData;
@@ -214,8 +221,10 @@ export class BioResultsExport {
       wikiTreeLink: "URL",
     };
     let headings = [];
-    for (let prop in firstRow) {
-      headings.push(headerText[prop]);
+    for (let key in firstRow) {
+      if (key in headerText) {
+        headings.push('"' + headerText[key] + '"');
+      }
     }
     let headerData = headings.join(",");
     return headerData;
@@ -240,8 +249,10 @@ export class BioResultsExport {
       deathDate: "Death Date",
     };
     let headings = [];
-    for (let prop in firstRow) {
-      headings.push(headerText[prop]);
+    for (let key in firstRow) {
+      if (key in headerText) {
+        headings.push('"' + headerText[key] + '"');
+      }
     }
     let headerData = headings.join(",");
     return headerData;
