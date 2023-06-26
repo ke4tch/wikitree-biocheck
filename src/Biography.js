@@ -1436,37 +1436,52 @@ export class Biography {
         if (this.#isFindAGraveCitation(line)) {
           isValid = true;
         } else {
-          // Does line contain a phrase on the invalid partial source list?
-          if (this.#onAnyPartialSourceList(line)) {
-            isValid = false;
+          // Very important to check for valid part of a string on Pre1700
+          // before checking for the invalid ones....
+          if (this.#onAnyValidPartialSourceList(line)) {
+            isValid = true;
           } else {
-            // Check for line that starts with something on the invalid start partial list
-            if (this.#sourceRules.isInvalidStartPartialSource(line)) {
+
+// TODO
+// add special peerage logic for ones like this https://www.wikitree.com/wiki/Wedderburn-44
+// something like invalidFamilyTree but for the string the peerage with just numbers follow
+            // Does line contain a phrase on the invalid partial source list?
+            // lines with ' or & will not match the source rules
+            line = line.replace(/\u0027/g, '');  // lines with ' will not match
+            line = line.replace(/\u0026/g, 'and');  // and convert & to and
+            if (this.#onAnyPartialSourceList(line)) {
               isValid = false;
             } else {
-              // TODO can you refactor so this uses a plugin architecture?
+              // Check for line that starts with something on the invalid start partial list
+              if (this.#sourceRules.isInvalidStartPartialSource(line)) {
+                isValid = false;
+              } else {
+                // TODO can you refactor so this uses a plugin architecture?
 
-              // Some other things to check
-              if (!this.#isJustCensus(line)) {
-                if (!this.#invalidFamilyTree(line)) {
-                  if (!this.#isJustRepository(line)) {
-                    if (!this.#isJustGedcomCrud(line)) {
-                       if (this.#isDnaConfirmation(line)) {
-                        // TODO add logic to check a DNA confirmation
-                        // so the source MIGHT be valid but the confirmation might be incomplete
-;
-                      } else {
-                        // TODO add more logic to eliminate sources as valid
-                        // TODO is the manager's name a valid source (this is hard)
-                        // TODO add logic to check for just the name followed by grave
-                        isValid = true;
+                // Some other things to check
+                if (!this.#isJustCensus(line)) {
+                  if (!this.#invalidFamilyTree(line)) {
+                    if (!this.#isJustRepository(line)) {
+                      if (!this.#isJustGedcomCrud(line)) {
+                         if (!this.#isJustThePeerage(line)) {
+                           if (this.#isDnaConfirmation(line)) {
+                            // TODO add logic to check a DNA confirmation
+                            // so the source MIGHT be valid but the confirmation might be incomplete
+                            ;   // TODO
+                          } else {
+                            // TODO add more logic to eliminate sources as valid
+                            // TODO is the manager's name a valid source (this is hard)
+                            // TODO add logic to check for just the name followed by grave
+                            isValid = true;
+                          }
+                        }
                       }
                     }
                   }
                 }
-              }
-            } // endif starts with invalid phrase
-          } // endif contains a phrase on invalid partial source list
+              } // endif starts with invalid phrase
+            } // endif contains a phrase on invalid partial source list
+          }
         } // endif a findagrave citation
       } // endif on the list of invalid sources
     } // endif too short when stripped of whitespace
@@ -1515,6 +1530,18 @@ export class Biography {
       // TODO add more pre1500 validation
     }
     return foundInvalidPartialSource;
+  }
+  /*
+   * Determine if found on valid partial source list
+   * @param {String} line input source string
+   * @returns {Boolean} true if on a list of valid partial sources else false
+   */
+  #onAnyValidPartialSourceList(line) {
+    let foundValidPartialSource = false;
+    if (this.#isPre1700 || this.#treatAsPre1700) {
+      foundValidPartialSource = this.#sourceRules.isValidPartialSourcePre1700(line);
+    }
+    return foundValidPartialSource;
   }
 
   /*
@@ -1693,6 +1720,23 @@ export class Biography {
       this.#invalidSpanTargetList.push(spanId);
     }
     return isValid;
+  }
+
+  /*
+   * Check for a line that is just
+   * The Peerage then some digits
+   * @param {String} line to check
+   * @returns {Boolean} true if just a peerage line 
+   */
+  #isJustThePeerage(line) {
+    let isPeerage = true;
+    line = line.replace(/[0-9]/g, '');
+    line = line.replace('the peerage', '');
+    line = line.trim();
+    if (line.length > 0) {
+      isPeerage = false;
+    }
+    return isPeerage;
   }
 
   /*
