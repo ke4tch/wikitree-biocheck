@@ -967,7 +967,7 @@ export class Biography {
     if (this.#acknowledgementsIndex > 0 && this.#acknowledgementsIndex < endIndex) {
       endIndex = this.#acknowledgementsIndex;
     }
-
+    startIndex++;
     if (this.#biographyIndex === endIndex) {
       this.#style.bioHeadingWithNoLinesFollowing = true;
     } else {
@@ -977,6 +977,10 @@ export class Biography {
           startIndex++;
         }
       }
+    }
+    let str = bioLinesString.trim();
+    if (str.length === 0) {
+      this.#style.bioHeadingWithNoLinesFollowing = true;
     }
     return bioLinesString;
   }
@@ -1158,7 +1162,7 @@ export class Biography {
     }
     if (this.#style.bioHeadingWithNoLinesFollowing) {
       this.#style.bioHasStyleIssues = true;
-      this.#messages.sectionMessages.push('Empty Biography section');
+      this.#messages.styleMessages.push('Empty Biography section');
     }
     if (this.#style.bioHasMultipleSourceHeadings) {
       this.#style.bioHasStyleIssues = true;
@@ -1407,6 +1411,7 @@ export class Biography {
    */
   #isValidSource(mixedCaseLine) {
     let isValid = false; // assume guilty
+    let isRepository = false;
 
     // just ignore starting *
     if (mixedCaseLine.startsWith("*")) {
@@ -1416,7 +1421,6 @@ export class Biography {
 
     // perform tests on lower case line
     let line = mixedCaseLine.toLowerCase().trim();
-
     // ignore starting source:
     if (line.length > 0 && line.startsWith(Biography.#SOURCE_START)) {
       line = line.substring(7);
@@ -1441,10 +1445,6 @@ export class Biography {
           if (this.#onAnyValidPartialSourceList(line)) {
             isValid = true;
           } else {
-
-// TODO
-// add special peerage logic for ones like this https://www.wikitree.com/wiki/Wedderburn-44
-// something like invalidFamilyTree but for the string the peerage with just numbers follow
             // Does line contain a phrase on the invalid partial source list?
             // lines with ' or & will not match the source rules
             line = line.replace(/\u0027/g, '');  // lines with ' will not match
@@ -1461,7 +1461,8 @@ export class Biography {
                 // Some other things to check
                 if (!this.#isJustCensus(line)) {
                   if (!this.#invalidFamilyTree(line)) {
-                    if (!this.#isJustRepository(line)) {
+                    isRepository = this.#isJustRepository(line)
+                    if (!isRepository) {
                       if (!this.#isJustGedcomCrud(line)) {
                          if (!this.#isJustThePeerage(line)) {
                            if (this.#isDnaConfirmation(line)) {
@@ -1469,7 +1470,7 @@ export class Biography {
                             // so the source MIGHT be valid but the confirmation might be incomplete
                             ;   // TODO
                           } else {
-                            // TODO add more logic to eliminate sources as valid
+                            // TODO add more logic to eliminate sources as valid by combining ones
                             // TODO is the manager's name a valid source (this is hard)
                             // TODO add logic to check for just the name followed by grave
                             isValid = true;
@@ -1481,7 +1482,7 @@ export class Biography {
                 }
               } // endif starts with invalid phrase
             } // endif contains a phrase on invalid partial source list
-          }
+          } // endif on any valid partial list
         } // endif a findagrave citation
       } // endif on the list of invalid sources
     } // endif too short when stripped of whitespace
@@ -1490,7 +1491,9 @@ export class Biography {
     if (isValid) {
       this.#sources.validSource.push(mixedCaseLine);
     } else {
-      this.#sources.invalidSource.push(mixedCaseLine);
+      if (!isRepository) {
+        this.#sources.invalidSource.push(mixedCaseLine);
+      }
     }
     return isValid;
   }
@@ -1861,6 +1864,7 @@ export class Biography {
         "internet",
         "cont",
         "unknown",
+        "www.ancestry.com",
       ];
       for (let i = 0; i < repositoryStrings.length; i++) {
         let str = repositoryStrings[i];

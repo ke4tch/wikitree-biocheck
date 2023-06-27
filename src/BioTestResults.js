@@ -35,17 +35,8 @@ export class BioTestResults {
   SOURCED = "Sourced";
   MARKED = "Marked";
   POSSIBLY_UNSOURCED = "?";
-  MISSING = "Missing";
-  HEADING = "Heading";
-  COMMENT = "Comment";
-  AUTO_GENERATED = "Auto generated";
   REF = "ref tag";
   SPAN = "span";
-  MULTIPLE = "Multiple";
-  NO_LINES_FOLLOW = "Empty";
-  REF_FOLLOWING = "ref Following";
-  BEFORE_SOURCES = "Before Sources";
-  EXTRA_EQUALS = "Extra =";
 
   // the results
   /*
@@ -257,7 +248,6 @@ export class BioTestResults {
         }
       }
     }
-
     if (profileShouldBeReported) {
       this.results.reportCount++;
       if (!reportStatsOnly) {
@@ -321,7 +311,6 @@ export class BioTestResults {
     if (messages.length > 0) {
       rowDataItem.styleDetails = messages.join('\n');
     }
-
     // And add the item to the row data
     this.results.checkResults.resultsRowData.push(rowDataItem);
   }
@@ -444,6 +433,7 @@ export class BioTestResults {
    * @param maxProfilesReached {Boolean} true if max number of profiles exceeded
    */
   reportStatistics(duplicateProfileCount, maxProfilesReached) {
+    /* by popular request, don't sort 
     this.setProgressMessage("Sorting results....");
     if (this.results.sourcesReport) {
       this.results.checkResults.sourcesRowData.sort(function (a, b) {
@@ -466,6 +456,7 @@ export class BioTestResults {
         return 0; //default return value (no sorting)
       });
     }
+    */
 
     let msg = "Checked " + this.results.checkedProfileCount +
       " profiles: Found " + this.results.reportCount +
