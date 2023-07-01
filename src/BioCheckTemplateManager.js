@@ -21,22 +21,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+import { theSourceRules } from "./SourceRules.js";
+
 /**
  * BioCheck Template Manager
  */
-
-import { theSourceRules } from "./SourceRules.js";
-
 export class BioCheckTemplateManager {
   constructor() {
   } 
 
-  /*
-   * load the template data
-   * this is screwy but seems to work. theload method here calls theSourceRules.loadTemplates
-   * and this load method is called from theSourceRules constructor
-   * it should NOT be called anywhere else
-   * and it should only be called once
+  /**
+   * Load the template data from WikiTree Plus.
+   * Send the templates into theSourceRules, which is a singleton.
+   * This only needs to be done once, at initialization.
    */
   async load() {
     try {
