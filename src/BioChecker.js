@@ -60,8 +60,7 @@ export class BioChecker {
   //static WIKI_TREE_URI = "https://staging.wikitree.com/api.php";
   // staging.wikitree.com 
   static BASIC_PROFILE_REQUEST_FIELDS =
-    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio";
-//    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,Bio";
+    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio,IsMember";
   static REDIRECT_KEY = "&resolveRedirect=1";
   static MAX_API_PROFILES = 100;
   static LARGE_MAX_API_PROFILES = 1000;
@@ -463,8 +462,6 @@ export class BioChecker {
    * @param {String} bioString the bio
    */
   async checkBio(thePerson, bioString) {
-    this.testResults.setProgressMessage("Examining profile for " + thePerson.getWikiTreeId());
-
     //    let startTime = new Date();                    // timing instrumentation
 
     // get information about person dates
@@ -580,6 +577,17 @@ export class BioChecker {
         }
         let profileIdGroup = profileIds.slice(startIndex, endIndex);
         let profileId = profileIdGroup.join();
+        let msg = 'Examining ';
+        if (profileIdGroup.length > 1) {
+          msg = msg + profileIdGroup.length;
+        } else {
+          msg = msg + 'up to ' + limit;
+        }
+        if ((start > 0) || (startIndex > 0)) {
+          msg = msg + ' more';
+        }
+        msg = msg + ' profiles';
+        this.testResults.setStateMessage(msg);
         let formData = new FormData();
         formData.append('action', 'getPeople');
         formData.append('keys', profileId);

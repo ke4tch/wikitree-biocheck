@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.5</h4>
+      <h4>Bio Check Version 1.6.6</h4>
     </div>
 
     <div class="flex-grid">
@@ -388,10 +388,29 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </div>
     </div>
 
+<!-- TODO
+Greg suggested bold the stateMessage when it is check completed and no errors
+
+I've noticed that the progressMessage is not necessarily the correct
+message, especially for paging, see what you can do.
+-->
     <div class="feedback">
+    <!--
       <div class="feedback-state">
         {{ checkStatus.stateMessage }} 
       </div>
+    -->
+      <template v-if="isCheckCompleted">
+        <div class="feedback-complete">
+            <span v-html="checkStatus.stateMessage" style="font-weight: bolder"></span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="feedback-state">
+          {{ checkStatus.stateMessage }} 
+        </div>
+      </template>
+
       <template v-if="isAfterFirstCheck">
         <div class="feedback-progress">
           <span v-bind:title="checkStatus.progressMessageTitle">
@@ -598,6 +617,7 @@ export default {
           exportDisabled: true,
           toolsDisabled: true,
           checkStarted: false,
+          checkCompleted: false,
         },
         checkResults: {
           key: "",
@@ -637,6 +657,10 @@ export default {
   
     isAfterFirstCheck: function() {
       return (this.checkStatus.checkStarted);
+    },
+
+    isCheckCompleted: function() {
+      return (this.checkStatus.checkCompleted);
     },
 
     isCheckByProfile: function() {
@@ -719,22 +743,23 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
+    // This is to just load from WT+ once per browser session
+    let bioCheckTemplateManager = new BioCheckTemplateManager();
+    await bioCheckTemplateManager.load();
+
+    // Code that will run only after the entire view has been rendered
     nextTick(() => {
-      // Code that will run only after the
-      // entire view has been rendered
       // use the auto arg to act like check profiles button click
       if (this.checkStart === "auto") {
         this.userArgs.reportAllProfiles = false;
         this.checkProfiles();
       }
-      // This is to just load from WT+ once per browser session
-      let bioCheckTemplateManager = new BioCheckTemplateManager();
-      bioCheckTemplateManager.load();
     })
   },
 
-    methods: {
+    //methods: {
+  methods: {
 
       sortBy: function(sortKey) {
         let sortData = this.checkResults.resultsRowData;
@@ -848,6 +873,7 @@ export default {
           this.checkStatus.cancelDisabled = false;
           this.checkStatus.exportDisabled = true;
           this.checkStatus.checkStarted = true;
+          this.checkStatus.checkCompleted = false;
           this.checkStatus.stateMessage = "";
           this.checkStatus.progressMessage = "Examining profiles";
           this.userArgs.userId = this.userContext.userId;

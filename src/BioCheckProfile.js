@@ -59,7 +59,6 @@ export class BioCheckProfile extends BioChecker {
    */
   async check() {
     this.testResults.setStateMessage("Gathering profiles");
-
     let profileIdArray = [];
     profileIdArray.push(this.getInputWikiTreeId().trim());
 
@@ -104,7 +103,6 @@ export class BioCheckProfile extends BioChecker {
     if ((numRelatives > 0) && (!this.getCheckAllConnections())) {
       await this.checkUnsourcedRelatives();
     }
-
     this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), this.reportReachedMax);
   }
 

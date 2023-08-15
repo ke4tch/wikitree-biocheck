@@ -1,6 +1,6 @@
 {
   "name": "biocheck",
-  "version": "1.6.0",
+  "version": "1.6.6",
   "private": true,
   "scripts": {
     "dev": "vite",

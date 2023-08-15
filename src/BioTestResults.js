@@ -138,13 +138,14 @@ export class BioTestResults {
    * Set detailed progress (hover text)
    * @param {String} number of profiles requested
    */
+   // TODO this is not working correctly, counts are off with API changes
   setProgressMessageDetails(requestedProfileCount) {
     let message =
       "Wait... Requested " + requestedProfileCount +
       " profiles. Examined " + this.results.checkedProfileCount +
       " profiles. Reported " + this.results.reportCount +
       " profiles";
-    this.results.checkStatus.progressMessageTitle = message;
+    // this.results.checkStatus.progressMessageTitle = message;
   }
 
   /**
@@ -480,8 +481,8 @@ export class BioTestResults {
     if (this.errorMessage.length > 0) {
       msg += this.errorMessage;
     }
-
     this.setStateMessage(msg);
+    this.results.checkStatus.checkCompleted = true;
     this.results.checkStatus.progressMessageTitle = "";
     this.results.checkStatus.cancelPending = false;
     this.results.checkStatus.cancelDisabled = true;
