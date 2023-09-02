@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.6</h4>
+      <h4>Bio Check Version 1.6.7</h4>
     </div>
 
     <div class="flex-grid">
@@ -902,7 +902,7 @@ export default {
             bioResultsExport.exportResultsRowCsv(this.userArgs, this.checkResults.resultsRowData);
           }
         }
-        this.checkStatus.stateMessage = "Completed";
+        this.checkStatus.stateMessage = "Download Completed";
       },
 
       setTools: function (enableTools, profileId) {
