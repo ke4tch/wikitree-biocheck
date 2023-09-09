@@ -473,6 +473,9 @@ export class BioChecker {
     }
 
     let biography = new Biography(theSourceRules);
+    if (this.userArgs.reliableSourcesOnly) {
+      biography.applyPre1700ToAll();
+    }
     biography.parse(bioString, thePerson, this.getBioSearchString());
     biography.validate();
 
