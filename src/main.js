@@ -20,12 +20,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-import Vue from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import WikiTreeAuth from './WikiTreeAuth.js'
-
-Vue.config.productionTip = false;
-
+  
 let myUserContext = {
   urlParamString: "",
   loggedIn: false,
@@ -68,15 +66,8 @@ function startAppNow() {
   document.getElementById("logged_in").style.display = "block";
   wtAuth.cookie('biocheck_state', 'null');
   myUserContext.urlParamString = window.location;
-  new Vue({
-    el: "#app",
 
-    components: { App },
-
-    created() {
-      // send args to the App
-      myUserContext.urlParamString = window.location;
-    },
-    render: (h) => h("app", { props: { userContext: myUserContext } }),
-  }).$mount("#app");
+  // question with the change to Vue3 how do you send myUserContext?
+  const app = createApp(App, { userContext:myUserContext });
+  app.mount("#app");
 }

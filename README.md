@@ -1,11 +1,10 @@
 App to check a WikiTree biography
 
 ## Dependencies
-Makes use of Vue version 2.x
-
+Makes use of Vue version 3.x
 Uses Vite to compile the Vue templates and build project
-
-Using npm to build project:
+Use npm to build the project.
+Use npm to build project:
 
 ### Compiles and hot-reloads for development
 ```
@@ -15,48 +14,40 @@ npm run dev
 ### Compiles and minifies for production
 ```
 npm run build
-
 ```
-### Lints and fixes files
-```
-npm run lint
-```
-### Generate docs
-```
-npm run docs
-```
-
 
 ## Shared Code
-The following are identical classes found in the Bio Check app and in the 
-WikiTree Browser Extension Bio Check feature. They may, in the future, be
-used in the WikiTree Dynamic Tree.
+The following are **identical** classes found in the Bio Check app, in the
+WikiTree Browser Extension, and in the WikiTree Dynamic Tree.
 * Biography.js
-* PersonDate.js
+* BioCheckPerson.js
 * SourceRules.js
+The Bio Check app and WikiTree Dynamic Tree make use of
+* BioCheckTemplateManager
 
 Example use:
 ```
+import { BioCheckTemplateManager } from "./BioCheckTemplateManager";
 import { theSourceRules } from "./SourceRules.js";
-import { PersonDate } from "./PersonDate.js";
+import { BioCheckPerson } from "./PersonDate.js";
 import { Biography } from "./Biography.js";
 
-  let thePerson = new PersonDate();
-  // get the bio text and person dates to check
-  thePerson.initWithDates(birthDate, deathDate);
+  // initialization - just once
+  let bioCheckTemplateManager = new BioCheckTemplateManager();
+  bioCheckTemplateManager.load();
+
+  // For each person. Get the bio text and dates to test
+  let thePerson = new BioCheckPerson();
+  let canUseThis = thePerson.canUse(profileObj, openOnly, ignorePre1500, useId);
   let biography = new Biography(theSourceRules);
-  biography.parse(bioString, thePerson.isPersonPre1500(), thePerson.isPersonPre1700(),
-    thePerson.mustBeOpen(), thePerson.isUndated(), false
-  );
-  let hasSources = biography.validate(); 
+  biography.parse(bioString, thePerson, searchString);
+  let hasSources = biography.validate();
+
   // now report from biography (use getters) as desired or just the boolean return 
 ```
 
 ## Software Status
-Needs review to consider viablity of migrating to Vue 3.x. 
-
-The index.html file has a placeholder for the app div. This is
-where the Vue app is placed.
+The index.html file contains the app div where the Vue app is placed.
 
 The main.js script deals with authentication and then starts the Vue app,
 passing arguments to be used when the div is rendered.

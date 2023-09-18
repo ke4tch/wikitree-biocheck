@@ -53,8 +53,7 @@ export class BioCheckPeopleManager extends PeopleManager {
    * Don't do this or you double check when iterating relatives
    * side effect set person null so it can be garbage collected
    *
-   * TODO
-   * Can you figure out a way around this to allow some garbage collection?
+   * TODO Can you figure out a way around this to allow some garbage collection?
    */
   removeProfile(profileId) {
     let id = this.personIdToWikiTreeIdMap.get(profileId);

@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -31,11 +31,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.4.4</h4>
+      <h4>Bio Check Version 1.6.8</h4>
     </div>
 
     <div class="flex-grid">
       <div class="col">
+        <div class="flex-center">
+          <div class="user-input">
+            <label>
+              {{loginMessage}}
+            </label>
+          </div>
+        </div>
         <div class="user-input">
           <div class="col">
             <span v-bind:title="promptMessage" >
@@ -99,7 +106,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.numRelatives" type="number"
                  id="userArgs.numRelatives" name="userArgs.numRelatives"
-                 min="0" max="25" value="0">
+                 min="0" max="10" value="0">
             </div>
           </div>
 
@@ -142,7 +149,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
               <input class="vmodel-input" v-model.number="userArgs.maxQuery" type="number"
                :disabled="isCheckByProfile"
                id="userArgs.maxQuery" name="userArgs.maxQuery" 
-               min="0" value="5000" > 
+               min="0" value="1000" > 
              </div>
           </div>
           <div class="user-input">
@@ -166,7 +173,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
-               min="0" max="5000" value="5000" >
+               min="0" max="5000" value="1000" >
             </div>
           </div>
         </template>
@@ -209,6 +216,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                min="0" max="200" value="200" >
             </div>
           </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="reportNonManagedTip">
+                <label for="userArgs.openOnly" >Report only profiles not managed by you</label>
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model="userArgs.reportNonManaged" type="checkbox"
+                 id="userArgs.reportNonManaged"
+                 name="userArgs.reportNonManaged" >
+            </div>
+          </div>
         </template>
         <template v-if="isCheckRandom">
           <div class="user-input">
@@ -234,49 +253,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
               <input class="vmodel-input" v-model.number="userArgs.maxRandom" type="number"
                :disabled="isCheckByProfile"
                id="userArgs.maxQuery" name="userArgs.maxRandom" 
-               min="0" value="5000" > 
+               min="0" value="1000" > 
             </div>
           </div>
           <div class="user-input">
             <div class="col">
               <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMax" >Max to check</label> 
+                <label for="userArgs.searchMaxRandom" >Max to check</label> 
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
-               min="0" max="5000" value="5000" >
+              <input class="vmodel-input" v-model.number="userArgs.searchMaxRandom" type="number"
+                 id="userArgs.searchMaxRandom" name="searchMaxRandom" 
+               min="0" max="5000" value="1000" >
             </div>
           </div>
         </template>
-      </div>
-
-      <div class="col">
-        <div class="user-input">
-          <label>
-            {{loginMessage}}
-          </label>
-        </div>
-        <div class="user-input">
-          <div class="col">
-            <span v-bind:title="reportStyleTip" >
-              Profiles to report:
-            </span>
-          </div>
-          <div class="col">
-            <select v-model="userArgs.selectedReportType">
-              <option disabled value="">Select profiles to report</option>
-              <option value="reportSourcesStyle" >Unsourced and Style Issues</option>
-              <option value="reportAll" >All profiles</option>
-              <option value="reportNonManaged" :disabled="!watchlistSelected">Watchlist profiles not managed by you</option>
-              <option value="sourcesReportStyle">Sources for Unsourced Profiles</option>
-              <option value="sourcesReportAll">Sources for All Profiles</option>
-              <option value="reportReviewProfiles">Profiles for Review</option>
-              <option value="reportReviewProfilesAll">All Profiles for Review</option>
-              <option value="reportStatsOnly">None (Statistics Only)</option>
-            </select>
-          </div>
-        </div>
         <div class="user-input">
           <div class="col">
             <span v-bind:title="maxReportTip">
@@ -285,7 +277,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="col">
             <input class="vmodel-input" v-model.number="userArgs.maxReport" type="number" id="userArgs.maxReport" name="maxReport" 
-               min="0" max="5000" value="5000" >
+               min="0" max="5000" value="1000" >
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="user-input">
+          <div class="col">
+            <span v-bind:title="reportStyleTip" >
+              Profiles to report:
+            </span>
+          </div>
+          <div class="col">
+            <select v-model="userArgs.selectedReportType">
+              <option disabled value="">Select report type</option>
+              <option value="detailedReport" >Detailed report</option>
+              <option value="summaryReport">Summary report</option>
+              <option value="sourcesReport">Sources report</option>
+              <option value="statsOnlyReport">None (Statistics Only)</option>
+            </select>
           </div>
         </div>
         <div class="user-input">
@@ -324,22 +335,45 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </div>
         <div class="user-input">
           <div class="col">
-            <span v-bind:title="checkAutoGeneratedTip">
-              <label for="userArgs.checkAutoGenerated" >GEDCOM generated bio</label>
+            <span v-bind:title="reportStyleDetailsTip">
+              <label for="userArgs.reportStyleDetails" >Report style details</label>
             </span>
           </div>
           <div class="col">
-            <input class="vmodel-input" v-model="userArgs.checkAutoGenerated"
-                 type="checkbox" id="userArgs.checkAutoGenerated"
-                 name="userArgs.checkAutoGenerated" >
+            <input class="vmodel-input" v-model="userArgs.reportStyleDetails"
+                 type="checkbox" id="userArgs.reportStyleDetails"
+                 name="userArgs.reportStyleDetails" >
           </div>
         </div>
+        <div class="user-input">
+          <div class="col">
+            <span v-bind:title="reportAllProfilesTip">
+              <label for="userArgs.reportAllProfiles" >Report all profiles</label>
+            </span>
+          </div>
+          <div class="col">
+            <input class="vmodel-input" v-model="userArgs.reportAllProfiles"
+                 type="checkbox" id="userArgs.reportAllProfiles"
+                 name="userArgs.reportAllProfiles" >
+          </div>
+        </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="bioSearchStringTip">
+                <label for="userArgs.bioSearchString" >Search biography for:</label> 
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model.trim="userArgs.bioSearchString" 
+                 placeholder="Enter phrase to find inside biography">
+            </div>
+          </div>
       </div>
     </div>
 
     <div class="button-panel">
       <div class="left-button">
-        <button v-on:click="checkProfiles"
+        <button class="check-button" v-on:click="checkProfiles"
               :disabled="checkStatus.checkDisabled">Check Profiles</button>
         <button v-on:click="cancelCheck" 
               :disabled="checkStatus.cancelDisabled">Cancel</button>
@@ -354,15 +388,43 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </div>
     </div>
 
+<!-- TODO
+Greg suggested bold the stateMessage when it is check completed and no errors
+
+I've noticed that the progressMessage is not necessarily the correct
+message, especially for paging, see what you can do.
+-->
     <div class="feedback">
+    <!--
       <div class="feedback-state">
         {{ checkStatus.stateMessage }} 
       </div>
-      <div class="feedback-progress">
-        <span v-bind:title="checkStatus.progressMessageTitle">
-          {{ checkStatus.progressMessage }}
-        </span>
-      </div>
+    -->
+      <template v-if="isCheckCompleted">
+        <div class="feedback-complete">
+            <span v-html="checkStatus.stateMessage" style="font-weight: bolder"></span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="feedback-state">
+          {{ checkStatus.stateMessage }} 
+        </div>
+      </template>
+
+      <template v-if="isAfterFirstCheck">
+        <div class="feedback-progress">
+          <span v-bind:title="checkStatus.progressMessageTitle">
+          {{ checkStatus.progressMessage }} 
+          </span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="feedback-start">
+          <span v-bind:title="checkStatus.progressMessageTitle">
+            <span v-html="checkStatus.progressMessage" style="font-weight: bolder"></span>
+          </span>
+        </div>
+      </template>
     </div>
 
     <div class="tableContainer">
@@ -423,14 +485,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            <th class = "colWikiTreeId" id = "wikiTreeId" scope="col" @click="sortBy('wikiTreeId')" >Profile</th>
            <th class = "colPersonName" id = "personName" scope="col" @click="sortBy('personName')" >Name</th>
            <th class = "colUnsourcedStatus" id = "unsourcedStatus" scope="col" @click="sortBy('unsourcedStatus')" >Sourced?</th>
-           <th class = "colIsEmpty" id = "isEmpty" scope="col" @click="sortBy('isEmpty')" >Empty</th>
-           <th class = "colMisplacedLineCnt" id = "misplacedLineCnt" scope="col" @click="sortBy('misplacedLineCnt')" >Misplaced Lines</th>
-           <th class = "colMissingEnd" id = "missingEnd" scope="col" @click="sortBy('missingEnd')" >Missing end</th>
-           <th class = "colBioHeading" id = "bioHeading" scope="col"
-           @click="sortBy('bioHeading')" >Biography Heading</th>
-           <th class = "colSourcesHeading" id = "sourcesHeading" scope="col" @click="sortBy('sourcesHeading')" >Sources Heading</th>
-           <th class = "colReferencesTag" id = "referencesTag" scope="col" @click="sortBy('referencesTag')" >references tag</th>
-           <th class = "colAcknowledgements" id = "acknowledgements" scope="col" @click="sortBy('acknowledgements')" >Ack...</th>
+           <th class = "colRequiredSections" id = "requiredSections" scope="col" @click="sortBy('requiredSections')" >Required Sections</th>
+           <th class = "colStyleDetails" id = "styleDetails" scope="col" @click="sortBy('styleDetails')" >Style Issues</th>
+           <th class = "colSearchPhrase" id = "searchPhrase" scope="col" @click="sortBy('searchPhrase')" >Search?</th>
            <th class = "colInlineRefCnt" id = "inlineRefCnt" scope="col" @click="sortBy('inlineRefCnt')" >Inline ref Count</th>
         </tr>
         </thead>
@@ -442,13 +499,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </td>
             <td class = "colPersonName">{{ item.personName }} </td>
             <td class = "colUnsourcedStatus">{{ item.unsourcedStatus }} </td>
-            <td class = "colIsEmpty">{{ item.isEmpty }} </td>
-            <td class = "colMisplacedLineCnt">{{ item.misplacedLineCnt}} </td> 
-            <td class = "colMissingEnd">{{ item.missingEnd }} </td>
-            <td class = "colBioHeading">{{ item.bioHeading }} </td>
-            <td class = "colSourcesHeading">{{ item.sourcesHeading }} </td>
-            <td class = "colReferencesTag">{{ item.referencesTag }} </td>
-            <td class = "colAcknowledgements">{{ item.acknowledgements }} </td>
+            <td class = "colRequiredSections">{{ item.requiredSections }} </td>
+            <td class = "colStyleDetails">{{ item.styleDetails}} </td> 
+            <td class = "colSearchPhrase">{{ item.searchPhrase}} </td> 
             <td class = "colInlineRefCnt">{{ item.inlineRefCnt }} </td>
           </tr>
         </tbody>
@@ -478,8 +531,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 <script>
 
+import { nextTick } from 'vue'
 import { BioCheck } from "./BioCheck.js"
 import { BioResultsExport } from "./BioResultsExport.js"
+import { BioCheckTemplateManager } from "./BioCheckTemplateManager.js";
 
 export default {
   name: 'App',
@@ -489,11 +544,11 @@ export default {
     data: function() {
       return {
 
-        promptMessage: "Select how to find profiles from the pulldown menu: Select Profile Id to find by profile OR select WikiTree+ search results to find by WikiTree+ search OR select Check watchlist to check profiles on your watchlist",
-        inputWikiTreeIdTip: "If you have set How to Find Profiles as Profile Id, enter the Profile Id to use to find profiles to check (e.g., Doe-100",
-        numAncestorGenTip: "If you have set How to Find Profiles as Profile Id, enter the number of generations of ancestors to check for the profile",
-        numDescendantsGenTip: "If you have set How to Find Profiles as Profile Id, enter the number of generations of descendants to check for the profile",
-        queryArgTip: "If you have set How to Find Profiles as WikiTree+ search results, enter the text to use in a WikiTree+ search to find profiles to check)",
+        promptMessage: "Select how to find profiles from the dropdown menu",
+        inputWikiTreeIdTip: "Enter the Profile Id to check (e.g., Doe-100)",
+        numAncestorGenTip: "Enter the number of generations of ancestors to check for the profile",
+        numDescendantGenTip: "Enter the number of generations of descendants to check for the profile",
+        queryArgTip: "Enter the text to use in a WikiTree+ search to find profiles to check",
         maxQueryTip: "Enter the maximum number profiles to return from the WikiTree+ search or your watchlist. Use this to limit the number of profiles returned to Bio Check",
         maxRandomTip: "Enter the highest random number profile to check",
         minRandomTip: "Enter the lowest random number profile to check",
@@ -503,11 +558,14 @@ export default {
         openOnlyTip: "Select to check only open profiles. When not selected, any profile with a public biography will be checked",
         ignorePre1500Tip: "Select to check only post-1500 profiles or those with no dates",
         reliableSourcesOnlyTip: "Select to require Pre-1700 reliable sources for all profiles",
-        checkAutoGeneratedTip: "Select to report style for biography auto-generated by a GEDCOM import",
-        numRelativesTip: "Enter number of degrees of connection to check.  This will check all relatives (parents, spouses, children, siblings) for the profile. This can apply to all profiles or ony those profiles that have source or style issues. Each degree will check the relatives of all previously checked profiles.",
+        numRelativesTip: "Enter number of degrees of connection to check.  This will check all relatives (parents, spouses, children, siblings) for the profile. This can apply to all profiles or ony those profiles that have source or style issues. When checking profiles that have issues, each degree will check the relatives of all previously checked profiles.",
         connectionsTip: "Select to check all connected profiles. When selected, all profiles will be checked; otherwise only unsourced profiles or profiles with style issues will be checked. Profiles will be checked for the number of degrees specified.",
         maxReportTip: "Enter the maximum number of profiles to report. The check will complete when this many profiles have been reported",
-        reportStyleTip: "Select profiles to report.  Select Unsourced and Style to report profiles with source or style issues. Select Watchlist profiles not managed by you to report only those profiles from your watchlist where you are the manager. Select All Profiles to report all profiles. Select Sources for ... to report sources on the profiles, Select None to report overall statistics but no individual profiles",
+        reportStyleTip: "Select report type. A detailed report includes source and style issues. A summary report includes information to review profiles. A sources report includes the profiles sources. Select None to report overall statistics but no individual profiles",
+        reportAllProfilesTip: "Select to report all profiles. When not selected, only profiles with source or style issues are reported",
+        reportNonManagedTip: "Select to report only profiles on your watchlist where you are not the manager",
+        reportStyleDetailsTip: "Select to report all profiles with style issues. When not selected, only profiles with source or section headings issues are reported",
+        bioSearchStringTip: "Enter phrase to search for in biography",
 
 
         checkStart: "user:",
@@ -519,18 +577,19 @@ export default {
           checkType: 1,
           selectedCheckType: "checkByProfile",
           queryArg: "",
-          maxQuery: 5000,
+          maxQuery: 1000,
           searchStart: 0,
-          searchMax: 5000,
+          searchMax: 1000,
+          searchMaxRandom: 1000,
           openOnly: false,
           ignorePre1500: false,
           reliableSourcesOnly: false,
-          checkAutoGenerated: false,
           numRelatives: 0,
           checkAllConnections: false,
-          maxReport: 5000,
+          maxReport: 1000,
           reportAllProfiles: false,
           reportNonManaged: false,
+          reportStyleDetails: true,
           selectedReportType: "",
           sourcesReport: false,
           profileReviewReport: false,
@@ -538,15 +597,18 @@ export default {
           userId: 0,
           userName: "",
           loggedIn: false,
-          maxWatchlistCount: 5000,
+          maxWatchlistCount: 1000,
           searchStartWatchlist: 0,
           searchMaxWatchlist: 200,
           minRandom: 0,
-          maxRandom: 36000000,
+          maxRandom: 38506714,
+          bioSearchString: "",
         },
         checkStatus: { 
-          stateMessage: " ",
-          progressMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, then select Check Profiles",
+          //stateMessage: " ",
+          //progressMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, then select Check Profiles",
+          stateMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...",
+          progressMessage: "select Check Profiles",
           progressMessageTitle: "",
           cancelPending: false,
 
@@ -554,6 +616,8 @@ export default {
           cancelDisabled: true,
           exportDisabled: true,
           toolsDisabled: true,
+          checkStarted: false,
+          checkCompleted: false,
         },
         checkResults: {
           key: "",
@@ -561,23 +625,21 @@ export default {
           sourcesRowData: [],
           profilesRowData: [],
         },
-        isInternetExplorer: false,
-
         sortKey: "wikiTreeId",
         reverse: false,
         loginMessage: "",
         toolsLabel: "Tools not available",
         toolsUserId: "",
-
+      
       }
     },
 
   computed: {
     isExportDisabled: function () {
-      if ((this.checkStatus.exportDisabled || this.isInternetExplorer) ||
+      if (this.checkStatus.exportDisabled || 
           ((this.checkResults.resultsRowData.length < 1) &&
-            (this.checkResults.sourcesRowData.length < 1) &&
-            (this.checkResults.profilesRowData.length < 1))) {
+           (this.checkResults.sourcesRowData.length < 1) &&
+           (this.checkResults.profilesRowData.length < 1))) {
         return true;
       } else {
         return false;
@@ -591,6 +653,14 @@ export default {
 
     watchlistSelected: function() {
       return (this.userArgs.selectedCheckType === "checkWatchlist");
+    },
+  
+    isAfterFirstCheck: function() {
+      return (this.checkStatus.checkStarted);
+    },
+
+    isCheckCompleted: function() {
+      return (this.checkStatus.checkCompleted);
     },
 
     isCheckByProfile: function() {
@@ -623,8 +693,7 @@ export default {
     },
 
     isSourcesReport: function() {
-      if ((this.userArgs.selectedReportType === "sourcesReportStyle") ||
-          (this.userArgs.selectedReportType === "sourcesReportAll")) {
+      if (this.userArgs.selectedReportType === "sourcesReport") {
         return true;
       } else {
         return false;
@@ -632,21 +701,17 @@ export default {
     },
 
     isProfileReviewReport: function() {
-      if ((this.userArgs.selectedReportType === "reportReviewProfiles") ||
-          (this.userArgs.selectedReportType === "reportReviewProfilesAll")) {
+      if (this.userArgs.selectedReportType === "summaryReport") {
         return true;
       } else {
         return false;
       }
     },
 
-// should "reportNonManaged"  be default only?
     isDefaultReport: function() {
-      if ((this.userArgs.selectedReportType === "sourcesReportStyle") ||
-          (this.userArgs.selectedReportType === "sourcesReportAll") ||
-          (this.userArgs.selectedReportType === "reportReviewProfiles") ||
-          (this.userArgs.selectedReportType === "reportReviewProfilesAll") ||
-          (this.userArgs.selectedReportType === "reportStatsOnly")) {
+      if ((this.userArgs.selectedReportType === "sourcesReport") ||
+          (this.userArgs.selectedReportType === "summaryReport") ||
+          (this.userArgs.selectedReportType === "statsOnlyReport")) {
         return false;
       } else {
         return true;
@@ -667,7 +732,6 @@ export default {
   created() {
     // Override default values with those from URL, if any
     let userAgent = navigator.userAgent;
-    this.isInternetExplorer = userAgent.indexOf("MSIE ") > -1 || userAgent.indexOf("Trident/") > -1;
     this.getUrlParams();
     if (this.userContext.loggedIn) {
       this.loginMessage = "You are currently logged in as " + this.userContext.userName;
@@ -679,10 +743,13 @@ export default {
     }
   },
 
-  mounted() {
-    this.$nextTick(function () {
-      // Code that will run only after the
-      // entire view has been rendered
+  async mounted() {
+    // This is to just load from WT+ once per browser session
+    let bioCheckTemplateManager = new BioCheckTemplateManager();
+    await bioCheckTemplateManager.load();
+
+    // Code that will run only after the entire view has been rendered
+    nextTick(() => {
       // use the auto arg to act like check profiles button click
       if (this.checkStart === "auto") {
         this.userArgs.reportAllProfiles = false;
@@ -691,7 +758,8 @@ export default {
     })
   },
 
-    methods: {
+    //methods: {
+  methods: {
 
       sortBy: function(sortKey) {
         let sortData = this.checkResults.resultsRowData;
@@ -702,41 +770,49 @@ export default {
             sortData = this.checkResults.profilesRowData;
           }
         }
-        //this.checkResults.resultsRowData.sort( (a, b) => {
+        if (sortKey === 'birthDate') {
+          sortKey = 'birthDateDate';
+        }
+        if (sortKey === 'deathDate') {
+          sortKey = 'deathDateDate';
+        }
         sortData.sort( (a, b) => {
-          //  numeric sort
-          if (typeof a[sortKey] === 'number'){
+          if (typeof a[sortKey] === 'string') {
+            //  alphanumeric sort
+            const aa = a[sortKey];
+            const bb = b[sortKey];
+            return aa < bb ? -1 : aa > bb ?  1 : 0;
+          } else {   // number or object such as Date
             return a[sortKey] - b[sortKey];
           }
-          //  alphanumeric sort
-          const aa = a[sortKey];
-          const bb = b[sortKey];
-          return aa < bb ? -1 : aa > bb ?  1 : 0;
-          } );
-          this.reverse = (this.sortKey === sortKey) ? !this.reverse : false;
-          if (this.reverse) this.checkResults.resultsRowData.reverse();
-          this.sortKey = sortKey;
-        },
+        } );
+        this.reverse = (this.sortKey === sortKey) ? !this.reverse : false;
+        if (this.reverse) sortData.reverse();
+        this.sortKey = sortKey;
+      },
 
       checkProfiles: function () {
+        this.checkStatus.checkStarted = true;
         let isValidUserInput = true;
         if (this.userArgs.searchStart > this.userArgs.maxQuery) {
           this.checkStatus.progressMessage = "Check starting at cannot be greater than Max search profiles";
         } else {
           switch (this.userArgs.selectedCheckType) {
             case "checkByQuery":
-              if (this.userArgs.maxQuery > 50000) {
-                this.userArgs.maxQuery = 50000;
-                this.checkStatus.progressMessage = "Max search profiles has been changed to maximum of 50000";
+              if (this.userArgs.maxQuery > 30000) {
+                this.userArgs.maxQuery = 30000;
+                this.checkStatus.progressMessage = "Max search profiles has been changed to maximum of 50,000";
               }
               if (this.userArgs.queryArg.length === 0) {
                 isValidUserInput = false;
                 this.checkStatus.progressMessage = "WikiTree+ search text must be supplied";
               }
               this.setTools(false, "");
+              this.userArgs.reportNonManaged = false;
               break;
             case "checkRandom":
               this.setTools(false, "");
+              this.userArgs.reportNonManaged = false;
               break;
             case "checkByProfile":
               if (!this.userArgs.inputWikiTreeId.includes("-")) {
@@ -744,6 +820,11 @@ export default {
                 this.checkStatus.progressMessage = "Enter WikiTreeId in the form Name-####";
               } else {
                 this.setTools(true, this.userArgs.inputWikiTreeId);
+              }
+              this.userArgs.reportNonManaged = false;
+              if (this.userArgs.numRelatives > 10) {
+                this.userArgs.numRelatives = 10;
+                this.checkStatus.progressMessage = "Number of degrees of connection to check has been changed to maximum of 10";
               }
               break;
             case "checkWatchlist":
@@ -757,63 +838,33 @@ export default {
         }
         if (isValidUserInput) {
           switch (this.userArgs.selectedReportType) {
-            case "reportSourcesStyle":
+            case "detailedReport":
               this.userArgs.sourcesReport = false;
-              this.userArgs.reportAllProfiles = false;
-              this.userArgs.profileReviewReport = false;
-              this.userArgs.reportNonManaged = false;
-              this.userArgs.reportStatsOnly = false;
-              break;
-            case "reportAll":
-              this.userArgs.sourcesReport = false;
-              this.userArgs.reportAllProfiles = true;
-              this.userArgs.profileReviewReport = false;
-              this.userArgs.reportNonManaged = false;
-              this.userArgs.reportStatsOnly = false;
-              break;
-            case "reportNonManaged":
-              this.userArgs.sourcesReport = false;
-              this.userArgs.reportNonManaged = true;
-              this.userArgs.reportAllProfiles = false;
               this.userArgs.profileReviewReport = false;
               this.userArgs.reportStatsOnly = false;
               break;
-            case "sourcesReportStyle":
+            case "sourcesReport":
               this.userArgs.sourcesReport = true;
-              this.userArgs.reportAllProfiles = false;
               this.userArgs.profileReviewReport = false;
               this.userArgs.reportNonManaged = false;
               this.userArgs.reportStatsOnly = false;
               break;
-            case "sourcesReportAll":
-              this.userArgs.sourcesReport = true;
-              this.userArgs.reportAllProfiles = true;
-              this.userArgs.profileReviewReport = false;
-              this.userArgs.reportNonManaged = false;
-              this.userArgs.reportStatsOnly = false;
-              break;
-            case "reportReviewProfiles":
+            case "summaryReport":
               this.userArgs.sourcesReport = false;
-              this.userArgs.reportAllProfiles = false;
               this.userArgs.profileReviewReport = true;
-              this.userArgs.reportNonManaged = false;
               this.userArgs.reportStatsOnly = false;
               break;
-            case "reportReviewProfilesAll":
-              this.userArgs.sourcesReport = false;
-              this.userArgs.reportAllProfiles = true;
-              this.userArgs.profileReviewReport = true;
-              this.userArgs.reportNonManaged = false;
-              this.userArgs.reportStatsOnly = false;
-              break;
-            case "reportStatsOnly":
+            case "statsOnlyReport":
               this.userArgs.sourcesReport = false;
               this.userArgs.reportAllProfiles = false;
               this.userArgs.profileReviewReport = false;
-              this.userArgs.reportNonManaged = false;
               this.userArgs.reportStatsOnly = true;
               break;
           }
+          // we could save all userArgs but the query string might be a security hole
+          window.localStorage.setItem('biocheck_action', this.userArgs.selectedCheckType);
+          window.localStorage.setItem('biocheck_report', this.userArgs.selectedReportType);
+
           // Clear previous results
           this.checkResults.resultsRowData.splice(0, this.checkResults.resultsRowData.length);
           this.checkResults.sourcesRowData.splice(0, this.checkResults.sourcesRowData.length);
@@ -821,6 +872,8 @@ export default {
           this.checkStatus.checkDisabled = true;
           this.checkStatus.cancelDisabled = false;
           this.checkStatus.exportDisabled = true;
+          this.checkStatus.checkStarted = true;
+          this.checkStatus.checkCompleted = false;
           this.checkStatus.stateMessage = "";
           this.checkStatus.progressMessage = "Examining profiles";
           this.userArgs.userId = this.userContext.userId;
@@ -849,7 +902,7 @@ export default {
             bioResultsExport.exportResultsRowCsv(this.userArgs, this.checkResults.resultsRowData);
           }
         }
-        this.checkStatus.stateMessage = "Completed";
+        this.checkStatus.stateMessage = "Download Completed";
       },
 
       setTools: function (enableTools, profileId) {
@@ -878,7 +931,7 @@ export default {
       },
 
       wikiTreePlus: function () {
-        let url = "https://wikitree.sdms.si/default.htm?report=srch1";
+        let url = "https://plus.wikitree.com/default.htm?report=srch1";
         if (this.userArgs.selectedCheckType === "checkByQuery") {
           url += "&Query=" + this.userArgs.queryArg + "&MaxProfiles=" + this.userArgs.maxQuery;
         }
@@ -900,97 +953,62 @@ export default {
      *   numAncestorGen=number of ancestor generations
      *   numDescendantGen=number of descendant generations
      *   checkStart=user or auto
-     * when action=checkWatchlist&checkStart=auto max search, check, and report are set to 5000
+     * when action=checkWatchlist&checkStart=auto max search, check, and report are set to 1000
     */
       getUrlParams: function () {
-        if (this.isInternetExplorer) {
-          let regex = new RegExp('[\\?&]' + "action" + '=([^&#]*)');
-          //let args = regex.exec(this.urlParams);
-          let args = regex.exec(this.userContext.urlParamString);
-          if (!(args === null) && (args.length > 0)) {
-            let checkType = decodeURIComponent(args[1].replace(/\+/g, " "));
-            if (checkType === "checkQuery") {
-              this.userArgs.selectedCheckType = "checkByQuery";
+        let args = new URLSearchParams(this.userContext.urlParamString.search);
+        if (args.has("action")) {
+          let checkType = args.get("action");
+          if (checkType === "checkQuery") {
+            this.userArgs.selectedCheckType = "checkByQuery";
+          } else {
+            if (checkType === "checkProfile") {
+              this.userArgs.selectedCheckType = "checkByProfile";
             } else {
-              if (checkType === "checkProfile") {
-                this.userArgs.selectedCheckType = "checkByProfile";
+              if (checkType === "checkWatchlist") {
+                this.userArgs.selectedCheckType = "checkWatchlist";
+                this.userArgs.maxWatchlistCount = 1000;
+                this.userArgs.searchMax = 1000;
+                this.userArgs.maxReport = 1000;
               } else {
-                if (checkType === "checkWatchlist") {
-                  this.userArgs.selectedCheckType = "checkWatchlist";
-                  this.userArgs.maxWatchlistCount = 5000;
-                  this.userArgs.searchMax = 200;
-                  this.userArgs.maxReport = 5000;
+                if (checkType === "checkRandom") {
+                  this.userArgs.selectedCheckType = "checkRandom";
                 }
               }
             }
-          }
-          regex = new RegExp('[\\?&]' + "query" + '=([^&#]*)');
-          args = regex.exec(this.urlParams);
-          if (!(args === null) && (args.length > 0)) {
-            this.userArgs.queryArg = decodeURIComponent(args[1].replace(/\+/g, " "));
-          }
-          regex = new RegExp('[\\?&]' + "maxProfiles" + '=([^&#]*)');
-          args = regex.exec(this.urlParams);
-          if (!(args === null) && (args.length > 0)) {
-            this.userArgs.maxQuery = decodeURIComponent(args[1].replace(/\+/g, " "));
-          }
-          regex = new RegExp('[\\?&]' + "numAncestorGen" + '=([^&#]*)');
-          args = regex.exec(this.urlParams);
-          if (!(args === null) && (args.length > 0)) {
-            this.userArgs.numAncestorGen = decodeURIComponent(args[1].replace(/\+/g, " "));
-          }
-          regex = new RegExp('[\\?&]' + "numDescendantGen" + '=([^&#]*)');
-          args = regex.exec(this.urlParams);
-          if (!(args === null) && (args.length > 0)) {
-            this.userArgs.numAncestorGen = decodeURIComponent(args[1].replace(/\+/g, " "));
-          }
-          regex = new RegExp('[\\?&]' + "checkStart" + '=([^&#]*)');
-          args = regex.exec(this.urlParams);
-          if (!(args === null) && (args.length > 0)) {
-            this.checkStart = decodeURIComponent(args[1].replace(/\+/g, " "));
           }
         } else {
-          let args = new URLSearchParams(this.userContext.urlParamString.search);
-          if (args.has("action")) {
-            let checkType = args.get("action");
-            if (checkType === "checkQuery") {
-              this.userArgs.selectedCheckType = "checkByQuery";
-            } else {
-              if (checkType === "checkProfile") {
-                this.userArgs.selectedCheckType = "checkByProfile";
-              } else {
-                if (checkType === "checkWatchlist") {
-                  this.userArgs.selectedCheckType = "checkWatchlist";
-                  this.userArgs.maxWatchlistCount = 5000;
-                  this.userArgs.searchMax = 5000;
-                  this.userArgs.maxReport = 5000;
-                } else {
-                  if (checkType === "checkRandom") {
-                    this.userArgs.selectedCheckType = "checkRandom";
-                  }
-                }
-              }
-            }
+          // set default check type from last time you were here
+          let savedAction = window.localStorage.getItem('biocheck_action');
+          if (savedAction !== null) {
+            this.userArgs.selectedCheckType = savedAction;
           }
-          if (args.has("query")) {
-            this.userArgs.queryArg = args.get("query");
-          }
-          if (args.has("maxProfiles")) {
-            this.userArgs.maxQuery = args.get("maxProfiles");
-          }
-          if (args.has("profileId")) {
-            this.userArgs.inputWikiTreeId = args.get("profileId");
-            this.userArgs.openOnly = false;
-          }
-          if (args.has("numAncestorGen")) {
-            this.userArgs.numAncestorGen = args.get("numAncestorGen");
-          }
-          if (args.has("numDescendantGen")) {
-            this.userArgs.numDescendantGen = args.get("numDescendantGen");
-          }
-          if (args.has("checkStart")) {
-            this.checkStart = args.get("checkStart");
-          }
+        }
+        let savedReport = window.localStorage.getItem('biocheck_report');
+        if (savedReport !== null) {
+          this.userArgs.selectedReportType = savedReport;
+        }
+        if (args.has("query")) {
+          this.userArgs.queryArg = args.get("query");
+        }
+        if (args.has("maxProfiles")) {
+          this.userArgs.maxQuery = args.get("maxProfiles");
+        }
+        if (args.has("profileId")) {
+          this.userArgs.inputWikiTreeId = args.get("profileId");
+          this.userArgs.openOnly = false;
+        }
+        if (args.has("numAncestorGen")) {
+          this.userArgs.numAncestorGen = args.get("numAncestorGen");
+        }
+        if (args.has("numDescendantGen")) {
+          this.userArgs.numDescendantGen = args.get("numDescendantGen");
+        }
+        // Do not want to start automatically in case someone is
+        // trying to overload 
+        // or maybe we just want smalled numbers?
+        if (args.has("checkStart")) {
+          this.checkStart = args.get("checkStart");
         }
       }
     }
@@ -1064,6 +1082,12 @@ button {
   font-size: 100%;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
+.check-button {
+  margin: .5em;
+  font-size: 100%;
+  box-shadow: 2px 2px 2px 1px black;
+  font-weight: 'bold';
+}
 .button-panel {
   display: flex;
   flex-wrap: wrap;
@@ -1085,6 +1109,8 @@ button {
 .feedback-progress {
 }
 .feedback-state {
+}
+.feedback-start {
 }
 .tableContainer {
   clear: both;
@@ -1125,6 +1151,8 @@ td {
   border-right: 1px solid black;
   border-bottom: 1px solid black;
   border-left: 1px solid black;
+
+  white-space: pre-wrap;
 }
 .colWikiTreeId { width: 9% }
 .colPersonName { width: 15% }
@@ -1146,8 +1174,13 @@ td {
 .colBirthDate { width : 7% }
 .colDeathDate { width : 7% }
 
+.colRequiredSections { width : 14% }
+.colStyleDetails { width : 26% }
+.colSearchPhrase { width : 4% }
+
 td {
   text-align: center;
 }
 td.colSourceLine { text-align: left }
+td.colStyleDetails { text-align: left }
 </style>

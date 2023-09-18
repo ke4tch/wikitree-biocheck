@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2023 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -80,6 +80,7 @@ export class BioCheckWatchlist extends BioChecker {
       "&fields=" +
       BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
       WATCHLIST_REQUEST_FIELDS +
+      BioChecker.MY_ID_KEY + 
       BioChecker.REDIRECT_KEY;
     // start with a request for one profile to get the number of profiles on the watchlist
     let url = urlbase + "&offset=0&limit=1";
@@ -158,12 +159,11 @@ export class BioCheckWatchlist extends BioChecker {
                     // iterate returned profiles
                     let profileObj = watchlistArray[i];
                     let thePerson = new BioCheckPerson();
-                    let canUseThis = thePerson.build(
+                    let canUseThis = thePerson.canUse(
                       profileObj,
                       this.getOpenOnly(),
                       this.getIgnorePre1500(),
-                      this.getUserId(),
-                      0
+                      this.getUserId()
                     );
                     this.testResults.countProfile(
                       0,
@@ -204,7 +204,8 @@ export class BioCheckWatchlist extends BioChecker {
             let allPromises = Promise.all(promiseArray);
             await allPromises;
             this.promiseCollection = new Array();
-            this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
+            this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(),
+                 this.reachedMaxProfiles);
           }
         }
       }

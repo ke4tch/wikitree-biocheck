@@ -25,13 +25,15 @@ import { BioCheckProfile } from "./BioCheckProfile.js";
 import { BioCheckQueryResults } from "./BioCheckQueryResults.js";
 import { BioCheckWatchlist } from "./BioCheckWatchlist.js";
 import { BioCheckRandom } from "./BioCheckRandom.js";
+
 /**
  * Send inputs from gui onto the checker and ripple results back
  * in the bio test results
  */
 
 export class BioCheck {
-  constructor() {}
+  constructor() {
+  } 
 
   /**
    * Check bio.
@@ -42,6 +44,7 @@ export class BioCheck {
    * @param {String} checkResults - the results returned to GUI
    */
   check(userArgs, checkStatus, checkResults) {
+
     // link the gui stuff into the results
     let testResults = new BioTestResults();
     testResults.setArgs(checkStatus, checkResults);

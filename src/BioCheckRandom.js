@@ -45,14 +45,9 @@ export class BioCheckRandom extends BioChecker {
     // https://www.wikitree.com/index.php?title=Special:NetworkFeed&showall=1&l=100&created=1
     // then getting the most recent and getting their id as the max rand
 
-    // max captured as of 28 Oct 2022
-    const MAX_RANDOM = 36331670;
+    // max captured as of 02 Sep 2023
+    const MAX_RANDOM = 39923156;
     this.verbose = false;
-    this.unnamedProfileCount = 0;
-    this.invalidIdProfileCount = 0;
-    this.noPersonCount = 0;
-    this.randomProfilesChecked = 0;
-    this.privacyCount = 0;
 
     let minRand = this.getMinRandom();
     let maxRand = this.getMaxRandom();
@@ -62,7 +57,7 @@ export class BioCheckRandom extends BioChecker {
 
     let min = minRand;
     this.testResults.setStateMessage("Please wait, checking random profiles...");
-    let maxToCheck = this.getSearchMax();
+    let maxToCheck = this.getSearchMaxRandom();
     if (maxToCheck > BioChecker.MAX_TO_CHECK) {
       // let's not kill the api server
       this.testResults.setStateMessage("Check limited to a max of " + BioChecker.MAX_TO_CHECK);
@@ -90,125 +85,32 @@ export class BioCheckRandom extends BioChecker {
      *
      * Space:BioCheckHelp is id 31120671 and getPerson returns invalid user
      */
-    else
-      try {
-        console.log("random check starting at " + minRand + " for up to " + maxRand + " xxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        while (i < maxToCheck && i <= maxRand && !this.timeToQuit()) {
-          // get a profileId from random number generator
-          let profileId = this.#getRandomNumber(min, maxRand);
-          if (this.verbose) {
-            console.log("check random " + i + " profileId " + profileId);
-          }
-          if (this.thePeopleManager.hasPerson(profileId)) {
-            if (this.verbose) {
-              console.log("   Profile " + profileId + " has already been checked");
-            }
-          } else {
-            this.testResults.countProfile(1, false, false);
-            const url =
-              BioChecker.WIKI_TREE_URI +
-              "?action=getPerson" +
-              "&key=" +
-              profileId +
-              "&fields=" +
-              BioChecker.BASIC_PROFILE_REQUEST_FIELDS +
-              BioChecker.REDIRECT_KEY;
-            this.setDetailedProgress();
-            this.pendingRequestCount++;
-            try {
-              this.testResults.countRequest();  // instrumentation
-              const fetchResponse = await fetch(url, {
-                credentials: "include",
-              });
-              if (!fetchResponse.ok) {
-                console.log("  Error from getPerson " + fetchResponse.status + " profileId " + profileId);
-                this.invalidIdProfileCount++;
-                this.testResults.addUncheckedDueToPrivacy();
-              }
-              let theJson = await fetchResponse.json();
-              let responseObj = theJson[0];
-              let responseStatus = responseObj.status;
-              if (responseStatus != 0) {
-                console.log("  API returned " + responseObj["status"] + " profileId " + profileId);
-                this.invalidIdProfileCount++;
-                this.testResults.addUncheckedDueToPrivacy();
-              } else {
-                if (responseObj.person == null) {
-                  if (this.verbose) {
-                    console.log("  Returned profile does not have person property");
-                    this.noPersonCount++;
-                    this.testResults.addUncheckedDueToPrivacy();
-                  }
-                } else {
-                  let profileObj = responseObj.person;
-                  let thePerson = new BioCheckPerson();
-                  thePerson.setVerbose(true);
-                  let canUseThis = thePerson.build(
-                    profileObj,
-                    this.getOpenOnly(),
-                    this.getIgnorePre1500(),
-                    this.getUserId(),
-                    profileId
-                  );
-                  if (!thePerson.hasName()) {
-                    this.unnamedProfileCount++;
-                  }
-                  if (!canUseThis) {
-                    //console.log("Profile " + profileId + " privacy does not allow testing");
-                    this.testResults.countProfile( 0, thePerson.isUncheckedDueToPrivacy(),
-                      thePerson.isUncheckedDueToDate()
-                    );
-                    if (thePerson.isUncheckedDueToPrivacy()) {
-                      this.privacyCount++;
-                    }
-                  } else {
-                    if (!this.thePeopleManager.hasPerson(thePerson.getProfileId()) && !this.timeToQuit()) {
-                      if (this.pendingRequestCount > BioChecker.MAX_PENDING_REQUESTS) {
-                        this.testResults.countPromiseWait();
-                        await this.sleep(BioChecker.SYNC_DELAY_MS);
-                        let promiseArray = await this.promiseCollection;
-                        let allPromises = Promise.all(promiseArray);
-                        await allPromises;
-                        this.promiseCollection = new Array();
-                        this.pendingRequestCount = 0;
-                      }
-                      if (this.needToGetBio(thePerson)) {
-                        let promise = this.checkPerson(thePerson);
-                        if (!this.timeToQuit()) {
-                          this.promiseCollection.push(promise);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            } catch (error) {
-              console.log("  Error from getPerson " + error + " profileId " + profileId);
-              this.testResults.setProgressMessage("Error getting profile " + profileId + " " + error);
-            }
-          }
-          i++;
-          this.randomProfilesChecked = i;
-        }
-        // Wait for all to complete then report
-        let promiseArray = await this.promiseCollection;
-        let allPromises = Promise.all(promiseArray);
-        await allPromises;
-        this.promiseCollection = new Array();
+    try {
+      console.log("random check starting at " + minRand + " for up to " + maxRand + " xxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
-        // Report profiles returned invalid from API, ones with no name
-        console.log("Random profiles checked " + this.randomProfilesChecked);
-        console.log("   Profiles returned as invalid Id " + this.invalidIdProfileCount);
-        console.log("   Profiles without a Name not tested " + this.unnamedProfileCount);
-        console.log("   Profiles without a Person Property " + this.noPersonCount);
-        let j = this.privacyCount - this.unnamedProfileCount;
-        console.log("   Profiles that failed privacy test " + j);
-        console.log("   Profiles that were duplicates " + this.thePeopleManager.getDuplicateProfileCount());
-        this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
-        //console.log("totalValidateTime (milliseconds) " + BioChecker.totalValidateTime);
-      } catch (error) {
-        console.log("Error " + error);
+      let profileIdArray = [];
+      while (i < maxToCheck && i <= maxRand && !this.timeToQuit()) {
+        // get a profileId from random number generator
+        let profileId = this.#getRandomNumber(min, maxRand);
+        if (this.verbose) {
+          console.log("check random " + i + " profileId " + profileId);
+        }
+        if (this.thePeopleManager.hasPerson(profileId)) {
+          if (this.verbose) {
+            console.log("   Profile " + profileId + " has already been checked");
+          }
+        } else {
+          profileIdArray.push(profileId);
+        }
+        i++;
       }
+      await this.pageThroughPeople(profileIdArray, 0, 0, 0);
+      this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
+                 this.reachedMaxProfiles);
+
+    } catch (error) {
+      console.log("Error " + error);
+    }
   }
 
   /*
