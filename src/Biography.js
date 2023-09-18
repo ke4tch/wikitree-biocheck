@@ -158,6 +158,7 @@ export class Biography {
    */
   applyPre1700ToAll() {
     this.#treatAsPre1700 = true; 
+    this.#tooOldToRemember = true;
   }
 
   /**
