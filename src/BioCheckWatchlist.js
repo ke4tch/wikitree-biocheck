@@ -86,128 +86,133 @@ export class BioCheckWatchlist extends BioChecker {
     let url = urlbase + "&offset=0&limit=1";
     this.pendingRequestCount++;
     this.testResults.countRequest();  // instrumentation
-    const fetchResponse = await fetch(url, {
-      credentials: "include",
-    });
-    if (!fetchResponse.ok) {
-      console.log("Error from getWatchlist " + fetchResponse.status);
-      this.testResults.resetStateOnError();
-    } else {
-      const theJson = await fetchResponse.json();
-      let responseObj = theJson[0];
-      let responseStatus = responseObj.status;
-      if (responseStatus != 0) {
-        console.log("responseStatus " + responseStatus);
+    try {
+      const fetchResponse = await fetch(url, {
+        credentials: "include",
+      });
+      if (!fetchResponse.ok) {
+        console.log("Error from getWatchlist " + fetchResponse.status);
+        this.testResults.resetStateOnError();
       } else {
-        watchlistCount = responseObj.watchlistCount;
-        if (!watchlistCount) {
-          this.testResults.setStateMessage(
-            "Could not get watchlist. Make sure you are logged in. Reload the page to log in."
-          );
-          this.testResults.resetStateOnError();
+        const theJson = await fetchResponse.json();
+        let responseObj = theJson[0];
+        let responseStatus = responseObj.status;
+        if (responseStatus != 0) {
+          console.log("responseStatus " + responseStatus);
         } else {
-          if (maxProfileCount > watchlistCount) {
-            maxProfileCount = responseObj.watchlistCount;
-          }
-          if (this.getSearchStartWatchlist() >= watchlistCount) {
+          watchlistCount = responseObj.watchlistCount;
+          if (!watchlistCount) {
             this.testResults.setStateMessage(
-              "Check starting at " +
-                this.getSearchStartWatchlist() +
-                " must be less than the " +
-                watchlistCount +
-                " profiles on your watchlist"
+              "Could not get watchlist. Make sure you are logged in. Reload the page to log in."
             );
             this.testResults.resetStateOnError();
           } else {
-            this.testResults.countProfile(maxProfileCount - this.getSearchStartWatchlist(), false, false);
-            this.testResults.setStateMessage("Checking watchlist with " + watchlistCount + " profiles.");
-            this.testResults.setProgressMessage("Gathering profiles on watchlist...");
-            while (
-              start < maxProfileCount &&
-              totalProfileCount < watchlistCount &&
-              totalProfileCount < this.getSearchMaxWatchlist() &&
-              !this.timeToQuit()
-            ) {
-              // process profiles up to limit at a time
-              if (totalProfileCount + limit > maxProfileCount) {
-                limit = maxProfileCount - start;
-                console.log("reset limit to " + limit);
-              }
-              let url = urlbase + "&offset=" + start + "&limit=" + limit;
-              this.pendingRequestCount++;
-              this.testResults.countRequest();  // instrumentation
-              const fetchResponse = await fetch(url, {
-                credentials: "include",
-              });
-              if (!fetchResponse.ok) {
-                console.log("Error from getWatchlist " + fetchResponse.status);
-                this.testResults.resetStateOnError();
-              } else {
-                const theJson = await fetchResponse.json();
-                let responseObj = theJson[0];
-                let responseStatus = responseObj.status;
-                if (responseStatus != 0) {
-                  console.log("responseStatus " + responseStatus);
+            if (maxProfileCount > watchlistCount) {
+              maxProfileCount = responseObj.watchlistCount;
+            }
+            if (this.getSearchStartWatchlist() >= watchlistCount) {
+              this.testResults.setStateMessage(
+                "Check starting at " +
+                  this.getSearchStartWatchlist() +
+                  " must be less than the " +
+                  watchlistCount +
+                  " profiles on your watchlist"
+              );
+              this.testResults.resetStateOnError();
+            } else {
+              this.testResults.countProfile(maxProfileCount - this.getSearchStartWatchlist(), false, false);
+              this.testResults.setStateMessage("Checking watchlist with " + watchlistCount + " profiles.");
+              this.testResults.setProgressMessage("Gathering profiles on watchlist...");
+              while (
+                start < maxProfileCount &&
+                totalProfileCount < watchlistCount &&
+                totalProfileCount < this.getSearchMaxWatchlist() &&
+                !this.timeToQuit()
+              ) {
+                // process profiles up to limit at a time
+                if (totalProfileCount + limit > maxProfileCount) {
+                  limit = maxProfileCount - start;
+                  console.log("reset limit to " + limit);
+                }
+                let url = urlbase + "&offset=" + start + "&limit=" + limit;
+                this.pendingRequestCount++;
+                this.testResults.countRequest();  // instrumentation
+                const fetchResponse = await fetch(url, {
+                  credentials: "include",
+                });
+                if (!fetchResponse.ok) {
+                  console.log("Error from getWatchlist " + fetchResponse.status);
+                  this.testResults.resetStateOnError();
                 } else {
-                  let watchlistArray = responseObj.watchlist;
-                  this.testResults.setStateMessage(
-                    "Checking watchlist with " + watchlistCount + " profiles. Checking at number " + start + "..."
-                  );
-                  let len = watchlistArray.length;
-                  let i = 0;
-                  while (i < len) {
-                    // iterate returned profiles
-                    let profileObj = watchlistArray[i];
-                    let thePerson = new BioCheckPerson();
-                    let canUseThis = thePerson.canUse(
-                      profileObj,
-                      this.getOpenOnly(),
-                      this.getIgnorePre1500(),
-                      this.getUserId()
+                  const theJson = await fetchResponse.json();
+                  let responseObj = theJson[0];
+                  let responseStatus = responseObj.status;
+                  if (responseStatus != 0) {
+                    console.log("responseStatus " + responseStatus);
+                  } else {
+                    let watchlistArray = responseObj.watchlist;
+                    this.testResults.setStateMessage(
+                      "Checking watchlist with " + watchlistCount + " profiles. Checking at number " + start + "..."
                     );
-                    this.testResults.countProfile(
-                      0,
-                      thePerson.isUncheckedDueToPrivacy(),
-                      thePerson.isUncheckedDueToDate()
-                    );
-                    if (
-                      canUseThis &&
-                      !this.thePeopleManager.hasPerson(thePerson.getProfileId()) &&
-                      !this.timeToQuit()
-                    ) {
-                      this.setDetailedProgress();
-                      if (this.needToGetBio(thePerson)) {
-                        let promise = this.checkPerson(thePerson);
-                        if (!this.timeToQuit()) {
-                          this.promiseCollection.push(promise);
+                    let len = watchlistArray.length;
+                    let i = 0;
+                    while (i < len) {
+                      // iterate returned profiles
+                      let profileObj = watchlistArray[i];
+                      let thePerson = new BioCheckPerson();
+                      let canUseThis = thePerson.canUse(
+                        profileObj,
+                        this.getOpenOnly(),
+                        this.getIgnorePre1500(),
+                        this.getUserId()
+                      );
+                      this.testResults.countProfile(
+                        0,
+                        thePerson.isUncheckedDueToPrivacy(),
+                        thePerson.isUncheckedDueToDate()
+                      );
+                      if (
+                        canUseThis &&
+                        !this.thePeopleManager.hasPerson(thePerson.getProfileId()) &&
+                        !this.timeToQuit()
+                      ) {
+                        this.setDetailedProgress();
+                        if (this.needToGetBio(thePerson)) {
+                          let promise = this.checkPerson(thePerson);
+                          if (!this.timeToQuit()) {
+                            this.promiseCollection.push(promise);
+                          }
+                        }
+                        if (this.pendingRequestCount > MAX_PENDING_REQUESTS) {
+                          this.testResults.countPromiseWait();
+                          await this.sleep(BioChecker.SYNC_DELAY_MS);
+                          let promiseArray = await this.promiseCollection;
+                          let allPromises = Promise.all(promiseArray);
+                          await allPromises;
+                          this.promiseCollection = new Array();
+                          this.pendingRequestCount = 0;
                         }
                       }
-                      if (this.pendingRequestCount > MAX_PENDING_REQUESTS) {
-                        this.testResults.countPromiseWait();
-                        await this.sleep(BioChecker.SYNC_DELAY_MS);
-                        let promiseArray = await this.promiseCollection;
-                        let allPromises = Promise.all(promiseArray);
-                        await allPromises;
-                        this.promiseCollection = new Array();
-                        this.pendingRequestCount = 0;
-                      }
+                      i++;
+                      start++;
+                      totalProfileCount++;
                     }
-                    i++;
-                    start++;
-                    totalProfileCount++;
                   }
                 }
               }
+              // Wait for all to complete then report
+              let promiseArray = await this.promiseCollection;
+              let allPromises = Promise.all(promiseArray);
+              await allPromises;
+              this.promiseCollection = new Array();
+              this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
             }
-            // Wait for all to complete then report
-            let promiseArray = await this.promiseCollection;
-            let allPromises = Promise.all(promiseArray);
-            await allPromises;
-            this.promiseCollection = new Array();
-            this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(),
-                 this.reachedMaxProfiles);
           }
         }
+      }
+    } catch (error) {
+      if (error.name != 'AbortError') {
+        this.errorCleanup("Error from getWatchlist " + error);
       }
     }
   }

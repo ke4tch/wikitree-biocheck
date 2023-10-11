@@ -58,9 +58,9 @@ export class BioCheckProfile extends BioChecker {
    * Check a profile for the input wikiTreeId
    */
   async check() {
-    this.testResults.setStateMessage("Gathering profiles");
     let profileIdArray = [];
     profileIdArray.push(this.getInputWikiTreeId().trim());
+    this.testResults.setStateMessage("Gathering profiles for " + this.getInputWikiTreeId().trim());
 
     let numAncestors = this.getNumAncestorGen();
     if (numAncestors > BioCheckProfile.MAX_DEPTH) {
@@ -77,7 +77,7 @@ export class BioCheckProfile extends BioChecker {
 
     // Check more ancestors beyond the ancestor limits
     // but only if you have not already reached max limits
-    if ((this.getNumAncestorGen() > 0) && !this.timeToQuit() && !this.reportReachedMax &&
+    if ((this.getNumAncestorGen() > 0) && !this.timeToQuit() &&
         (this.getNumAncestorGen() > BioCheckProfile.MAX_DEPTH)) {
       numAncestors = this.getNumAncestorGen();
       let remainingAncestorGenerations = 0;
@@ -103,7 +103,7 @@ export class BioCheckProfile extends BioChecker {
     if ((numRelatives > 0) && (!this.getCheckAllConnections())) {
       await this.checkUnsourcedRelatives();
     }
-    this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), this.reportReachedMax);
+    this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
   }
 
   /*

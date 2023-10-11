@@ -29,7 +29,7 @@ Example use:
 ```
 import { BioCheckTemplateManager } from "./BioCheckTemplateManager";
 import { theSourceRules } from "./SourceRules.js";
-import { BioCheckPerson } from "./PersonDate.js";
+import { BioCheckPerson } from "./BioCheckPerson.js";
 import { Biography } from "./Biography.js";
 
   // initialization - just once
@@ -41,7 +41,7 @@ import { Biography } from "./Biography.js";
   let canUseThis = thePerson.canUse(profileObj, openOnly, ignorePre1500, useId);
   let biography = new Biography(theSourceRules);
   biography.parse(bioString, thePerson, searchString);
-  let hasSources = biography.validate();
+  let profileLooksGood = biography.validate();
 
   // now report from biography (use getters) as desired or just the boolean return 
 ```

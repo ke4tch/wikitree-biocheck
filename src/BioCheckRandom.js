@@ -46,7 +46,7 @@ export class BioCheckRandom extends BioChecker {
     // then getting the most recent and getting their id as the max rand
 
     // max captured as of 02 Sep 2023
-    const MAX_RANDOM = 39923156;
+    const MAX_RANDOM = 40291394;
     this.verbose = false;
 
     let minRand = this.getMinRandom();
@@ -60,7 +60,7 @@ export class BioCheckRandom extends BioChecker {
     let maxToCheck = this.getSearchMaxRandom();
     if (maxToCheck > BioChecker.MAX_TO_CHECK) {
       // let's not kill the api server
-      this.testResults.setStateMessage("Check limited to a max of " + BioChecker.MAX_TO_CHECK);
+      this.testResults.setStateMessage("Check random; limited to a max of " + BioChecker.MAX_TO_CHECK);
       maxToCheck = BioChecker.MAX_TO_CHECK;
     }
     if (min === "" || min === 0) {
@@ -105,8 +105,7 @@ export class BioCheckRandom extends BioChecker {
         i++;
       }
       await this.pageThroughPeople(profileIdArray, 0, 0, 0);
-      this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
-                 this.reachedMaxProfiles);
+      this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
 
     } catch (error) {
       console.log("Error " + error);

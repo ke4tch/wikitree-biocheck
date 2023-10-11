@@ -28,7 +28,8 @@ import { BioChecker } from "./BioChecker.js";
  * @extends BioChecker
  */
 export class BioCheckQueryResults extends BioChecker {
-  static WIKI_TREE_PLUS_URI = "https://plus.wikitree.com/function/WTWebProfileSearch/Profiles.json";
+  static WIKI_TREE_PLUS_URI = "https://plus.wikitree.com/function/WTWebProfileSearch/apiAppsBioCheck.json";
+
 
   /**
    * Constructor
@@ -39,6 +40,21 @@ export class BioCheckQueryResults extends BioChecker {
     super(theTestResults, theUserArgs);
   }
 
+/*
+for the future to be able to get Challenge tracker profiles comparable to 
+https://plus.wikitree.com/function/WTTrackerReview/profiles.json?Challenge=SourcerersChallenge20231001&WikiTreeID=Couch-3906&format=json
+https://plus.wikitree.com/function/WTTrackerReview/profiles.htm?Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611
+
+to do this, use a URL in the form
+url = "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611&format=json";
+"https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=Couch-3906&format=json&maxProfiles=200";
+
+but don't do anything until you get with Ales and find out what the arguments should/could be and get him to add
+maxProfiles to the request
+
+you can use comparable/same request except that WTWebProfileSearch returns queryResponse.found and WTTrackerReview
+returns queryResponse.uniqueProfiles
+*/
   /**
    * Check profiles found via a WikiTree+ Query
    */
@@ -64,35 +80,34 @@ export class BioCheckQueryResults extends BioChecker {
       const fetchResponse = await fetch(url);
       if (!fetchResponse.ok) {
         this.testResults.resetStateOnError();
-        console.log("Error from WikiTree+ Query " + fetchResponse.status);
+        console.log("Error from WikiTree+ search " + fetchResponse.status);
       } else {
         const theJson = await fetchResponse.json();
         let queryResponse = theJson.response;
-        if (queryResponse.found > 0) {
+        let found = queryResponse.found;
+        if (found > 0) {
           // Pick out just from start to max but no more than found
-          let endIndex = queryResponse.found;
+          let endIndex = found;
           if (maxToCheck > 0) {
             endIndex = maxToCheck + this.getSearchStart();
-            if (endIndex > queryResponse.found) {
-              endIndex = queryResponse.found;
+            if (endIndex > found) {
+              endIndex = found;
             }
           }
           let i = this.getSearchStart();
           let cnt = endIndex - i;
-          this.testResults.setStateMessage("Examining " + cnt + " of " + queryResponse.found + 
-                                         " profiles found via search");
+          this.testResults.setStateMessage("Examining " + cnt + " of " + found + 
+                                         " profiles found via WikiTree+ search");
           await this.checkPeople(queryResponse.profiles.slice(this.getSearchStart(), endIndex), 0, 0, 0, 0, 1000, 0);
-          this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
-                     this.reachedMaxProfiles);
+          this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount()); 
         } else {
           this.testResults.resetStateOnError();
-          this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount(), 
-                     this.reachedMaxProfiles);
+          this.testResults.reportStatistics(this.thePeopleManager.getDuplicateProfileCount());
         }
       }
     } catch (error) {
       this.testResults.resetStateOnError();
-      this.testResults.setProgressMessage("Error from WikiTree+ query " + this.getQueryArg() + " " + error);
+      this.testResults.setProgressMessage("Error from WikiTree+ search " + this.getQueryArg() + " " + error);
     }
   }
 }

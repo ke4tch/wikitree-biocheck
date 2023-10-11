@@ -71,6 +71,10 @@ export class BioTestResults {
     totalServerRequests: 0,     // logging and diagnostics
     totalPromiseWaits: 0,  // number of times awaiting all promises
     errorMessage: "",     // errorMessage for reporting
+    maxProfilesReached: false, // got max number of profiles
+    apiLimitReached: false,  // hit the max API limit
+    totalValidateTime: 0,
+    totalFetchTime: 0,
   };
 
   constructor() {}
@@ -135,25 +139,25 @@ export class BioTestResults {
   }
 
   /**
-   * Set detailed progress (hover text)
-   * @param {String} number of profiles requested
-   */
-   // TODO this is not working correctly, counts are off with API changes
-  setProgressMessageDetails(requestedProfileCount) {
-    let message =
-      "Wait... Requested " + requestedProfileCount +
-      " profiles. Examined " + this.results.checkedProfileCount +
-      " profiles. Reported " + this.results.reportCount +
-      " profiles";
-    // this.results.checkStatus.progressMessageTitle = message;
-  }
-
-  /**
    * Get count of reported rows
    * @returns {Number} count of reported rows
    */
   getReportCount() {
     return this.results.reportCount;
+  }
+
+ /**
+  * Set detailed progress (hover text)
+  * @param {String} number of profiles requested
+  */
+  // TODO this is not working correctly, counts are off with API changes
+  setProgressMessageDetails(requestedProfileCount) {
+   let message =
+     "Wait... Requested " + requestedProfileCount +
+     " profiles. Examined " + this.results.checkedProfileCount +
+     " profiles. Reported " + this.results.reportCount +
+     " profiles";
+   // this.results.checkStatus.progressMessageTitle = message;
   }
 
   /*
@@ -178,6 +182,21 @@ export class BioTestResults {
    */
   isCancelPending() {
     return this.results.checkStatus.cancelPending;
+  }
+
+  /**
+   * Set total validate time for reporting
+   * @param {Integer} time to report
+   */
+  setTotalValidateTime(t) {
+    this.results.totalValidateTime = t;
+  }
+  /**
+   * Set total fetch time for reporting
+   * @param {Integer} time to report
+   */
+  setTotalFetchTime(t) {
+    this.results.totalFetchTime = t;
   }
 
   /**
@@ -293,6 +312,7 @@ export class BioTestResults {
     if (biography.getTotalBioLines() > 0) {
       rowDataItem.bioLineCnt = biography.getTotalBioLines();
     }
+
     if (biography.getInlineRefCount() > 0) {
       rowDataItem.inlineRefCnt = biography.getInlineRefCount();
     }
@@ -302,6 +322,11 @@ export class BioTestResults {
     if (biography.getPossibleSourcesLineCount() > 0) {
       rowDataItem.sourceLineCnt = biography.getPossibleSourcesLineCount();
     }
+    // TODO the sourceLineCnt is probably not reported but what if
+    // we reported validSources.length
+    // as the Sources Count ?
+    // YES this works great
+// TODO console.log('Sources Count ' + biography.getValidSources().length);
 
     // Get the list of issues to report and put as an item in the result
     let messages = biography.getSectionMessages(); 
@@ -431,9 +456,8 @@ export class BioTestResults {
   /**
    * Report summary statistics
    * @param {Number} duplicateProfileCount ignored profiles for logging metrics
-   * @param maxProfilesReached {Boolean} true if max number of profiles exceeded
    */
-  reportStatistics(duplicateProfileCount, maxProfilesReached) {
+  reportStatistics(duplicateProfileCount) {
     /* by popular request, don't sort 
     this.setProgressMessage("Sorting results....");
     if (this.results.sourcesReport) {
@@ -465,19 +489,24 @@ export class BioTestResults {
       " style issues; " + this.results.unsourcedProfileCnt +
       " marked unsourced; " + this.results.unmarkedProfileCnt +
       " possibly unsourced not marked";
-    if (this.results.checkStatus.cancelPending) {
-      msg = "Canceled. " + msg;
-    }
     this.setProgressMessage(msg);
-    msg = "Check completed. Examined " + this.results.totalProfileCount + " unique profiles.";
+    msg = "Check Completed. ";
+    if (this.results.apiLimitReached) {
+      msg = "Server is overloaded. Results may be incomplete. Try again later. ";
+    }
+    if (this.results.maxProfilesReached) {
+      msg = "Reached maximum number of profiles. Results may be incomplete. ";
+    }
+    if (this.results.checkStatus.cancelPending) {
+      msg = "Canceled. Results may be incomplete. ";
+    }
+    msg += "Examined " + this.results.totalProfileCount + " unique profiles.";
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;
     if (otherCnt > 0) {
       msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles.";
     }
-    if (maxProfilesReached) {
-      msg += " Reached maximum number of profiles. ";
-    }
+
     if (this.errorMessage.length > 0) {
       msg += this.errorMessage;
     }
@@ -517,6 +546,9 @@ export class BioTestResults {
     let timeDiff = endTime.getTime() - this.startTime.getTime();
     timeDiff = timeDiff / 1000;
     console.log("Elapsed time (seconds): " + timeDiff);
+    // TODO uncomment below for more detailed instrumentation
+    // console.log('Total validate time ' + this.results.totalValidateTime / 1000);
+    // console.log('Total fetch time ' + this.results.totalFetchTime / 1000);
   }
 
   /**

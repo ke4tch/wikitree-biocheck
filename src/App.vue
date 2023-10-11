@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.8</h4>
+      <h4>Bio Check Version 1.6.9</h4>
     </div>
 
     <div class="flex-grid">
@@ -603,6 +603,7 @@ export default {
           minRandom: 0,
           maxRandom: 38506714,
           bioSearchString: "",
+          abortController: null, // to cancel
         },
         checkStatus: { 
           //stateMessage: " ",
@@ -879,6 +880,7 @@ export default {
           this.userArgs.userId = this.userContext.userId;
           this.userArgs.userName = this.userContext.userName;
           this.userArgs.loggedIn = this.userContext.loggedIn;
+          this.userArgs.abortController = new AbortController();
           let bioCheck = new BioCheck();
           bioCheck.check(this.userArgs, this.checkStatus, this.checkResults);
         }
@@ -888,6 +890,7 @@ export default {
         this.checkStatus.stateMessage = "Cancel in progress...";
         this.checkStatus.cancelPending = true;
         this.checkStatus.cancelDisabled = true;
+        this.userArgs.abortController.abort();
       },
 
       exportCsv: function () {

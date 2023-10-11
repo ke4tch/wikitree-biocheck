@@ -33,14 +33,9 @@ export class BioChecker {
   testResults = null;
   thePeopleManager = new BioCheckPeopleManager();
 
-  relativesIncrement = 400;
   requestedProfileCount = 0; // total number of profiles examined
   promiseCollection = []; // what we are waiting for
   pendingRequestCount = 0; // how many we are waiting for
-  verbose = false; // control logging
-  reachedMaxProfiles = false;  // true if we hit max profiles from checkPeople
-  reachedLimit = false;      // true if getPeople returned requested limit
-  reportReachedMax = false;    // true to report that we reached max
   ancestorParents = new Set();
   alreadyHaveRelatives = new Set();
   encounteredError = false;
@@ -49,6 +44,7 @@ export class BioChecker {
   userArgs = null;
 
   totalValidateTime = 0; // optionally report total ms for validation
+  totalFetchTime = 0; // optionally report total ms for fetch
 
   useGetPeopleAPI = true;
 
@@ -60,7 +56,7 @@ export class BioChecker {
   //static WIKI_TREE_URI = "https://staging.wikitree.com/api.php";
   // staging.wikitree.com 
   static BASIC_PROFILE_REQUEST_FIELDS =
-    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio,IsMember";
+   "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio,IsMember";
   static REDIRECT_KEY = "&resolveRedirect=1";
   static MAX_API_PROFILES = 100;
   static LARGE_MAX_API_PROFILES = 1000;
@@ -70,6 +66,7 @@ export class BioChecker {
   static GET_PEOPLE_MAX_PAGES = 4;
   static MY_ID = "bioCheck";
   static MY_ID_KEY = "&appId=" + BioChecker.MY_ID + " ";
+  static MAX_UNSOURCED_RELATIVES = 3;
 
   /*
    * The pending request count is used with MAX_PENDING_REQUESTS
@@ -305,7 +302,9 @@ export class BioChecker {
   timeToQuit() {
     if (this.encounteredError ||
        (this.testResults.getReportCount() >= this.getMaxReport()) || 
-       this.testResults.isCancelPending()) {
+       (this.testResults.results.maxProfilesReached) ||
+       (this.testResults.results.apiLimitReached) ||
+       (this.testResults.isCancelPending())) {
       return true;
     } else {
       return false;
@@ -340,12 +339,18 @@ export class BioChecker {
 
     // Use a set of profiles so that profiles are only checked once
     // The people manager knows who has already been checked
-    let stateMessage = "Examining relatives";
+    let stateMessage = "Examining relatives for unsourced profiles";
     this.testResults.setStateMessage(stateMessage);
-    this.testResults.setProgressMessage("Examining relatives");
     this.alreadyHaveRelatives.clear();
     let numUnsourced = 0;
-    if (!this.timeToQuit() && this.getNumRelatives() > 0) {
+    let gotAllPeople = false;
+    let numRelativeChecks = this.getNumRelatives();
+    let chokedDown = false;
+    if (numRelativeChecks > BioChecker.MAX_UNSOURCED_RELATIVES) {
+      chokedDown = true;
+      numRelativeChecks = BioChecker.MAX_UNSOURCED_RELATIVES;
+    }
+    if (!this.timeToQuit() && numRelativeChecks > 0) {
       numUnsourced = this.thePeopleManager.getUnmarkedProfileCount() +
           this.thePeopleManager.getMarkedProfileCount() +
           this.thePeopleManager.getStyleProfileCount();
@@ -353,7 +358,7 @@ export class BioChecker {
         let profileIdSet = new Set();
         this.alreadyHaveRelatives = new Set();
         let checkNum = 0;
-        while (checkNum < this.getNumRelatives() && !this.timeToQuit() && !this.reachedMaxProfiles) {
+        while (checkNum < numRelativeChecks && !this.timeToQuit() && !gotAllPeople) {
           this.thePeopleManager.getUnmarkedProfileIds().forEach((item) => profileIdSet.add(item));
           this.thePeopleManager.getMarkedProfileIds().forEach((item) => profileIdSet.add(item));
           this.thePeopleManager.getStyleProfileIds().forEach((item) => profileIdSet.add(item));
@@ -365,18 +370,19 @@ export class BioChecker {
             }
           }
           if (profilesToCheck.length == 0) {
-            // So here there are no more to be found
-            checkNum = this.getNumRelatives();  // escape the while
+            gotAllPeople = true; // So here there are no more to be found
           } else {
-            let stateMessage = "Examining relatives for " + profilesToCheck.length + " profiles";
+            let maxMsg = numRelativeChecks;
+            if (chokedDown) {
+              maxMsg = 'within a maximum of ' + numRelativeChecks;
+            }
+            let stateMessage = "Examining " + profilesToCheck.length + " profiles within " + maxMsg + 
+                " degrees of profiles with source or style issues";
             this.testResults.setStateMessage(stateMessage);
           }
           // instead of N nuclear here we want 1 nuclear for each iteration of unsourced checking
           await this.pageThroughPeople(profilesToCheck, 0, 0, 1);
           checkNum++;
-        }
-        if (this.reachedLimit || this.reachedMaxProfiles) {
-          this.reportReachedMax = true;
         }
       }
     }
@@ -462,7 +468,7 @@ export class BioChecker {
    * @param {String} bioString the bio
    */
   async checkBio(thePerson, bioString) {
-    //    let startTime = new Date();                    // timing instrumentation
+    let startTime = new Date();                    // timing instrumentation
 
     // get information about person dates
     let isPre1500 = thePerson.isPre1500();
@@ -479,9 +485,10 @@ export class BioChecker {
     biography.parse(bioString, thePerson, this.getBioSearchString());
     biography.validate();
 
-    //    let endTime = new Date();
-    //    let timeDiff = endTime.getTime() - startTime.getTime();
-    //    this.totalValidateTime = this.totalValidateTime + timeDiff;
+    let endTime = new Date();
+    let timeDiff = endTime.getTime() - startTime.getTime();
+    this.totalValidateTime = this.totalValidateTime + timeDiff;
+    this.testResults.setTotalValidateTime(this.totalValidateTime);
 
     // keep track of what you found
     if (biography.hasStyleIssues()) {
@@ -518,21 +525,16 @@ export class BioChecker {
     let start = 0;
     let gotAllPeople = false;
     let counter = 0;
-    let reachedMax = false;
-                //this.reachedLimit = true;
-    while (!gotAllPeople && !reachedMax && !this.timeToQuit()) {
+    while (!gotAllPeople && !this.timeToQuit()) {
       await this.checkPeople(profileIdArray, numAncestors, numDescendents, numRelatives, 0, limit, start);
-      if (this.reportReachedMax) {  // max reached in getPeople response
-        reachedMax = true;
-      } else {
+      if (!this.testResults.results.maxProfilesReached) {  // max reached in getPeople response
         if (this.peopleCount < limit) {
           gotAllPeople = true;
         } else {
           start += limit;
           counter++;
           if (counter > BioChecker.GET_PEOPLE_MAX_PAGES) {
-            reachedMax = true;
-            this.reportReachedMax = true;
+            this.testResults.results.maxProfilesReached = true;
           }
         }
       }
@@ -555,6 +557,7 @@ export class BioChecker {
     if (navigator.userAgent.indexOf('iPad') > 0) {
       isIpad = true;
     }
+    let gotAllPeople = false;
 
     let maxApiProfiles = BioChecker.MAX_API_PROFILES;
     if ((ancestorGen + descendantGen + numRelatives) == 0) {
@@ -563,8 +566,6 @@ export class BioChecker {
         maxApiProfiles = BioChecker.MEDIUM_MAX_API_PROFILES;  // for the impatient
       }
     }
-    this.reachedLimit = false;
-    this.reachedMaxProfiles = false;
     let profileIds = [];
     for (let i = 0; i < profileIdArray.length; i++) {
       profileIds.push(profileIdArray[i]);
@@ -573,14 +574,21 @@ export class BioChecker {
       // We have a list of profiles to examine
       // Do these in chunks to the WikiTree API server
       let startIndex = 0;
+// TODO this is just to test to force API limits on the apps server
+// for testing ONLY
+//maxApiProfiles = 1;
       let endIndex = maxApiProfiles;
-      while ((startIndex <= profileIds.length) && !this.timeToQuit() && !this.reachedMaxProfiles) {
+      while ((startIndex <= profileIds.length) && !this.timeToQuit()) {
         if (endIndex > profileIds.length) {
           endIndex = profileIds.length
         }
         let profileIdGroup = profileIds.slice(startIndex, endIndex);
         let profileId = profileIdGroup.join();
-        let msg = 'Examining ';
+        let msg = "";
+        if (this.testResults.results.totalProfileCount > 0) {
+          msg = "Examined " + this.testResults.results.totalProfileCount + " profiles. ";
+        }
+        msg += "Examining ";
         if (profileIdGroup.length > 1) {
           msg = msg + profileIdGroup.length;
         } else {
@@ -590,7 +598,7 @@ export class BioChecker {
           msg = msg + ' more';
         }
         msg = msg + ' profiles';
-        this.testResults.setStateMessage(msg);
+        this.testResults.setProgressMessage(msg);
         let formData = new FormData();
         formData.append('action', 'getPeople');
         formData.append('keys', profileId);
@@ -619,6 +627,8 @@ export class BioChecker {
         let options = {
           method: "POST",
           credentials: "include",
+          signal: this.userArgs.abortController.signal,
+
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -629,25 +639,32 @@ export class BioChecker {
         this.pendingRequestCount++;
         try {
           this.testResults.countRequest();  // instrumentation
+          let startTime = new Date();                    // timing instrumentation
           const fetchResponse = await fetch(BioChecker.WIKI_TREE_URI, options);
           if (!fetchResponse.ok) {
             this.errorCleanup("Error from getPeople " + fetchResponse.status);
           } else {
             let theJson = await fetchResponse.json();
+            let endTime = new Date();
+            let timeDiff = endTime.getTime() - startTime.getTime();
+            this.totalFetchTime = this.totalFetchTime + timeDiff;
+            this.testResults.setTotalFetchTime(this.totalFetchTime);
             let responseObj = theJson[0];
             let responseStatus = responseObj.status;
-            if ((responseStatus != 0) || (this.reachedMaxProfiles)) {
+            if ((responseStatus != 0)) {
+              if (responseStatus.startsWith('Limit exceeded')) {
+                this.testResults.results.apiLimitReached = true;
+              }
               if (responseStatus.startsWith('Maximum number of profiles')) {
-                this.reachedMaxProfiles = true;
-                this.reportReachedMax = true;
+                this.testResults.results.maxProfilesReached = true;
               }
             } else {
               let personArray = Object.values(responseObj.people);
               this.peopleCount = personArray.length;
               if (personArray.length >= limit) {
-                this.reachedLimit = true;
+                gotAllPeople = true;  
               }
-              
+//console.log('peopleCount ' + this.peopleCount);              
               // for some reason with logging on this avoids TypeError:Load Failed on the iPad
               // but trying a 10 ms wait did not avoid the error
               if (isIpad) { 
@@ -656,7 +673,7 @@ export class BioChecker {
 
               let personNum = 0;
               // Don't count private profiles (id < 0)
-              while ((personNum < personArray.length) && !this.timeToQuit() && !this.reachedMaxProfiles) {
+              while ((personNum < personArray.length) && !this.timeToQuit()) {
                 let profileObj = personArray[personNum];
                 if (profileObj.Id < 0) {
                   this.testResults.addUncheckedDueToPrivacy();
@@ -666,7 +683,7 @@ export class BioChecker {
                   //if ((personArray.length == 1) && (numRelatives > 0) && 
                   if ((personArray.length == 1) &&
                     (this.thePeopleManager.hasPerson(profileObj.Id))) {
-                    this.reachedMaxProfiles = true;
+                    gotAllPeople = true;
                   } else {
                     // check for duplicate nuclear you already have
                     if (!this.alreadyHaveRelatives.has(profileObj.Id)) {
@@ -710,7 +727,9 @@ export class BioChecker {
             }
           }
         } catch (error) {
-          this.errorCleanup("Error from getPeople " + error);
+          if (error.name != 'AbortError') {
+            this.errorCleanup("Error from getPeople " + error);
+          }
         }
         startIndex = startIndex + maxApiProfiles;
         endIndex = endIndex + maxApiProfiles;
