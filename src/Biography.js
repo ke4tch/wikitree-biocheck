@@ -1530,6 +1530,7 @@ export class Biography {
                             // TODO add more logic to eliminate sources as valid by combining ones
                             // TODO is the manager's name a valid source (this is hard)
                             // TODO add logic to check for just the name followed by grave
+                            // TODO add logic to strip "information from" from the start
                             isValid = true;
                           }
                         }

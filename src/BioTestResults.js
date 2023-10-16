@@ -300,6 +300,7 @@ export class BioTestResults {
       styleDetails: "",
       searchPhrase: "",
       bioLineCnt: "",
+      numSources: "",
       inlineRefCnt: "",
       sourceLineCnt: "",
     };
@@ -322,11 +323,9 @@ export class BioTestResults {
     if (biography.getPossibleSourcesLineCount() > 0) {
       rowDataItem.sourceLineCnt = biography.getPossibleSourcesLineCount();
     }
-    // TODO the sourceLineCnt is probably not reported but what if
-    // we reported validSources.length
-    // as the Sources Count ?
-    // YES this works great
-// TODO console.log('Sources Count ' + biography.getValidSources().length);
+    if (biography.getValidSources().length > 0) {
+      rowDataItem.numSources = biography.getValidSources().length;
+    }
 
     // Get the list of issues to report and put as an item in the result
     let messages = biography.getSectionMessages(); 
@@ -547,7 +546,7 @@ export class BioTestResults {
     timeDiff = timeDiff / 1000;
     console.log("Elapsed time (seconds): " + timeDiff);
     // TODO uncomment below for more detailed instrumentation
-    // console.log('Total validate time ' + this.results.totalValidateTime / 1000);
+    console.log('Total validate time ' + this.results.totalValidateTime / 1000);
     // console.log('Total fetch time ' + this.results.totalFetchTime / 1000);
   }
 

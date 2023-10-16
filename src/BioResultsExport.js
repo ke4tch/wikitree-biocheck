@@ -50,12 +50,14 @@ export class BioResultsExport {
       for (let key in resultRow) {
         //let val = '"' + resultRow[key] + '"';
         let val = resultRow[key].toString();
-        val = val.replace(/#/g, "");
-        val = val.replace(/\u005B/g, " ");  // [
-        val = val.replace(/\u005D/g, " ");  // ]
-        val = val.replace(/\u201C/g, '');
-        val = val.replace(/\u201D/g, '');
-        val = val.replace(/\u0022/g, "");  // "
+        if (key != "wikiTreeHyperLink") {
+          val = val.replace(/#/g, "");
+          val = val.replace(/\u005B/g, " ");  // [
+          val = val.replace(/\u005D/g, " ");  // ]
+          val = val.replace(/\u201C/g, '');
+          val = val.replace(/\u201D/g, '');
+          val = val.replace(/\u0022/g, "");  // "
+        }
         val = '"' + val + '"';
         rda.push(val);
       }
@@ -97,6 +99,9 @@ export class BioResultsExport {
           val = val.replace(/#/g, "");
         }
         if (val.search(/("|,|\n)/g) >= 0) {
+          val = '"' + val + '"';
+        }
+        if (key == 'personName')  {
           val = '"' + val + '"';
         }
         rda.push(val);
@@ -192,6 +197,7 @@ export class BioResultsExport {
       styleDetails: "Style Issues",
       searchPhrase: "Search?",
       bioLineCnt: "Bio Lines",
+      numSources: "Number Valid Sources",
       inlineRefCnt: "Inline ref",
       sourceLineCnt: "Source Line Count",
       wikiTreeLink: "URL",

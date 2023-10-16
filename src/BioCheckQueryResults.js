@@ -77,6 +77,12 @@ returns queryResponse.uniqueProfiles
         maxToCheck = BioChecker.MAX_TO_CHECK;
       }
       ***/
+      let testChallengeResults = false;
+      if (testChallengeResults) {
+        url = "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611&format=json";
+        url =
+        "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourceAThon2023&WikiTreeID=Brunson-1754&format=json";
+      }
       const fetchResponse = await fetch(url);
       if (!fetchResponse.ok) {
         this.testResults.resetStateOnError();
@@ -85,6 +91,9 @@ returns queryResponse.uniqueProfiles
         const theJson = await fetchResponse.json();
         let queryResponse = theJson.response;
         let found = queryResponse.found;
+        if (testChallengeResults) {
+          found = queryResponse.uniqueProfiles
+        }
         if (found > 0) {
           // Pick out just from start to max but no more than found
           let endIndex = found;

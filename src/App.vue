@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.9</h4>
+      <h4>Bio Check Version 1.6.10</h4>
     </div>
 
     <div class="flex-grid">
@@ -388,18 +388,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </div>
     </div>
 
-<!-- TODO
-Greg suggested bold the stateMessage when it is check completed and no errors
-
-I've noticed that the progressMessage is not necessarily the correct
-message, especially for paging, see what you can do.
--->
     <div class="feedback">
-    <!--
-      <div class="feedback-state">
-        {{ checkStatus.stateMessage }} 
-      </div>
-    -->
       <template v-if="isCheckCompleted">
         <div class="feedback-complete">
             <span v-html="checkStatus.stateMessage" style="font-weight: bolder"></span>
@@ -488,6 +477,7 @@ message, especially for paging, see what you can do.
            <th class = "colRequiredSections" id = "requiredSections" scope="col" @click="sortBy('requiredSections')" >Required Sections</th>
            <th class = "colStyleDetails" id = "styleDetails" scope="col" @click="sortBy('styleDetails')" >Style Issues</th>
            <th class = "colSearchPhrase" id = "searchPhrase" scope="col" @click="sortBy('searchPhrase')" >Search?</th>
+           <th class = "colNumSources" id = "numSources" scope="col" @click="sortBy('numSources')" >Number Valid Sources</th>
            <th class = "colInlineRefCnt" id = "inlineRefCnt" scope="col" @click="sortBy('inlineRefCnt')" >Inline ref Count</th>
         </tr>
         </thead>
@@ -502,6 +492,7 @@ message, especially for paging, see what you can do.
             <td class = "colRequiredSections">{{ item.requiredSections }} </td>
             <td class = "colStyleDetails">{{ item.styleDetails}} </td> 
             <td class = "colSearchPhrase">{{ item.searchPhrase}} </td> 
+            <td class = "colNumSources">{{ item.numSources}} </td> 
             <td class = "colInlineRefCnt">{{ item.inlineRefCnt }} </td>
           </tr>
         </tbody>
@@ -606,8 +597,6 @@ export default {
           abortController: null, // to cancel
         },
         checkStatus: { 
-          //stateMessage: " ",
-          //progressMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, then select Check Profiles",
           stateMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...",
           progressMessage: "select Check Profiles",
           progressMessageTitle: "",
@@ -1159,15 +1148,7 @@ td {
 }
 .colWikiTreeId { width: 9% }
 .colPersonName { width: 15% }
-.colUnsourcedStatus { width: 6% }
-.colIsEmpty { width: 5% }
-.colMisplacedLineCnt { width: 7% }
-.colMissingEnd { width: 6% }
-.colBioHeading { width: 7% }
-.colSourcesHeading { width: 6% }
-.colReferencesTag { width: 8% }
-.colAcknowledgements { width: 5% }
-.colInlineRefCnt { width: 5% }
+.colUnsourcedStatus { width: 4% }
 
 .colSourceCount { width: 4% }
 .colSourceLine { width: 51% }
@@ -1180,6 +1161,8 @@ td {
 .colRequiredSections { width : 14% }
 .colStyleDetails { width : 26% }
 .colSearchPhrase { width : 4% }
+.colNumSources { width : 4% }
+.colInlineRefCnt { width: 3% }
 
 td {
   text-align: center;
