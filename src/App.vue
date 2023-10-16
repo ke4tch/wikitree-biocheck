@@ -1148,7 +1148,7 @@ td {
 }
 .colWikiTreeId { width: 9% }
 .colPersonName { width: 15% }
-.colUnsourcedStatus { width: 4% }
+.colUnsourcedStatus { width: 5% }
 
 .colSourceCount { width: 4% }
 .colSourceLine { width: 51% }
@@ -1159,10 +1159,10 @@ td {
 .colDeathDate { width : 7% }
 
 .colRequiredSections { width : 14% }
-.colStyleDetails { width : 26% }
+.colStyleDetails { width : 18% }
 .colSearchPhrase { width : 4% }
-.colNumSources { width : 4% }
-.colInlineRefCnt { width: 3% }
+.colNumSources { width : 5% }
+.colInlineRefCnt { width: 5% }
 
 td {
   text-align: center;
