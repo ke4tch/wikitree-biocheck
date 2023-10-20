@@ -29,7 +29,7 @@ import { BioChecker } from "./BioChecker.js";
  */
 export class BioCheckQueryResults extends BioChecker {
   static WIKI_TREE_PLUS_URI = "https://plus.wikitree.com/function/WTWebProfileSearch/apiAppsBioCheck.json";
-
+  static WIKI_TREE_PLUS_TRACKER_URI = "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json";
 
   /**
    * Constructor
@@ -40,30 +40,14 @@ export class BioCheckQueryResults extends BioChecker {
     super(theTestResults, theUserArgs);
   }
 
-/*
-for the future to be able to get Challenge tracker profiles comparable to 
-https://plus.wikitree.com/function/WTTrackerReview/profiles.json?Challenge=SourcerersChallenge20231001&WikiTreeID=Couch-3906&format=json
-https://plus.wikitree.com/function/WTTrackerReview/profiles.htm?Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611
-
-to do this, use a URL in the form
-url = "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611&format=json";
-"https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=Couch-3906&format=json&maxProfiles=200";
-
-but don't do anything until you get with Ales and find out what the arguments should/could be and get him to add
-maxProfiles to the request
-
-you can use comparable/same request except that WTWebProfileSearch returns queryResponse.found and WTTrackerReview
-returns queryResponse.uniqueProfiles
-*/
   /**
    * Check profiles found via a WikiTree+ Query
    */
   async check() {
+
     try {
       let url = BioCheckQueryResults.WIKI_TREE_PLUS_URI +
-        "?appId=bioCheck" +
-        //"?Query=" +
-        "&Query=" +
+        "?Query=" +
         this.getQueryArg() +
         "&format=JSON&maxProfiles=" +
         this.getMaxQuery();
@@ -77,11 +61,15 @@ returns queryResponse.uniqueProfiles
         maxToCheck = BioChecker.MAX_TO_CHECK;
       }
       ***/
-      let testChallengeResults = false;
-      if (testChallengeResults) {
-        url = "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourcerersChallenge20231001&WikiTreeID=McGee-1611&format=json";
-        url =
-        "https://plus.wikitree.com/function/WTTrackerReview/apiAppsBioCheck.json?appId=bioCheck&Challenge=SourceAThon2023&WikiTreeID=Brunson-1754&format=json";
+      let checkChallengeResults = false;
+      if (this.userArgs.selectedCheckType === "checkChallenge") {
+        checkChallengeResults = true;
+      }
+      if (checkChallengeResults) {
+        url = BioCheckQueryResults.WIKI_TREE_PLUS_TRACKER_URI +
+          "?Challenge=" + this.userArgs.challengeName + this.userArgs.challengeDate +
+          "&WikiTreeID=" + this.userArgs.inputWikiTreeId +
+          "&format=json";
       }
       const fetchResponse = await fetch(url);
       if (!fetchResponse.ok) {
@@ -91,7 +79,7 @@ returns queryResponse.uniqueProfiles
         const theJson = await fetchResponse.json();
         let queryResponse = theJson.response;
         let found = queryResponse.found;
-        if (testChallengeResults) {
+        if (checkChallengeResults) {
           found = queryResponse.uniqueProfiles
         }
         if (found > 0) {

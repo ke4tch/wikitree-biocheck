@@ -49,7 +49,8 @@ export class BioCheck {
     let testResults = new BioTestResults();
     testResults.setArgs(checkStatus, checkResults);
 
-    if (userArgs.selectedCheckType === "checkByQuery") {
+    //if (userArgs.selectedCheckType === "checkByQuery") {
+    if ((userArgs.selectedCheckType === "checkByQuery") || (userArgs.selectedCheckType === "checkChallenge")) {
       let checker = new BioCheckQueryResults(testResults, userArgs);
       checker.check();
     } else {

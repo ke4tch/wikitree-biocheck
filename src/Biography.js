@@ -97,6 +97,7 @@ export class Biography {
       bioMissingResearchNoteBox: false,
       bioMightHaveEmail: false,
       bioHasSearchString: false,
+      bioHasBrWithoutEnd: false,
   };
   #sources = {
       sourcesFound: false,
@@ -823,7 +824,7 @@ export class Biography {
     if (pos < 0) {
       outStr = inStr; // no br
     }
-    while (pos < len && pos >= 0) {
+    while (pos < len && pos >= 0 && endPos >= 0) {
       if (pos > 0) {
         outStr = outStr + inStr.substring(endPos, pos);
       }
@@ -836,6 +837,9 @@ export class Biography {
             outStr += inStr.substring(endPos + 1);
           }
         }
+      } else {
+        // <BR without ending bracket
+        this.#style.bioHasBrWithoutEnd = true;
       }
     }
     return outStr;
@@ -1098,6 +1102,7 @@ export class Biography {
     if (this.#stats.bioIsMarkedUnsourced) {
       if (this.#sources.sourcesFound) {
         this.#messages.sectionMessages.push('Profile is marked unsourced but may have sources');
+        this.#style.bioHasStyleIssues = true;
       } else {
         this.#messages.sectionMessages.push('Profile is marked unsourced');
       }
@@ -1109,6 +1114,11 @@ export class Biography {
     if (this.#style.bioCategoryNotAtStart) {
       this.#style.bioHasStyleIssues = true;
     }
+    if (this.#style.bioHasBrWithoutEnd) {
+      this.#style.bioHasStyleIssues = true;
+      this.#messages.styleMessages.push('Biography has <BR without ending > ');
+    }
+
     if (this.#biographyIndex < 0) {
       this.#style.bioHasStyleIssues = true;
       this.#style.bioIsMissingBiographyHeading = true;

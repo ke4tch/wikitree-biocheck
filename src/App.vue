@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.6.10</h4>
+      <h4>Bio Check Version 1.7.0</h4>
     </div>
 
     <div class="flex-grid">
@@ -55,6 +55,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
               <option value="checkByQuery" >WikiTree+ search results</option>
               <option value="checkWatchlist" :disabled="isWatchlistDisabled">Check watchlist</option>
               <option value="checkRandom" >Check random profiles</option>
+              <option value="checkChallenge">Check challenge contributions</option>
             </select>
           </div>
         </div>
@@ -269,6 +270,75 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </div>
           </div>
         </template>
+        <template v-if="isCheckChallenge">
+        <div class="user-input">
+          <div class="col">
+            <span v-bind:title="challengeNameTip" >
+              Challenge:
+            </span>
+          </div>
+          <div class="col">
+            <select v-model="userArgs.challengeName">
+              <option value="ConnectorsChallenge">ConnectorsChallenge</option>
+              <option value="IntegratorsChallenge">IntegratorsChallenge</option>
+              <option value="SaturdaySourcingSprint">SaturdaySourcingSprint	</option>
+              <option value="SourcerersChallenge">SourcerersChallenge	</option>
+              <option value="SourceaThon">SourceAThon</option>
+              <option value="USBHConnectingChallenge">USBHConnectingChallenge	</option>
+              <option value="WikiGamesSourcing">WikiGamesSourcing	</option>
+            </select>
+          </div>
+        </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="challengeDateTip">
+                <label for="userArgs.challengeDate" >Date</label> 
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model.trim="userArgs.challengeDate" 
+                 id="userArgs.challengeDate" name="challengeDate" >
+            </div>
+          </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="inputWikiTreeIdTip">
+                <label for="userArgs.inputWikiTreeId" >Contributor Profile</label>
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model.trim="userArgs.inputWikiTreeId" 
+               id="userArgs.inputWikiTreeId" :disabled="!isCheckChallenge"
+               placeholder="Enter Profile Id to search">
+            </div>
+          </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="searchStartTip">
+                <label for="userArgs.searchStart" >Check starting at</label>
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model.number="userArgs.searchStart" type="number"
+               :disabled="isCheckByProfile"
+               id="userArgs.searchStart" name="userArgs.searchStart" 
+               min="0" value="0" >
+            </div>
+          </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="searchMaxTip">
+                <label for="userArgs.searchMax" >Max to check</label> 
+              </span>
+            </div>
+            <div class="col">
+              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
+               min="0" max="5000" value="1000" >
+            </div>
+          </div>
+        </template>
+
+        <!-- find by any method uses this input -->
         <div class="user-input">
           <div class="col">
             <span v-bind:title="maxReportTip">
@@ -544,7 +614,7 @@ export default {
         maxRandomTip: "Enter the highest random number profile to check",
         minRandomTip: "Enter the lowest random number profile to check",
         searchStartTip: "Enter the offset to start checking returned profiles.  Start at 0. See the Help for more details",
-        searchMaxTip: "Enter maximum number of profiles to check from the WikiTree+ search results or your watchlist. The check will complete when this number is reached",
+        searchMaxTip: "Enter maximum number of profiles to check. The check will complete when this number is reached",
 
         openOnlyTip: "Select to check only open profiles. When not selected, any profile with a public biography will be checked",
         ignorePre1500Tip: "Select to check only post-1500 profiles or those with no dates",
@@ -557,7 +627,8 @@ export default {
         reportNonManagedTip: "Select to report only profiles on your watchlist where you are not the manager",
         reportStyleDetailsTip: "Select to report all profiles with style issues. When not selected, only profiles with source or section headings issues are reported",
         bioSearchStringTip: "Enter phrase to search for in biography",
-
+        challengeNameTip: "Select challenge to check from the dropdown menu",
+        challengeDateTip: "Enter challenge date as YYYY or YYYYMMDD. See the Help for more details",
 
         checkStart: "user:",
 
@@ -595,6 +666,8 @@ export default {
           maxRandom: 38506714,
           bioSearchString: "",
           abortController: null, // to cancel
+          challengeName: "SaturdaySourcingSprint",
+          challengeDate: "",
         },
         checkStatus: { 
           stateMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...",
@@ -681,6 +754,13 @@ export default {
         return false;
       }
     },
+    isCheckChallenge: function() {
+      if (this.userArgs.selectedCheckType === "checkChallenge") {
+        return true;
+      } else {
+        return false;
+      }
+    },
 
     isSourcesReport: function() {
       if (this.userArgs.selectedReportType === "sourcesReport") {
@@ -711,6 +791,7 @@ export default {
     disableQueryArg: function() {
       if ((this.userArgs.selectedCheckType === "checkByProfile") ||
           (this.userArgs.selectedCheckType === "checkWatchlist") ||
+          (this.userArgs.selectedCheckType === "checkChallenge") ||
           (this.userArgs.selectedCheckType === "checkRandom")) {
         return true;
       } else {
@@ -748,7 +829,6 @@ export default {
     })
   },
 
-    //methods: {
   methods: {
 
       sortBy: function(sortKey) {
@@ -824,6 +904,11 @@ export default {
                 }
                 this.setTools(true, this.userContext.userName);
               break;
+            case "checkChallenge":
+              this.setTools(false, "");
+              this.userArgs.reportNonManaged = false;
+              isValidUserInput = this.checkChallengeDate();
+              break;
           }
         }
         if (isValidUserInput) {
@@ -854,6 +939,7 @@ export default {
           // we could save all userArgs but the query string might be a security hole
           window.localStorage.setItem('biocheck_action', this.userArgs.selectedCheckType);
           window.localStorage.setItem('biocheck_report', this.userArgs.selectedReportType);
+          window.localStorage.setItem('biocheck_challenge', this.userArgs.challengeName);
 
           // Clear previous results
           this.checkResults.resultsRowData.splice(0, this.checkResults.resultsRowData.length);
@@ -874,6 +960,99 @@ export default {
           bioCheck.check(this.userArgs, this.checkStatus, this.checkResults);
         }
       },
+
+    checkChallengeDate() {
+      let validChallengeDate = true;
+      if (!/^\d+$/.test(this.userArgs.challengeDate)) {
+        this.checkStatus.progressMessage = "Enter challenge date as numbers";
+        validChallengeDate = false;
+      } else {
+        let currentDate = new Date();
+        let firstDate = new Date();
+        firstDate.setMonth(currentDate.getMonth() - 2);  
+        firstDate.setHours(0, 0, 0, 0);     // just compare year, month, date
+        let firstDay = "01";
+        let defaultFirstDay = false;
+
+        switch (this.userArgs.challengeName) {
+          case "ConnectorsChallenge":
+          case "IntegratorsChallenge":
+          case "SourcerersChallenge":
+          case "USBHConnectingChallenge":
+            if (this.userArgs.challengeDate.length < 8) {
+              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year, 2 digit month, 2 digit day";
+              validChallengeDate = false;
+            } else {
+              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
+              let challengeMonth = this.userArgs.challengeDate.substring(4,6);
+              this.userArgs.challengeDate = challengeYear + challengeMonth + "01";
+              let challengeDay = this.userArgs.challengeDate.substring(6);
+              firstDate.setDate(1);
+              defaultFirstDay = true;
+            }
+            // fall through
+          case "SaturdaySourcingSprint":
+            if (this.userArgs.challengeDate.length < 8) {
+              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year, 2 digit month, 2 digit day";
+              validChallengeDate = false;
+            } else {
+              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
+              let challengeMonth = this.userArgs.challengeDate.substring(4,6);
+              let challengeDay = this.userArgs.challengeDate.substring(6);
+
+              let chDate = new Date(challengeYear, challengeMonth - 1, challengeDay);
+              if (chDate.getTime() < firstDate.getTime()) {
+                let firstDateMsg = firstDate.getFullYear();
+                let firstMonth = firstDate.getMonth() + 1;
+                if (firstMonth < 10) {
+                  firstDateMsg += "0";
+                }
+                firstDateMsg += firstMonth;
+                if (!defaultFirstDay) {
+                  firstDay = firstDate.getDate();
+                }
+                firstDateMsg += firstDay;
+                this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+                this.checkStatus.progressMessage = "Challenge date cannot be before " + firstDateMsg;
+                validChallengeDate = false;
+              } else {
+                if (chDate.getTime() > currentDate.getTime()) {
+                  this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+                  this.checkStatus.progressMessage = "Challenge date cannot be in the future";
+                  validChallengeDate = false;
+                }
+              }
+            }
+            break;
+
+          case "SourceaThon":
+          case "WikiGamesSourcing":
+            if (this.userArgs.challengeDate.length < 4) {
+              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year";
+              validChallengeDate = false;
+            } else {
+              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
+              this.userArgs.challengeDate = challengeYear;
+              if (challengeYear > currentDate.getFullYear()) {
+                this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+                this.checkStatus.progressMessage = "Challenge date cannot be in the future";
+                validChallengeDate = false;
+              } else {
+                if (challengeYear < firstDate.getFullYear()) {
+                  this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+                  this.checkStatus.progressMessage = "Challenge date cannot be before " + firstDate.getFullYear();
+                  validChallengeDate = false;
+                }
+              }
+            }
+            break;
+        }
+      }
+      return validChallengeDate;
+    },
 
       cancelCheck: function () {
         this.checkStatus.stateMessage = "Cancel in progress...";
@@ -945,6 +1124,9 @@ export default {
      *   numAncestorGen=number of ancestor generations
      *   numDescendantGen=number of descendant generations
      *   checkStart=user or auto
+     *   challengeName=challenge name
+     *   challengeDate=challenge date
+     *   WikiTreeID=profile name 
      * when action=checkWatchlist&checkStart=auto max search, check, and report are set to 1000
     */
       getUrlParams: function () {
@@ -965,6 +1147,10 @@ export default {
               } else {
                 if (checkType === "checkRandom") {
                   this.userArgs.selectedCheckType = "checkRandom";
+                } else {
+                  if (checkType === "checkChallenge") {
+                    this.userArgs.selectedCheckType = "checkChallenge";
+                  }
                 }
               }
             }
@@ -979,6 +1165,10 @@ export default {
         let savedReport = window.localStorage.getItem('biocheck_report');
         if (savedReport !== null) {
           this.userArgs.selectedReportType = savedReport;
+        }
+        let savedChallenge = window.localStorage.getItem('biocheck_challenge');
+        if (savedChallenge !== null) {
+          this.userArgs.challengeName = savedChallenge;
         }
         if (args.has("query")) {
           this.userArgs.queryArg = args.get("query");
@@ -996,6 +1186,16 @@ export default {
         if (args.has("numDescendantGen")) {
           this.userArgs.numDescendantGen = args.get("numDescendantGen");
         }
+        if (args.has("challengeName")) {
+          this.userArgs.challengeName = args.get("challengeName");
+        }
+        if (args.has("challengeDate")) {
+          this.userArgs.challengeDate = args.get("challengeDate");
+        }
+        if (args.has("WikiTreeID")) {
+          this.userArgs.inputWikiTreeId = args.get("WikiTreeID");
+        }
+
         // Do not want to start automatically in case someone is
         // trying to overload 
         // or maybe we just want smalled numbers?
