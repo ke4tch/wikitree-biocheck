@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.0</h4>
+      <h4>Bio Check Version 1.7.1</h4>
     </div>
 
     <div class="flex-grid">
@@ -271,35 +271,33 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
         </template>
         <template v-if="isCheckChallenge">
-        <div class="user-input">
-          <div class="col">
-            <span v-bind:title="challengeNameTip" >
-              Challenge:
-            </span>
-          </div>
-          <div class="col">
-            <select v-model="userArgs.challengeName">
-              <option value="ConnectorsChallenge">ConnectorsChallenge</option>
-              <option value="IntegratorsChallenge">IntegratorsChallenge</option>
-              <option value="SaturdaySourcingSprint">SaturdaySourcingSprint	</option>
-              <option value="SourcerersChallenge">SourcerersChallenge	</option>
-              <option value="SourceaThon">SourceAThon</option>
-              <option value="USBHConnectingChallenge">USBHConnectingChallenge	</option>
-              <option value="WikiGamesSourcing">WikiGamesSourcing	</option>
-            </select>
-          </div>
-        </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="challengeDateTip">
-                <label for="userArgs.challengeDate" >Date</label> 
+              <span v-bind:title="challengeNameTip" >
+                Challenge:
               </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.trim="userArgs.challengeDate" 
-                 id="userArgs.challengeDate" name="challengeDate" >
+                <select v-model="selectedChallengeName">
+                <option v-for="[key, value] in activeChallenges" key="key">
+                  {{ key }}
+                </option>
+              </select>
             </div>
           </div>
+          <div class="user-input">
+            <div class="col">
+              <span v-bind:title="challengeDateTip" >
+                Challenge Date:
+              </span>
+            </div>
+            <div class="col">
+              <select :disabled="challengeDates.length == 0" v-model="selectedChallengeDate">
+                <option v-for="date in challengeDates">{{date}}</option>
+              </select>
+            </div>
+          </div>
+
           <div class="user-input">
             <div class="col">
               <span v-bind:title="inputWikiTreeIdTip">
@@ -596,6 +594,7 @@ import { nextTick } from 'vue'
 import { BioCheck } from "./BioCheck.js"
 import { BioResultsExport } from "./BioResultsExport.js"
 import { BioCheckTemplateManager } from "./BioCheckTemplateManager.js";
+import { BioCheckCalendarManager } from "./BioCheckCalendarManager.js";
 
 export default {
   name: 'App',
@@ -666,7 +665,7 @@ export default {
           maxRandom: 38506714,
           bioSearchString: "",
           abortController: null, // to cancel
-          challengeName: "SaturdaySourcingSprint",
+          challengeName: "",
           challengeDate: "",
         },
         checkStatus: { 
@@ -693,7 +692,25 @@ export default {
         loginMessage: "",
         toolsLabel: "Tools not available",
         toolsUserId: "",
-      
+
+        activeChallenges: [],   // map of active challenges
+        challengeManager: null,
+        selectedChallengeName: "",  // display name
+        selectedChallengeDate: "",  // display date
+        challengeDates: [],
+
+      }
+    },
+    watch: {
+      selectedChallengeName: function() {
+        // Clear previously selected values
+        // and set default to last selected or most recent if none previously selected
+        this.challengeDates = [];
+        this.challengeDates = this.activeChallenges.get(this.selectedChallengeName);
+        this.selectedChallengeDate = this.challengeManager.getChallengeUsedDate(this.selectedChallengeName);
+      },
+      selectedChallengeDate: function() {
+        this.challengeManager.setChallengeUsedDate(this.selectedChallengeName, this.selectedChallengeDate);
       }
     },
 
@@ -803,7 +820,7 @@ export default {
   created() {
     // Override default values with those from URL, if any
     let userAgent = navigator.userAgent;
-    this.getUrlParams();
+
     if (this.userContext.loggedIn) {
       this.loginMessage = "You are currently logged in as " + this.userContext.userName;
       if (this.userArgs.inputWikiTreeId.length == 0) {
@@ -818,6 +835,17 @@ export default {
     // This is to just load from WT+ once per browser session
     let bioCheckTemplateManager = new BioCheckTemplateManager();
     await bioCheckTemplateManager.load();
+
+    let bioCheckCalendarManager = new BioCheckCalendarManager();
+    this.challengeManager = bioCheckCalendarManager;
+    await bioCheckCalendarManager.load();
+    this.activeChallenges = bioCheckCalendarManager.getActiveChallenges();
+
+    // initialize value here to force a watched change
+    this.selectedChallengeName = "Sourcerers Challenge";
+    this.selectedChallengeDate = this.challengeManager.getChallengeUsedDate(this.selectedChallengeName);
+
+    this.getUrlParams();
 
     // Code that will run only after the entire view has been rendered
     nextTick(() => {
@@ -907,7 +935,14 @@ export default {
             case "checkChallenge":
               this.setTools(false, "");
               this.userArgs.reportNonManaged = false;
-              isValidUserInput = this.checkChallengeDate();
+              this.userArgs.challengeName = this.challengeManager.getChallengeRequestName(this.selectedChallengeName);
+              this.userArgs.challengeDate = this.challengeManager.getChallengeRequestDate(this.selectedChallengeDate);
+              if (this.userArgs.challengeDate == "") {
+                this.checkStatus.progressMessage = "Select a date";
+                isValidUserInput = false;
+              } else {
+                this.challengeManager.setChallengeUsedDate(this.selectedChallengeName, this.selectedChallengeDate);
+              }
               break;
           }
         }
@@ -939,7 +974,7 @@ export default {
           // we could save all userArgs but the query string might be a security hole
           window.localStorage.setItem('biocheck_action', this.userArgs.selectedCheckType);
           window.localStorage.setItem('biocheck_report', this.userArgs.selectedReportType);
-          window.localStorage.setItem('biocheck_challenge', this.userArgs.challengeName);
+          window.localStorage.setItem('biocheck_challenge_name', this.userArgs.challengeName);
 
           // Clear previous results
           this.checkResults.resultsRowData.splice(0, this.checkResults.resultsRowData.length);
@@ -960,99 +995,6 @@ export default {
           bioCheck.check(this.userArgs, this.checkStatus, this.checkResults);
         }
       },
-
-    checkChallengeDate() {
-      let validChallengeDate = true;
-      if (!/^\d+$/.test(this.userArgs.challengeDate)) {
-        this.checkStatus.progressMessage = "Enter challenge date as numbers";
-        validChallengeDate = false;
-      } else {
-        let currentDate = new Date();
-        let firstDate = new Date();
-        firstDate.setMonth(currentDate.getMonth() - 2);  
-        firstDate.setHours(0, 0, 0, 0);     // just compare year, month, date
-        let firstDay = "01";
-        let defaultFirstDay = false;
-
-        switch (this.userArgs.challengeName) {
-          case "ConnectorsChallenge":
-          case "IntegratorsChallenge":
-          case "SourcerersChallenge":
-          case "USBHConnectingChallenge":
-            if (this.userArgs.challengeDate.length < 8) {
-              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year, 2 digit month, 2 digit day";
-              validChallengeDate = false;
-            } else {
-              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
-              let challengeMonth = this.userArgs.challengeDate.substring(4,6);
-              this.userArgs.challengeDate = challengeYear + challengeMonth + "01";
-              let challengeDay = this.userArgs.challengeDate.substring(6);
-              firstDate.setDate(1);
-              defaultFirstDay = true;
-            }
-            // fall through
-          case "SaturdaySourcingSprint":
-            if (this.userArgs.challengeDate.length < 8) {
-              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year, 2 digit month, 2 digit day";
-              validChallengeDate = false;
-            } else {
-              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
-              let challengeMonth = this.userArgs.challengeDate.substring(4,6);
-              let challengeDay = this.userArgs.challengeDate.substring(6);
-
-              let chDate = new Date(challengeYear, challengeMonth - 1, challengeDay);
-              if (chDate.getTime() < firstDate.getTime()) {
-                let firstDateMsg = firstDate.getFullYear();
-                let firstMonth = firstDate.getMonth() + 1;
-                if (firstMonth < 10) {
-                  firstDateMsg += "0";
-                }
-                firstDateMsg += firstMonth;
-                if (!defaultFirstDay) {
-                  firstDay = firstDate.getDate();
-                }
-                firstDateMsg += firstDay;
-                this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-                this.checkStatus.progressMessage = "Challenge date cannot be before " + firstDateMsg;
-                validChallengeDate = false;
-              } else {
-                if (chDate.getTime() > currentDate.getTime()) {
-                  this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-                  this.checkStatus.progressMessage = "Challenge date cannot be in the future";
-                  validChallengeDate = false;
-                }
-              }
-            }
-            break;
-
-          case "SourceaThon":
-          case "WikiGamesSourcing":
-            if (this.userArgs.challengeDate.length < 4) {
-              this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-              this.checkStatus.progressMessage = "Challenge date must contain 4 digit year";
-              validChallengeDate = false;
-            } else {
-              let challengeYear = this.userArgs.challengeDate.substring(0, 4);
-              this.userArgs.challengeDate = challengeYear;
-              if (challengeYear > currentDate.getFullYear()) {
-                this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-                this.checkStatus.progressMessage = "Challenge date cannot be in the future";
-                validChallengeDate = false;
-              } else {
-                if (challengeYear < firstDate.getFullYear()) {
-                  this.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
-                  this.checkStatus.progressMessage = "Challenge date cannot be before " + firstDate.getFullYear();
-                  validChallengeDate = false;
-                }
-              }
-            }
-            break;
-        }
-      }
-      return validChallengeDate;
-    },
 
       cancelCheck: function () {
         this.checkStatus.stateMessage = "Cancel in progress...";
@@ -1166,9 +1108,10 @@ export default {
         if (savedReport !== null) {
           this.userArgs.selectedReportType = savedReport;
         }
-        let savedChallenge = window.localStorage.getItem('biocheck_challenge');
+        let savedChallenge = window.localStorage.getItem('biocheck_challenge_name');
         if (savedChallenge !== null) {
           this.userArgs.challengeName = savedChallenge;
+          this.selectedChallengeName = this.challengeManager.getChallengeDisplayName(this.userArgs.challengeName);
         }
         if (args.has("query")) {
           this.userArgs.queryArg = args.get("query");
@@ -1188,9 +1131,11 @@ export default {
         }
         if (args.has("challengeName")) {
           this.userArgs.challengeName = args.get("challengeName");
+          this.selectedChallengeName = this.challengeManager.getChallengeDisplayName(this.userArgs.challengeName);
         }
         if (args.has("challengeDate")) {
           this.userArgs.challengeDate = args.get("challengeDate");
+          this.selectedChallengeDate = this.challengeManager.getChallengeDisplayDate(this.userArgs.challengeDate);
         }
         if (args.has("WikiTreeID")) {
           this.userArgs.inputWikiTreeId = args.get("WikiTreeID");
