@@ -61,8 +61,8 @@ export class BioTestResults {
     unsourcedProfileCnt: 0,
     unmarkedProfileCnt: 0,
     reportCount: 0, // added to results rows
-    sourcesReport: false,
-    profileReviewReport: false,
+    //sourcesReport: false,
+    //profileReviewReport: false,
     reportStatsOnly: false,
     startTime: null,
     rowData: [], // a row in the results
@@ -206,16 +206,11 @@ export class BioTestResults {
    * @param {Boolean} reportAllProfiles true to report all profiles
    * @param {Boolean} reportNonManaged true to report profiles not managed by user
    * @param {Boolean} reportStyleDetails true to report style details
-   * @param {Boolean} sourcesReport true to report sources for profile
-   * @param {Boolean} profileReviewReport true to generate profile review report
    * @param {String} userId for testing nonManaged profiles
    */
   addProfile(biography, thePerson,
-             reportAllProfiles, reportNonManaged, reportStyleDetails, sourcesReport,
-             profileReviewReport, reportStatsOnly, userId) {
+             reportAllProfiles, reportNonManaged, reportStyleDetails, reportStatsOnly, userId) {
 
-    this.results.sourcesReport = sourcesReport;
-    this.results.profileReviewReport = profileReviewReport;
     this.results.reportStatsOnly = reportStatsOnly;
     let profileStatus = this.SOURCED;
     this.results.checkedProfileCount++;
@@ -270,41 +265,46 @@ export class BioTestResults {
     }
     if (profileShouldBeReported) {
       this.results.reportCount++;
-      if (!reportStatsOnly) {
-        if (sourcesReport) {
-          this.reportSources(biography, thePerson);
-        } else {
-          if (profileReviewReport) {
-            this.reportReviewProfile(biography, thePerson, profileStatus);
-          } else {
-            this.reportUnsourcedStyle(biography, thePerson, profileStatus);
-          }
-        }
-      }
+      this.reportProfile(biography, thePerson, profileStatus);
     }
   }
 
   /*
-   * Report unsourced and style for profile (the default)
-   * @param {Biography} biography contains the results of checking
-   * @param {BioCheckPerson} person to report
-   * @param {String} profileStatus the unsourced status
+   * Report profile
+   * includes all data. Table display and export will filter out as needed
    */
-  reportUnsourcedStyle(biography, thePerson, profileStatus) {
-    let rowDataItem = {
+  reportProfile(biography, thePerson, profileStatus) {
+    let rowDataItem = {  // spaces are needed for correct export
       profileId: 0,
-      wikiTreeId: "",
-      personName: "",
-      unsourcedStatus: "No", // Sourced, Marked, Maybe
-      requiredSections: "",
-      styleDetails: "",
-      searchPhrase: "",
-      bioLineCnt: "",
-      numSources: "",
-      inlineRefCnt: "",
-      sourceLineCnt: "",
+      wikiTreeId: " ",
+      personName: " ",
+      requiredSections: " ",
+      styleDetails: " ",
+      searchPhrase: " ",
+      bioLineCnt: " ",
+      numSources: " ",
+      inlineRefCnt: " ",
+      sourceLineCnt: " ",
+      wikiTreeLink: " ",
+      wikiTreeHyperLink: "",
+      sourceCount: "-1",
+      sourceLine: " ",
+      reviewerId: " ",
+      reviewStatus: " ",
+      reviewComments: "                                  ",
+      profileStatus: " ",
+      hasStyleIssues: " ",
+      profilePrivacy: " ",
+      profileIsOrphan: " ",
+      birthDate: " ",
+      deathDate: " ",
+      birthDateDate: null,
+      deathDateDate: null,
     };
-    rowDataItem.unsourcedStatus = profileStatus;
+    // Add everything to the results
+    // It will be filtered by the keys associated with the different 
+    // report types and also on the CSV export
+    rowDataItem.profileStatus = profileStatus;
     rowDataItem.profileId = thePerson.getProfileId();
     rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
     rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
@@ -313,7 +313,6 @@ export class BioTestResults {
     if (biography.getTotalBioLines() > 0) {
       rowDataItem.bioLineCnt = biography.getTotalBioLines();
     }
-
     if (biography.getInlineRefCount() > 0) {
       rowDataItem.inlineRefCnt = biography.getInlineRefCount();
     }
@@ -326,7 +325,6 @@ export class BioTestResults {
     if (biography.getValidSources().length > 0) {
       rowDataItem.numSources = biography.getValidSources().length;
     }
-
     // Get the list of issues to report and put as an item in the result
     let messages = biography.getSectionMessages(); 
     if (messages.length > 0) {
@@ -336,8 +334,36 @@ export class BioTestResults {
     if (messages.length > 0) {
       rowDataItem.styleDetails = messages.join('\n');
     }
-    // And add the item to the row data
+    rowDataItem.reviewerId = " ";
+    rowDataItem.reviewStatus = " ";
+    rowDataItem.reviewComments = " ";
+    if (biography.hasStyleIssues()) {
+      rowDataItem.hasStyleIssues = "X";
+    }
+    rowDataItem.profilePrivacy = thePerson.getPrivacyString();
+    if (thePerson.getManagerId() === 0) {
+      rowDataItem.profileIsOrphan = "X";
+    }
+    rowDataItem.birthDate = thePerson.getReportDate(true);
+    rowDataItem.deathDate = thePerson.getReportDate(false);
+    let birthDateDate = thePerson.getBirthDate();
+    let deathDateDate = thePerson.getDeathDate();
+    // if date null or invalid, make it today for sorting
+    if (birthDateDate == null || birthDateDate == 'Invalid Date') {
+      birthDateDate = new Date();
+    }
+    if (deathDateDate == null || deathDateDate == 'Invalid Date') {
+      deathDateDate = new Date();
+    }
+    rowDataItem.birthDateDate = birthDateDate;
+    rowDataItem.deathDateDate = deathDateDate;
+
+    // Add the data to the results to appear in the table
     this.results.checkResults.resultsRowData.push(rowDataItem);
+
+    // report sources needs a line per source per profile, not just per profile
+    this.reportSources(biography, thePerson);
+
   }
 
   /*
@@ -367,12 +393,12 @@ export class BioTestResults {
   reportSourceRow(thePerson, sourceNum, sourceContent) {
     let rowDataItem = {
       profileId: 0,
-      wikiTreeId: "",
-      wikiTreeHyperLink: "",
-      personName: "",
+      wikiTreeId: " ",
+      wikiTreeHyperLink: " ",
+      personName: " ",
       sourceCount: "-1",
-      sourceLine: "",
-      wikiTreeLink: "",
+      sourceLine: " ",
+      wikiTreeLink: " ",
     };
     rowDataItem.profileId = thePerson.getProfileId();
     rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
@@ -382,61 +408,6 @@ export class BioTestResults {
     rowDataItem.sourceCount = sourceNum;
     rowDataItem.sourceLine = sourceContent;
     this.results.checkResults.sourcesRowData.push(rowDataItem);
-  }
-
-  /*
-   * Report profile for review
-   * @param {Biography} biography contains the results of checking
-   * @param {BioCheckPerson} the person
-   * @param {String} profileStatus the unsourced status
-   */
-  reportReviewProfile(biography, thePerson, profileStatus) {
-    let rowDataItem = {
-      wikiTreeId: "",
-      wikiTreeHyperLink: "",
-      personName: "",
-      reviewerId: "",
-      reviewStatus: "",
-      reviewComments: "                                  ",
-      profileStatus: "",
-      hasStyleIssues: "",
-      profilePrivacy: "",
-      profileIsOrphan: "",
-      birthDate: "",
-      deathDate: "",
-      birthDateDate: null,
-      deathDateDate: null,
-      wikiTreeLink: ""
-    };
-    rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
-    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
-    rowDataItem.personName = thePerson.getReportName();
-    rowDataItem.reviewerId = " ";
-    rowDataItem.reviewStatus = " ";
-    rowDataItem.reviewComments = " ";
-    rowDataItem.profileStatus = profileStatus;
-    if (biography.hasStyleIssues()) {
-      rowDataItem.hasStyleIssues = "X";
-    }
-    rowDataItem.profilePrivacy = thePerson.getPrivacyString();
-    if (thePerson.getManagerId() === 0) {
-      rowDataItem.profileIsOrphan = "X";
-    }
-    rowDataItem.birthDate = thePerson.getReportDate(true);
-    rowDataItem.deathDate = thePerson.getReportDate(false);
-    let birthDateDate = thePerson.getBirthDate();
-    let deathDateDate = thePerson.getDeathDate();
-    // if date null or invalid, make it today for sorting
-    if (birthDateDate == null || birthDateDate == 'Invalid Date') {
-      birthDateDate = new Date();
-    }
-    if (deathDateDate == null || deathDateDate == 'Invalid Date') {
-      deathDateDate = new Date();
-    }
-    rowDataItem.birthDateDate = birthDateDate;
-    rowDataItem.deathDateDate = deathDateDate;
-    this.results.checkResults.profilesRowData.push(rowDataItem);
   }
 
   /**
@@ -457,30 +428,7 @@ export class BioTestResults {
    * @param {Number} duplicateProfileCount ignored profiles for logging metrics
    */
   reportStatistics(duplicateProfileCount) {
-    /* by popular request, don't sort 
-    this.setProgressMessage("Sorting results....");
-    if (this.results.sourcesReport) {
-      this.results.checkResults.sourcesRowData.sort(function (a, b) {
-        var nameA = a.wikiTreeId.toLowerCase(),
-          nameB = b.wikiTreeId.toLowerCase();
-        if (nameA < nameB)
-          //sort string ascending
-          return -1;
-        if (nameA > nameB) return 1;
-        return 0; //default return value (no sorting)
-      });
-    } else {
-      this.results.checkResults.resultsRowData.sort(function (a, b) {
-        var nameA = a.wikiTreeId.toLowerCase(),
-          nameB = b.wikiTreeId.toLowerCase();
-        if (nameA < nameB)
-          //sort string ascending
-          return -1;
-        if (nameA > nameB) return 1;
-        return 0; //default return value (no sorting)
-      });
-    }
-    */
+    // by popular request, don't sort 
 
     let msg = "Checked " + this.results.checkedProfileCount +
       " profiles: Found " + this.results.reportCount +
@@ -546,7 +494,7 @@ export class BioTestResults {
     timeDiff = timeDiff / 1000;
     console.log("Elapsed time (seconds): " + timeDiff);
     // TODO uncomment below for more detailed instrumentation
-    console.log('Total validate time ' + this.results.totalValidateTime / 1000);
+    // console.log('Total validate time ' + this.results.totalValidateTime / 1000);
     // console.log('Total fetch time ' + this.results.totalFetchTime / 1000);
   }
 

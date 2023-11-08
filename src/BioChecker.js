@@ -219,21 +219,7 @@ export class BioChecker {
   getReportStyleDetails () {
     return this.userArgs.reportStyleDetails;
   }
-  /**
-   * Get sources report argument
-   * @returns {Boolean} true to report sources
-   */
-  getSourcesReport() {
-    return this.userArgs.sourcesReport;
-  }
-  /**
-   * Get profile review report argument
-   * @returns {Boolean} true to report profiles for review
-   */
-  getProfileReviewReport() {
-    return this.userArgs.profileReviewReport;
-  }
-  /**
+  /*
    * Get stats only report argument
    * @returns {Boolean} true to report statistics only
    */
@@ -507,8 +493,6 @@ export class BioChecker {
       this.getReportAllProfiles(),
       this.getReportNonManaged(),
       this.getReportStyleDetails(),
-      this.getSourcesReport(),
-      this.getProfileReviewReport(),
       this.getReportStatsOnly(),
       this.getUserId());
 

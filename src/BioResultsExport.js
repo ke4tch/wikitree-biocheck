@@ -39,16 +39,18 @@ export class BioResultsExport {
   exportResultsRowCsv(userArgs, resultsRowData) {
     let filename = this.#buildFilename(userArgs);
     let csvData = "data:text/csv;charset=utf-8,";
-    let headerRow = resultsRowData[0];
-    let headerData = this.#getResultsRowHeaderData(headerRow);
+
+    // Get the report columns
+    let reportColumns = this.#getReportColumns(userArgs.selectedReportType);
+    let headerData = this.#getResultsHeaderRow(reportColumns);
     csvData += headerData;
     csvData += "\n";
+    // Add each row to result
     // surround with " to handle entries with a ,
     for (let i = 0; i < resultsRowData.length; i++) {
       let resultRow = resultsRowData[i];
       let rda = [];
-      for (let key in resultRow) {
-        //let val = '"' + resultRow[key] + '"';
+      for (let key in reportColumns) {
         let val = resultRow[key].toString();
         if (key != "wikiTreeHyperLink") {
           val = val.replace(/#/g, "");
@@ -58,87 +60,25 @@ export class BioResultsExport {
           val = val.replace(/\u201D/g, '');
           val = val.replace(/\u0022/g, "");  // "
         }
+        if (userArgs.selectedReportType == "sourcesReport") {
+          /* TODO this is what you had for sources report you might need it
+          val = val.replace(/\u201C/g, '"');   // same but only not in hyperlink
+          val = val.replace(/\u201D/g, '"');   // same but only not in hyperlink
+          val = val.replace(/\t/g, " ");
+          if (key != "wikiTreeHyperLink") {
+            val = val.replace(/"/g, '""');     // different
+            val = val.replace(/#/g, "");different
+          }
+          if (val.search(/("|,|\n)/g) >= 0) {
+            val = '"' + val + '"';
+          }
+          if (key == 'personName')  {
+            val = '"' + val + '"';
+          }
+          */
+        }
         val = '"' + val + '"';
         rda.push(val);
-      }
-      csvData += rda.join(",");
-      csvData += "\n";
-    }
-    const data = encodeURI(csvData);
-    const link = document.createElement("a");
-    link.setAttribute("href", data);
-    link.setAttribute("target", "_blank");
-    link.setAttribute("download", filename);
-    link.click();
-  }
-
-  /**
-   * export sources rows as CSV
-   * @param {Object} userArgs input user args
-   * @param {Array} sourcesRowData row data to export
-   */
-  exportSourcesRowCsv(userArgs, sourcesRowData) {
-    let filename = this.#buildFilename(userArgs);
-    let csvData = "data:text/csv;charset=utf-8,";
-    let headerRow = sourcesRowData[0];
-    let headerData = this.#getSourcesRowHeaderData(headerRow);
-    csvData += headerData;
-    csvData += "\n";
-    // surround with " to handle entries with a ,
-    for (let i = 0; i < sourcesRowData.length; i++) {
-      let sourcesRow = sourcesRowData[i];
-      let rda = [];
-      for (let key in sourcesRow) {
-        //unicode 201C and 201D are left and right double quotes
-        let val = sourcesRow[key].toString();
-        val = val.replace(/\u201C/g, '"');
-        val = val.replace(/\u201D/g, '"');
-        val = val.replace(/\t/g, " ");
-        if (key != "wikiTreeHyperLink") {
-          val = val.replace(/"/g, '""');
-          val = val.replace(/#/g, "");
-        }
-        if (val.search(/("|,|\n)/g) >= 0) {
-          val = '"' + val + '"';
-        }
-        if (key == 'personName')  {
-          val = '"' + val + '"';
-        }
-        rda.push(val);
-      }
-      csvData += rda.join(",");
-      csvData += "\n";
-    }
-    const data = encodeURI(csvData);
-    const link = document.createElement("a");
-    link.setAttribute("href", data);
-    link.setAttribute("target", "_blank");
-    link.setAttribute("download", filename);
-    link.click();
-  }
-
-  /**
-   * export review rows as CSV
-   * @param {Object} userArgs input user args
-   * @param {Array} profilesRowData row data to export
-   */
-  exportReviewRowCsv(userArgs, profilesRowData) {
-    let filename = this.#buildFilename(userArgs);
-    let csvData = "data:text/csv;charset=utf-8,";
-    let headerRow = profilesRowData[0];
-    let headerData = this.#getReviewRowHeaderData(headerRow);
-    csvData += headerData;
-    csvData += "\n";
-    // surround with " to handle entries with a ,
-    for (let i = 0; i < profilesRowData.length; i++) {
-      let resultRow = profilesRowData[i];
-      let rda = [];
-      for (let key in resultRow) {
-        if ((key != "wikiTreeLink") && (key != "birthDateDate") && (key != "deathDateDate")) {
-          let val = '"' + resultRow[key] + '"';
-          val = val.replace(/#/g, "");
-          rda.push(val);
-        }
       }
       csvData += rda.join(",");
       csvData += "\n";
@@ -185,14 +125,27 @@ export class BioResultsExport {
   }
 
   /*
-   * headers for default report
+   * Get comma delimited list of column titles
    */
-  #getResultsRowHeaderData(firstRow) {
-    let headerText = {
+  #getResultsHeaderRow(reportColumns) {
+    let headings = [];
+    for (let key in reportColumns) {
+      headings.push('"' + reportColumns[key] + '"');
+    }
+    let headerData = headings.join(",");
+    return headerData;
+  }
+
+  /*
+   * Get the key and text value for the report type
+   */
+  #getReportColumns(selectedReportType) {
+
+    let detailedReportColumns = {
       profileId: "Profile Id",
       wikiTreeId: "WikiTree Id",
       personName: "Name",
-      unsourcedStatus: "Sourced?",
+      profileStatus: "Sourced?",
       requiredSections: "Required Sections",
       styleDetails: "Style Issues",
       searchPhrase: "Search?",
@@ -203,44 +156,7 @@ export class BioResultsExport {
       wikiTreeLink: "URL",
       wikiTreeHyperLink: "Link",
     };
-    let headings = [];
-    for (let key in firstRow) {
-      if (key in headerText) {
-        headings.push('"' + headerText[key] + '"');
-      }
-    }
-    let headerData = headings.join(",");
-    return headerData;
-  }
-
-  /*
-   * get headers for sources report
-   */
-  #getSourcesRowHeaderData(firstRow) {
-    let headerText = {
-      profileId: "Profile Id",
-      wikiTreeId: "WikiTree Id",
-      wikiTreeHyperLink: "Link",
-      personName: "Name",
-      sourceCount: "Count",
-      sourceLine: "Source",
-      wikiTreeLink: "URL",
-    };
-    let headings = [];
-    for (let key in firstRow) {
-      if (key in headerText) {
-        headings.push('"' + headerText[key] + '"');
-      }
-    }
-    let headerData = headings.join(",");
-    return headerData;
-  }
-
-  /**
-   * get headers for review report
-   */
-  #getReviewRowHeaderData(firstRow) {
-    let headerText = {
+    let summaryReportColumns = {
       wikiTreeId: "WikiTree Id",
       wikiTreeHyperLink: "Link",
       personName: "Name",
@@ -254,13 +170,24 @@ export class BioResultsExport {
       birthDate: "Birth Date",
       deathDate: "Death Date",
     };
-    let headings = [];
-    for (let key in firstRow) {
-      if (key in headerText) {
-        headings.push('"' + headerText[key] + '"');
+    let sourcesReportColumns = {
+      profileId: "Profile Id",
+      wikiTreeId: "WikiTree Id",
+      wikiTreeHyperLink: "Link",
+      personName: "Name",
+      sourceCount: "Count",
+      sourceLine: "Source",
+      wikiTreeLink: "URL",
+    };
+    // Just get the columns for the desired report
+    let reportColumns = detailedReportColumns;
+    if (selectedReportType == "summaryReport") {
+        reportColumns = summaryReportColumns;
+    } else {
+      if (selectedReportType == "sourcesReport") {
+        reportColumns = sourcesReportColumns;
       }
     }
-    let headerData = headings.join(",");
-    return headerData;
+    return reportColumns;
   }
 }

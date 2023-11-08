@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.1</h4>
+      <h4>Bio Check Version 1.7.2</h4>
     </div>
 
     <div class="flex-grid">
@@ -358,7 +358,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </span>
           </div>
           <div class="col">
-            <select v-model="userArgs.selectedReportType">
+            <select v-model="reportType">
               <option disabled value="">Select report type</option>
               <option value="detailedReport" >Detailed report</option>
               <option value="summaryReport">Summary report</option>
@@ -521,7 +521,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </tr>
         </thead>
         <tbody class="scrollContent">
-          <tr v-for="(item,index) in checkResults.profilesRowData" :key="index">
+          <tr v-for="(item,index) in checkResults.resultsRowData" :key="index">
             <td class = "colWikiTreeId">
                 <a v-bind:href="item.wikiTreeLink" 
                 target="_blank"> {{ item.wikiTreeId }} </a>
@@ -541,7 +541,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          <tr>
            <th class = "colWikiTreeId" id = "wikiTreeId" scope="col" @click="sortBy('wikiTreeId')" >Profile</th>
            <th class = "colPersonName" id = "personName" scope="col" @click="sortBy('personName')" >Name</th>
-           <th class = "colUnsourcedStatus" id = "unsourcedStatus" scope="col" @click="sortBy('unsourcedStatus')" >Sourced?</th>
+           <th class = "colUnsourcedStatus" id = "profileStatus" scope="col" @click="sortBy('profileStatus')" >Sourced?</th>
            <th class = "colRequiredSections" id = "requiredSections" scope="col" @click="sortBy('requiredSections')" >Required Sections</th>
            <th class = "colStyleDetails" id = "styleDetails" scope="col" @click="sortBy('styleDetails')" >Style Issues</th>
            <th class = "colSearchPhrase" id = "searchPhrase" scope="col" @click="sortBy('searchPhrase')" >Search?</th>
@@ -556,7 +556,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 target="_blank"> {{ item.wikiTreeId }} </a>
             </td>
             <td class = "colPersonName">{{ item.personName }} </td>
-            <td class = "colUnsourcedStatus">{{ item.unsourcedStatus }} </td>
+            <td class = "colUnsourcedStatus">{{ item.profileStatus }} </td>
             <td class = "colRequiredSections">{{ item.requiredSections }} </td>
             <td class = "colStyleDetails">{{ item.styleDetails}} </td> 
             <td class = "colSearchPhrase">{{ item.searchPhrase}} </td> 
@@ -653,7 +653,6 @@ export default {
           reportStyleDetails: true,
           selectedReportType: "",
           sourcesReport: false,
-          profileReviewReport: false,
           reportStatsOnly: false,
           userId: 0,
           userName: "",
@@ -685,7 +684,6 @@ export default {
           key: "",
           resultsRowData: [],
           sourcesRowData: [],
-          profilesRowData: [],
         },
         sortKey: "wikiTreeId",
         reverse: false,
@@ -698,6 +696,7 @@ export default {
         selectedChallengeName: "",  // display name
         selectedChallengeDate: "",  // display date
         challengeDates: [],
+        reportType: "detailedReport",
 
       }
     },
@@ -711,15 +710,43 @@ export default {
       },
       selectedChallengeDate: function() {
         this.challengeManager.setChallengeUsedDate(this.selectedChallengeName, this.selectedChallengeDate);
-      }
+      },
+      reportType: function() {
+        this.userArgs.selectedReportType = this.reportType;
+        window.localStorage.setItem('biocheck_report', this.reportType);
+        switch (this.userArgs.selectedReportType) {
+          case "detailedReport":
+            this.userArgs.sourcesReport = false;
+            this.userArgs.reportStatsOnly = false;
+            this.checkStatus.exportDisabled = false;
+            break;
+          case "sourcesReport":
+            this.userArgs.sourcesReport = true;
+            this.userArgs.reportNonManaged = false;
+            this.userArgs.reportStatsOnly = false;
+            this.checkStatus.exportDisabled = false;
+            break;
+          case "summaryReport":
+            this.userArgs.sourcesReport = false;
+            this.userArgs.reportStatsOnly = false;
+            this.checkStatus.exportDisabled = false;
+            break;
+          case "statsOnlyReport":
+            this.userArgs.sourcesReport = false;
+            this.userArgs.reportAllProfiles = false;
+            this.userArgs.reportStatsOnly = true;
+            this.checkStatus.exportDisabled = true;
+            break;
+        }
+      },
     },
 
   computed: {
     isExportDisabled: function () {
       if (this.checkStatus.exportDisabled || 
+          (!this.userArgs.reportStatsOnly) &&
           ((this.checkResults.resultsRowData.length < 1) &&
-           (this.checkResults.sourcesRowData.length < 1) &&
-           (this.checkResults.profilesRowData.length < 1))) {
+           (this.checkResults.sourcesRowData.length < 1))) {
         return true;
       } else {
         return false;
@@ -787,7 +814,7 @@ export default {
       }
     },
 
-    isProfileReviewReport: function() {
+      isProfileReviewReport: function() {
       if (this.userArgs.selectedReportType === "summaryReport") {
         return true;
       } else {
@@ -842,6 +869,7 @@ export default {
     this.activeChallenges = bioCheckCalendarManager.getActiveChallenges();
 
     // initialize value here to force a watched change
+    this.reportType = "detailedReport";
     this.selectedChallengeName = "Sourcerers Challenge";
     this.selectedChallengeDate = this.challengeManager.getChallengeUsedDate(this.selectedChallengeName);
 
@@ -863,10 +891,6 @@ export default {
         let sortData = this.checkResults.resultsRowData;
         if (this.userArgs.sourcesReport) {
           sortData = this.checkResults.sourcesRowData;
-        } else {
-          if (this.userArgs.profileReviewReport) {
-            sortData = this.checkResults.profilesRowData;
-          }
         }
         if (sortKey === 'birthDate') {
           sortKey = 'birthDateDate';
@@ -950,36 +974,31 @@ export default {
           switch (this.userArgs.selectedReportType) {
             case "detailedReport":
               this.userArgs.sourcesReport = false;
-              this.userArgs.profileReviewReport = false;
               this.userArgs.reportStatsOnly = false;
               break;
             case "sourcesReport":
               this.userArgs.sourcesReport = true;
-              this.userArgs.profileReviewReport = false;
               this.userArgs.reportNonManaged = false;
               this.userArgs.reportStatsOnly = false;
               break;
             case "summaryReport":
               this.userArgs.sourcesReport = false;
-              this.userArgs.profileReviewReport = true;
               this.userArgs.reportStatsOnly = false;
               break;
             case "statsOnlyReport":
               this.userArgs.sourcesReport = false;
               this.userArgs.reportAllProfiles = false;
-              this.userArgs.profileReviewReport = false;
               this.userArgs.reportStatsOnly = true;
               break;
           }
           // we could save all userArgs but the query string might be a security hole
           window.localStorage.setItem('biocheck_action', this.userArgs.selectedCheckType);
-          window.localStorage.setItem('biocheck_report', this.userArgs.selectedReportType);
+          window.localStorage.setItem('biocheck_report', this.reportType);
           window.localStorage.setItem('biocheck_challenge_name', this.userArgs.challengeName);
 
           // Clear previous results
           this.checkResults.resultsRowData.splice(0, this.checkResults.resultsRowData.length);
           this.checkResults.sourcesRowData.splice(0, this.checkResults.sourcesRowData.length);
-          this.checkResults.profilesRowData.splice(0, this.checkResults.profilesRowData.length);
           this.checkStatus.checkDisabled = true;
           this.checkStatus.cancelDisabled = false;
           this.checkStatus.exportDisabled = true;
@@ -1007,13 +1026,9 @@ export default {
         this.checkStatus.stateMessage = "Creating CSV ...";
         let bioResultsExport = new BioResultsExport();
         if (this.userArgs.sourcesReport) {
-          bioResultsExport.exportSourcesRowCsv(this.userArgs, this.checkResults.sourcesRowData);
+          bioResultsExport.exportResultsRowCsv(this.userArgs, this.checkResults.sourcesRowData);
         } else {
-          if (this.userArgs.profileReviewReport) {
-            bioResultsExport.exportReviewRowCsv(this.userArgs, this.checkResults.profilesRowData);
-          } else {
-            bioResultsExport.exportResultsRowCsv(this.userArgs, this.checkResults.resultsRowData);
-          }
+          bioResultsExport.exportResultsRowCsv(this.userArgs, this.checkResults.resultsRowData);
         }
         this.checkStatus.stateMessage = "Download Completed";
       },
@@ -1107,6 +1122,7 @@ export default {
         let savedReport = window.localStorage.getItem('biocheck_report');
         if (savedReport !== null) {
           this.userArgs.selectedReportType = savedReport;
+          this.reportType = savedReport;
         }
         let savedChallenge = window.localStorage.getItem('biocheck_challenge_name');
         if (savedChallenge !== null) {
