@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.2</h4>
+      <h4>Bio Check Version 1.7.3</h4>
     </div>
 
     <div class="flex-grid">
@@ -844,7 +844,7 @@ export default {
     },
   },
 
-  created() {
+  async created() {
     // Override default values with those from URL, if any
     let userAgent = navigator.userAgent;
 
@@ -856,14 +856,33 @@ export default {
     } else {
       this.loginMessage = "You are not currently logged in to apps.wikitree.com. Only public biographies will be checked.";
     }
+
   },
 
   async mounted() {
+    
+    if (this.userContext.loggedIn) {
+      this.loginMessage = "You are currently logged in as " + this.userContext.userName;
+      if (this.userArgs.inputWikiTreeId.length == 0) {
+        this.userArgs.inputWikiTreeId = this.userContext.userName;
+      }
+    } else {
+      this.loginMessage = "You are not currently logged in to apps.wikitree.com. Only public biographies will be checked.";
+    }
+
+    /* 
+     * From a Vue tutorial:
+     *   Vue has another lifecycle hook that is similar to mounted(): the created() hook. 
+     *   Vue runs the created() hook when the component object is created, before the component is mounted to the DOM.
+     *   The Vue docs recommend using the mounted() hook over the created() hook for data fetching.
+     */
+
     // This is to just load from WT+ once per browser session
     let bioCheckTemplateManager = new BioCheckTemplateManager();
     await bioCheckTemplateManager.load();
 
     let bioCheckCalendarManager = new BioCheckCalendarManager();
+    // cannot use this yet
     this.challengeManager = bioCheckCalendarManager;
     await bioCheckCalendarManager.load();
     this.activeChallenges = bioCheckCalendarManager.getActiveChallenges();
@@ -871,8 +890,8 @@ export default {
     // initialize value here to force a watched change
     this.reportType = "detailedReport";
     this.selectedChallengeName = "Sourcerers Challenge";
+    this.challengeName = "SourcerersChallenge";
     this.selectedChallengeDate = this.challengeManager.getChallengeUsedDate(this.selectedChallengeName);
-
     this.getUrlParams();
 
     // Code that will run only after the entire view has been rendered
@@ -1126,8 +1145,14 @@ export default {
         }
         let savedChallenge = window.localStorage.getItem('biocheck_challenge_name');
         if (savedChallenge !== null) {
-          this.userArgs.challengeName = savedChallenge;
-          this.selectedChallengeName = this.challengeManager.getChallengeDisplayName(this.userArgs.challengeName);
+          if (savedChallenge.length > 0) {
+            // Just in case the saved challenge is no longer in the calendar
+            let dispName = this.challengeManager.getChallengeDisplayName(savedChallenge);
+            if ((dispName !== null) && (dispName.length > 0)) {
+              this.userArgs.challengeName = savedChallenge;
+              this.selectedChallengeName = this.challengeManager.getChallengeDisplayName(this.userArgs.challengeName);
+            }
+          }
         }
         if (args.has("query")) {
           this.userArgs.queryArg = args.get("query");
