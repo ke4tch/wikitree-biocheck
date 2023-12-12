@@ -116,11 +116,11 @@ export class BioResultsExport {
         }
       }
     }
-    filename += ".csv";
     if (userArgs.numRelatives > 0) {
       filename += "_Relatives_" + userArgs.numRelatives;
     }
     filename = filename.replace(/\s+/g, "_");
+    filename += ".csv";
     return filename;
   }
 

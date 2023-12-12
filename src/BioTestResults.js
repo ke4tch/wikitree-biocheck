@@ -222,44 +222,50 @@ export class BioTestResults {
      * An unsourced marked profile is needed only if we are reporting marked unsourced.
      * (for now always report marked, but might want this in future)
      * An unsourced unmarked profile is always needed.
+     *
+     * And for reportNonManaged ONLY those profiles not managed by the user should be reported,
+     * even if they have other reasons to report or if report all profiles is selected
      */
     let profileShouldBeReported = false;
-    if (reportAllProfiles) {
-      profileShouldBeReported = true;
-    }
-    if ((reportNonManaged) && (userId != thePerson.getManagerId())) {
-      profileShouldBeReported = true;
-    }
-    if (biography.isEmpty()) {
-      profileShouldBeReported = true;
-    }
-    if (biography.isMarkedUnsourced()) {
-      this.results.unsourcedProfileCnt++;
-      profileStatus = this.MARKED;
-      profileShouldBeReported = true;
-    } else {
-      if (!biography.hasSources()) {
-        this.results.unmarkedProfileCnt++;
-        profileStatus = this.POSSIBLY_UNSOURCED;
+    if (reportNonManaged) {
+      if (userId != thePerson.getManagerId()) {
         profileShouldBeReported = true;
       }
-    }
-    if (biography.isUndated()) {
-      profileShouldBeReported = true;
-    } 
-    if (biography.hasSearchString()) {
-      profileShouldBeReported = true;
-    }
-    if (biography.hasStyleIssues()) {
-      // let user turn off detailed style messages
-      // but not the section level messages
-      if (reportStyleDetails) {
+    } else {
+      if (reportAllProfiles) {
         profileShouldBeReported = true;
-        this.results.styleIssuesProfileCnt++;
+      }
+      if (biography.isEmpty()) {
+        profileShouldBeReported = true;
+      }
+      if (biography.isMarkedUnsourced()) {
+        this.results.unsourcedProfileCnt++;
+        profileStatus = this.MARKED;
+        profileShouldBeReported = true;
       } else {
-        if (biography.getSectionMessages().length > 0) {
+        if (!biography.hasSources()) {
+          this.results.unmarkedProfileCnt++;
+          profileStatus = this.POSSIBLY_UNSOURCED;
+          profileShouldBeReported = true;
+        }
+      }
+      if (biography.isUndated()) {
+        profileShouldBeReported = true;
+      } 
+      if (biography.hasSearchString()) {
+        profileShouldBeReported = true;
+      }
+      if (biography.hasStyleIssues()) {
+        // let user turn off detailed style messages
+        // but not the section level messages
+        if (reportStyleDetails) {
           profileShouldBeReported = true;
           this.results.styleIssuesProfileCnt++;
+        } else {
+          if (biography.getSectionMessages().length > 0) {
+            profileShouldBeReported = true;
+            this.results.styleIssuesProfileCnt++;
+          }
         }
       }
     }
