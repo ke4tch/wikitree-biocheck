@@ -347,7 +347,7 @@ export class BioTestResults {
       rowDataItem.hasStyleIssues = "X";
     }
     rowDataItem.profilePrivacy = thePerson.getPrivacyString();
-    if (thePerson.getManagerId() === 0) {
+    if (thePerson.isOrphan()) {
       rowDataItem.profileIsOrphan = "X";
     }
     rowDataItem.birthDate = thePerson.getReportDate(true);

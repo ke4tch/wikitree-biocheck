@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.7</h4>
+      <h4>Bio Check Version 1.7.8</h4>
     </div>
 
     <div class="flex-grid">
@@ -380,6 +380,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </div>
         <div class="user-input">
           <div class="col">
+            <span v-bind:title="orphanOnlyTip">
+              <label for="userArgs.orphanOnly" >Check Orphan Profiles only</label>
+            </span>
+          </div>
+          <div class="col">
+            <input class="vmodel-input" v-model="userArgs.orphanOnly" type="checkbox" id="userArgs.orphanOnly"
+               name="userArgs.orphanOnly" >
+          </div>
+        </div>
+        <div class="user-input">
+          <div class="col">
             <span v-bind:title="ignorePre1500Tip">
               <label for="userArgs.ignorePre1500" >Ignore Pre-1500 Profiles</label>
             </span>
@@ -616,6 +627,7 @@ export default {
         searchMaxTip: "Enter maximum number of profiles to check. The check will complete when this number is reached",
 
         openOnlyTip: "Select to check only open profiles. When not selected, any profile with a public biography will be checked",
+        orphanOnlyTip: "Select to check only orphan profiles. When selected, only profiles that do not have profile manager will be checked",
         ignorePre1500Tip: "Select to check only post-1500 profiles or those with no dates",
         reliableSourcesOnlyTip: "Select to require Pre-1700 reliable sources for all profiles",
         numRelativesTip: "Enter number of degrees of connection to check.  This will check all relatives (parents, spouses, children, siblings) for the profile. This can apply to all profiles or ony those profiles that have source or style issues. When checking profiles that have issues, each degree will check the relatives of all previously checked profiles.",
@@ -643,6 +655,7 @@ export default {
           searchMax: 1000,
           searchMaxRandom: 1000,
           openOnly: false,
+          orphanOnly: false,
           ignorePre1500: false,
           reliableSourcesOnly: false,
           numRelatives: 0,
@@ -661,7 +674,7 @@ export default {
           searchStartWatchlist: 0,
           searchMaxWatchlist: 200,
           minRandom: 0,
-          maxRandom: 38506714,
+          maxRandom: 41681141,
           bioSearchString: "",
           abortController: null, // to cancel
           challengeName: "",

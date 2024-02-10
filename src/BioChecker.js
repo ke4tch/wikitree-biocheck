@@ -149,6 +149,13 @@ export class BioChecker {
     return this.userArgs.openOnly;
   }
   /**
+   * Get orphan only argument
+   * @returns {Boolean} true to check only profiles with 
+   */
+  getOrphanOnly() {
+    return this.userArgs.orphanOnly;
+  }
+  /**
    * Get ignore pre1500 argument
    * @returns {Boolean} true to ignore profiles born or died before 1500
    */
@@ -673,6 +680,7 @@ export class BioChecker {
                     if (!this.alreadyHaveRelatives.has(profileObj.Id)) {
                       let thePerson = new BioCheckPerson();
                       let canUseThis = thePerson.canUse(profileObj, this.getOpenOnly(),
+                        this.getOrphanOnly(),
                         this.getIgnorePre1500(), this.getUserId());
                       if (!canUseThis) {
                         this.testResults.countProfile(0, thePerson.isUncheckedDueToPrivacy(),

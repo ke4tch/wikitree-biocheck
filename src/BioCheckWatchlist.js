@@ -163,6 +163,7 @@ export class BioCheckWatchlist extends BioChecker {
                       let canUseThis = thePerson.canUse(
                         profileObj,
                         this.getOpenOnly(),
+                        this.getOrphanOnly(),
                         this.getIgnorePre1500(),
                         this.getUserId()
                       );

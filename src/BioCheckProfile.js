@@ -184,7 +184,9 @@ export class BioCheckProfile extends BioChecker {
             while (descendantNum < len && !this.timeToQuit()) {
               let profileObj = descendantArray[descendantNum];
               let thePerson = new BioCheckPerson();
-              let canUseThis = thePerson.canUse( profileObj, this.getOpenOnly(), this.getIgnorePre1500(), this.getUserId());
+              let canUseThis = thePerson.canUse( profileObj, this.getOpenOnly(), 
+                this.getOrphanOnly(),
+                this.getIgnorePre1500(), this.getUserId());
               if (!this.thePeopleManager.hasPerson(thePerson.getProfileId())) {
                 this.testResults.countProfile(1, thePerson.isUncheckedDueToPrivacy(), thePerson.isUncheckedDueToDate());
                 if (canUseThis && !this.timeToQuit()) {
