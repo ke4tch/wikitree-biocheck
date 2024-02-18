@@ -191,18 +191,6 @@ export class BioCheckPerson {
       if (mustBeOrphan && !this.person.isOrphan) {
           canUseThis = false;
       }
-      /*
-      // Manager will be null due to privacy or 0 if a true orphan)
-      if (mustBeOrphan) {
-        if (profileObj.Manager == null) {   // don't see manager due to privacy
-          canUseThis = false;
-        } else {
-          if (this.person.managerId !== 0) {  // not an orphan
-            canUseThis = false;
-          }
-        }
-      }
-      */
 
       // Do not check the profile for a member
       // TODO not sure that you want to do this, need team guidance

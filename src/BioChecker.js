@@ -519,7 +519,12 @@ export class BioChecker {
     while (!gotAllPeople && !this.timeToQuit()) {
       await this.checkPeople(profileIdArray, numAncestors, numDescendents, numRelatives, 0, limit, start);
       if (!this.testResults.results.maxProfilesReached) {  // max reached in getPeople response
-        if (this.peopleCount < limit) {
+        // The getPeople API does not tell you when you have finished getting all people, other than
+        // a subsequent call returing a count of 0. This is needed when you are getting any relatives.
+        // When not getting any relatives, however, you can tell you are finished when the number returned
+        // is less than what you asked for. 
+        // So an extra check here to avoid an extra server request.
+        if ((this.peopleCount == 0) || ((this.peopleCount < limit) && (numRelatives == 0))) {
           gotAllPeople = true;
         } else {
           start += limit;
@@ -625,7 +630,6 @@ export class BioChecker {
           },
           body: new URLSearchParams(formData),
         };
-
         this.setDetailedProgress();
         this.pendingRequestCount++;
         try {
@@ -655,6 +659,7 @@ export class BioChecker {
               if (personArray.length >= limit) {
                 gotAllPeople = true;  
               }
+              // TODO in the future the API might return an indicator when you are done
 //console.log('peopleCount ' + this.peopleCount);              
               // for some reason with logging on this avoids TypeError:Load Failed on the iPad
               // but trying a 10 ms wait did not avoid the error
