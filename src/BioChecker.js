@@ -39,7 +39,7 @@ export class BioChecker {
   ancestorParents = new Set();
   alreadyHaveRelatives = new Set();
   encounteredError = false;
-  peopleCount = 0;               // number of profiles returned by getPeople
+  needToGetMorePeople = true;
 
   userArgs = null;
 
@@ -63,7 +63,7 @@ export class BioChecker {
   static MEDIUM_MAX_API_PROFILES = 250;   // for the impatient
   static MAX_RELATIVES = 10;
   static GET_PEOPLE_MAX_RESPONSE = 1000;
-  static GET_PEOPLE_MAX_PAGES = 4;
+  static GET_PEOPLE_MAX_PAGES = 9;
   static MY_ID = "bioCheck";
   static MY_ID_KEY = "&appId=" + BioChecker.MY_ID + " ";
   static MAX_UNSOURCED_RELATIVES = 3;
@@ -514,24 +514,14 @@ export class BioChecker {
   async pageThroughPeople(profileIdArray, numAncestors, numDescendents, numRelatives) {
     let limit = BioChecker.GET_PEOPLE_MAX_RESPONSE;
     let start = 0;
-    let gotAllPeople = false;
     let counter = 0;
-    while (!gotAllPeople && !this.timeToQuit()) {
+    while (this.needToGetMorePeople && !this.timeToQuit()) {
       await this.checkPeople(profileIdArray, numAncestors, numDescendents, numRelatives, 0, limit, start);
-      if (!this.testResults.results.maxProfilesReached) {  // max reached in getPeople response
-        // The getPeople API does not tell you when you have finished getting all people, other than
-        // a subsequent call returing a count of 0. This is needed when you are getting any relatives.
-        // When not getting any relatives, however, you can tell you are finished when the number returned
-        // is less than what you asked for. 
-        // So an extra check here to avoid an extra server request.
-        if ((this.peopleCount == 0) || ((this.peopleCount < limit) && (numRelatives == 0))) {
-          gotAllPeople = true;
-        } else {
-          start += limit;
-          counter++;
-          if (counter > BioChecker.GET_PEOPLE_MAX_PAGES) {
-            this.testResults.results.maxProfilesReached = true;
-          }
+      if ((!this.testResults.results.maxProfilesReached) && (this.needToGetMorePeople)) {
+        start += limit;
+        counter++;
+        if (counter > BioChecker.GET_PEOPLE_MAX_PAGES) {
+          this.testResults.results.maxProfilesReached = true;
         }
       }
     }
@@ -553,8 +543,6 @@ export class BioChecker {
     if (navigator.userAgent.indexOf('iPad') > 0) {
       isIpad = true;
     }
-    let gotAllPeople = false;
-
     let maxApiProfiles = BioChecker.MAX_API_PROFILES;
     if ((ancestorGen + descendantGen + numRelatives) == 0) {
       maxApiProfiles = BioChecker.LARGE_MAX_API_PROFILES;
@@ -646,21 +634,17 @@ export class BioChecker {
             this.testResults.setTotalFetchTime(this.totalFetchTime);
             let responseObj = theJson[0];
             let responseStatus = responseObj.status;
-            if ((responseStatus != 0)) {
-              if (responseStatus.startsWith('Limit exceeded')) {
-                this.testResults.results.apiLimitReached = true;
-              }
-              if (responseStatus.startsWith('Maximum number of profiles')) {
-                this.testResults.results.maxProfilesReached = true;
-              }
+            //if ((responseStatus != 0)) {
+            if (responseStatus.startsWith('Limit exceeded')) {
+              this.testResults.results.apiLimitReached = true;
             } else {
-              let personArray = Object.values(responseObj.people);
-              this.peopleCount = personArray.length;
-              if (personArray.length >= limit) {
-                gotAllPeople = true;  
+              if (responseStatus.startsWith('Maximum number of profiles')) {
+                this.needToGetMorePeople = true;
+              } else {
+                this.needToGetMorePeople = false;
               }
-              // TODO in the future the API might return an indicator when you are done
-//console.log('peopleCount ' + this.peopleCount);              
+              let personArray = Object.values(responseObj.people);
+//console.log('peopleCount ' + personArray.length);
               // for some reason with logging on this avoids TypeError:Load Failed on the iPad
               // but trying a 10 ms wait did not avoid the error
               if (isIpad) { 
@@ -676,10 +660,9 @@ export class BioChecker {
                 } else {
                   // check for a silently ignored max where nuclear is > 1 but
                   // results returned are the single profile that was requested which we already have
-                  //if ((personArray.length == 1) && (numRelatives > 0) && 
                   if ((personArray.length == 1) &&
                     (this.thePeopleManager.hasPerson(profileObj.Id))) {
-                    gotAllPeople = true;
+                    ;
                   } else {
                     // check for duplicate nuclear you already have
                     if (!this.alreadyHaveRelatives.has(profileObj.Id)) {
