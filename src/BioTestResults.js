@@ -37,6 +37,7 @@ export class BioTestResults {
   POSSIBLY_UNSOURCED = "?";
   REF = "ref tag";
   SPAN = "span";
+  static WIKI_TREE_URI = "https://www.wikitree.com/wiki/";  // for link to profile 
 
   // the results
   /*
@@ -313,8 +314,8 @@ export class BioTestResults {
     rowDataItem.profileStatus = profileStatus;
     rowDataItem.profileId = thePerson.getProfileId();
     rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
-    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
+    rowDataItem.wikiTreeLink = BioTestResults.WIKI_TREE_URI + rowDataItem.wikiTreeId;
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(rowDataItem.wikiTreeLink, rowDataItem.wikiTreeId);
     rowDataItem.personName = thePerson.getReportName();
     if (biography.getTotalBioLines() > 0) {
       rowDataItem.bioLineCnt = biography.getTotalBioLines();
@@ -408,8 +409,8 @@ export class BioTestResults {
     };
     rowDataItem.profileId = thePerson.getProfileId();
     rowDataItem.wikiTreeId = thePerson.getWikiTreeId();
-    rowDataItem.wikiTreeLink = thePerson.getWikiTreeLink();
-    rowDataItem.wikiTreeHyperLink = this.getHyperLink(thePerson.getWikiTreeLink(), thePerson.getWikiTreeId());
+    rowDataItem.wikiTreeLink = BioTestResults.WIKI_TREE_URI + rowDataItem.wikiTreeId;
+    rowDataItem.wikiTreeHyperLink = this.getHyperLink(rowDataItem.wikiTreeLink, rowDataItem.wikiTreeId);
     rowDataItem.personName = thePerson.getReportName();
     rowDataItem.sourceCount = sourceNum;
     rowDataItem.sourceLine = sourceContent;
