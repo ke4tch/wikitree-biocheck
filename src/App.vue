@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2023 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.11</h4>
+      <h4>Bio Check Version 1.7.12</h4>
     </div>
 
     <div class="flex-grid">
