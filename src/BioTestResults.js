@@ -452,14 +452,6 @@ export class BioTestResults {
       " style issues; " + this.results.unsourcedProfileCnt +
       " marked unsourced; " + this.results.unmarkedProfileCnt +
       " possibly unsourced not marked";
-    /*
-    let msg = "Checked " + this.results.checkedProfileCount +
-      " profiles: Found " + this.results.reportCount +
-      " profiles with " + this.results.styleIssuesProfileCnt +
-      " style issues; " + this.results.unsourcedProfileCnt +
-      " marked unsourced; " + this.results.unmarkedProfileCnt +
-      " possibly unsourced not marked";
-    */
     this.setProgressMessage(msg);
     msg = "Check Completed. ";
     if (this.results.apiLimitReached) {
@@ -477,18 +469,15 @@ export class BioTestResults {
     }
     msg += "Examined " + this.results.totalProfileCount + " unique " + 
       uniqueProfileMsg + ".";
-    //msg += "Examined " + this.results.totalProfileCount + " unique profiles.";
     let otherCnt = this.results.uncheckedDueToPrivacyCount;
     otherCnt += this.results.uncheckedDueToDateCount;
     if (otherCnt > 0) {
       msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt; 
       if (otherCnt == 1) {
-        msg += "profile.";
+        msg += " profile.";
       } else {
-        msg += "profiles.";
+        msg += " profiles.";
       }
-      msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles.";
-      //msg += " Privacy, date, or other reasons did not allow checking for " + otherCnt + " profiles.";
     }
 
     if (this.errorMessage.length > 0) {
