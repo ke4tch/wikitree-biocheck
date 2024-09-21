@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2023 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,7 +37,7 @@ export class BioCheckCalendarManager {
   challengeNameMap = null;
   challengeDateMap = null;
 
-  static WIKI_TREE_PLUS_CAL = "https://plus.wikitree.com/calendarExp.json";
+  static WIKI_TREE_PLUS_CAL = "https://plus.wikitree.com/calendarExp.json?appId=bioCheck";
   constructor() {
   } 
 
@@ -53,15 +53,11 @@ export class BioCheckCalendarManager {
   */
   async #loadCalendar() {
     try {
-      let url = "https://plus.wikitree.com/chrome/templatesExp.json?appid=bioCheck";
-      url = "https://plus.wikitree.com/calendarExp.json";
-      url = BioCheckCalendarManager.WIKI_TREE_PLUS_CAL;
-      const fetchResponse = await fetch(url);
+      const fetchResponse = await fetch(BioCheckCalendarManager.WIKI_TREE_PLUS_CAL);
       if (!fetchResponse.ok) {
         console.log("Error " + fetchResponse.status);
       } else {
         const jsonData = await fetchResponse.json();
-
         // map where the key is the challenge name
         // and the value is the array of challenge start date
         this.activeChallengeMap = new Map();

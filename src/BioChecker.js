@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -46,15 +46,12 @@ export class BioChecker {
   totalValidateTime = 0; // optionally report total ms for validation
   totalFetchTime = 0; // optionally report total ms for fetch
 
-  useGetPeopleAPI = true;
-
   static MAX_PENDING_REQUESTS = 80; // after this many wait for all responses from server
   static MAX_PENDING_PEOPLE_REQUESTS = 8; // after this many wait for all responses from server
   static SYNC_DELAY_MS = 80; // milliseconds to delay to sync with server
   static MAX_TO_CHECK = 10000;
   static WIKI_TREE_URI = "https://api.wikitree.com/api.php";
   //static WIKI_TREE_URI = "https://staging.wikitree.com/api.php";
-  // staging.wikitree.com 
   static BASIC_PROFILE_REQUEST_FIELDS =
    "Id,Name,IsLiving,Privacy,Manager,BirthDate,DeathDate,BirthDateDecade,DeathDateDecade,FirstName,RealName,LastNameCurrent,LastNameAtBirth,Mother,Father,DataStatus,Bio,IsMember";
   static REDIRECT_KEY = "&resolveRedirect=1";
@@ -385,7 +382,7 @@ export class BioChecker {
    * Determine if need to check bio
    * If the person does not have a bio, call the API to get it
    * and check it
-   * @param {BioChecPerson} thePerson person to be checked
+   * @param {BioCheckPerson} thePerson person to be checked
    * @returns {Boolean} true if need to get and check bio
    */
   needToGetBio(thePerson) {
@@ -414,6 +411,7 @@ export class BioChecker {
     let url = BioChecker.WIKI_TREE_URI + "?action=getBio" + BioChecker.MY_ID_KEY  + " &resolveRedirect=1&key=" + thePerson.getProfileId();
     this.pendingRequestCount++;
     this.testResults.countRequest();  // instrumentation
+console.log('fetch getBio for id ' + thePerson.getProfileId());
     let fetchResponse = await fetch(url, {
       credentials: "include",
     });

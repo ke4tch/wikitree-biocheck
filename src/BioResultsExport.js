@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2023 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -107,11 +107,19 @@ export class BioResultsExport {
         if (userArgs.selectedCheckType === "checkWatchlist") {
           filename += "_Watchlist";
         } else {
-          if (userArgs.numAncestorGen > 0) {
-            filename += "_" + userArgs.numAncestorGen + "AncestorGenerations";
-          }
-          if (userArgs.numDescendantGen > 0) {
-            filename += "_" + userArgs.numDescendantGen + "DescendantGenerations";
+          if (userArgs.selectedCheckType === "checkChallenge") {
+            if (filename.length > 0) {
+              filename += "_" + userArgs.challengeName + "_" + userArgs.challengeDate;
+            } else {
+              filename = "Challenge_" + userArgs.challengeName + "_" + userArgs.challengeDate;
+            }
+          } else {
+            if (userArgs.numAncestorGen > 0) {
+              filename += "_" + userArgs.numAncestorGen + "AncestorGenerations";
+            }
+            if (userArgs.numDescendantGen > 0) {
+              filename += "_" + userArgs.numDescendantGen + "DescendantGenerations";
+            }
           }
         }
       }

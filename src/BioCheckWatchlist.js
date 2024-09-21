@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2023 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -137,6 +137,7 @@ export class BioCheckWatchlist extends BioChecker {
                 let url = urlbase + "&offset=" + start + "&limit=" + limit;
                 this.pendingRequestCount++;
                 this.testResults.countRequest();  // instrumentation
+console.log('fetch getWatchlist');
                 const fetchResponse = await fetch(url, {
                   credentials: "include",
                 });

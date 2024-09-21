@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.13</h4>
+      <h4>Bio Check Version 1.7.14 TEST</h4>
     </div>
 
     <div class="flex-grid">
@@ -681,12 +681,12 @@ export default {
           challengeDate: "",
         },
         checkStatus: { 
-          stateMessage: "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...",
-          progressMessage: "select Check Profiles",
+          stateMessage: "Initializing...",
+          progressMessage: "please wait",
           progressMessageTitle: "",
           cancelPending: false,
 
-          checkDisabled: false,
+          checkDisabled: true,
           cancelDisabled: true,
           exportDisabled: true,
           toolsDisabled: true,
@@ -704,6 +704,7 @@ export default {
         toolsLabel: "Tools not available",
         toolsUserId: "",
 
+        templatePromise: null,
         activeChallenges: [],   // map of active challenges
         challengeManager: null,
         selectedChallengeName: "",  // display name
@@ -892,7 +893,7 @@ export default {
 
     // This is to just load from WT+ once per browser session
     let bioCheckTemplateManager = new BioCheckTemplateManager();
-    await bioCheckTemplateManager.load();
+    this.templatePromise = bioCheckTemplateManager.loadPrep();
 
     let bioCheckCalendarManager = new BioCheckCalendarManager();
     // cannot use this yet
@@ -907,14 +908,19 @@ export default {
     this.selectedChallengeDate = this.challengeManager.getChallengeUsedDate(this.selectedChallengeName);
     this.getUrlParams();
 
+    // this can take some time, make the user wait for it
+    await bioCheckTemplateManager.loadTemplates(this.templatePromise);
+    
     // Code that will run only after the entire view has been rendered
-    nextTick(() => {
-      // use the auto arg to act like check profiles button click
-      if (this.checkStart === "auto") {
-        this.userArgs.reportAllProfiles = false;
-        this.checkProfiles();
-      }
-    })
+    await nextTick();
+    this.checkStatus.checkDisabled = false;
+    this.checkStatus.stateMessage = "Identify how to find profiles, criteria for finding profiles, what to check, what to report, and then...";
+    this.checkStatus.progressMessage = "select Check Profiles";
+    // use the auto arg to act like check profiles button click
+    if (this.checkStart === "auto") {
+      this.userArgs.reportAllProfiles = false;
+      this.checkProfiles();
+    }
   },
 
   methods: {

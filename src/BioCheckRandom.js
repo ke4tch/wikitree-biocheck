@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2022 Kathryn J Knight
+Copyright (c) 2024 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -45,8 +45,8 @@ export class BioCheckRandom extends BioChecker {
     // https://www.wikitree.com/index.php?title=Special:NetworkFeed&showall=1&l=100&created=1
     // then getting the most recent and getting their id as the max rand
 
-    // max captured as of 10 Feb 2024
-    const MAX_RANDOM = 41681141;
+    // max captured as of 21 Sep 2024
+    const MAX_RANDOM = 44211997;
     this.verbose = false;
 
     let minRand = this.getMinRandom();
