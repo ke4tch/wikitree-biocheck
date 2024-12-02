@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.14</h4>
+      <h4>Bio Check Version 1.7.15</h4>
     </div>
 
     <div class="flex-grid">
@@ -1084,9 +1084,8 @@ export default {
 
       profileTools: function () {
         if (this.toolsUserId.includes("-")) {
-          let parts = this.toolsUserId.split("-");
-          let url = "https://www.wikitree.com/genealogy/" + parts[0] +
-                    "-Family-Tree-" + parts[1] + "#tools";
+          let defaultView = 'wt-dynamic-tree';
+          let url = 'https://www.wikitree.com/apps/' + this.toolsUserId + '#name=' + this.toolsUserId + '&view=' + defaultView;
           window.open(url);
         }
       },
