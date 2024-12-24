@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         </a>
     </div>
     <div class="flex-center">
-      <h4>Bio Check Version 1.7.15</h4>
+      <h4>Bio Check Version 1.7.16</h4>
     </div>
 
     <div class="flex-grid">
@@ -1161,12 +1161,15 @@ export default {
           this.userArgs.selectedReportType = savedReport;
           this.reportType = savedReport;
         }
+        /* something here is barfing on the if ((dispName line if no longer there?
+        */
+        
         let savedChallenge = window.localStorage.getItem('biocheck_challenge_name');
         if (savedChallenge !== null) {
           if (savedChallenge.length > 0) {
             // Just in case the saved challenge is no longer in the calendar
             let dispName = this.challengeManager.getChallengeDisplayName(savedChallenge);
-            if ((dispName !== null) && (dispName.length > 0)) {
+            if ((dispName !== null) && (dispName !== undefined) && (dispName.length > 0)) {
               this.userArgs.challengeName = savedChallenge;
               this.selectedChallengeName = this.challengeManager.getChallengeDisplayName(this.userArgs.challengeName);
             }
