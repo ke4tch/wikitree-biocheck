@@ -45,8 +45,8 @@ export class BioCheckRandom extends BioChecker {
     // https://www.wikitree.com/index.php?title=Special:NetworkFeed&showall=1&l=100&created=1
     // then getting the most recent and getting their id as the max rand
 
-    // max captured as of 21 Sep 2024
-    const MAX_RANDOM = 44211997;
+    // max captured as of 31 Jan 2025
+    const MAX_RANDOM = 45644936;
     this.verbose = false;
 
     let minRand = this.getMinRandom();
