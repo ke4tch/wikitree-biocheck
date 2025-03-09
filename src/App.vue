@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2024 Kathryn J Knight
+Copyright (c) 2025 Kathryn J Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -25,28 +25,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 <template>
   <div id="app">
-    <div id="HEADER" class ="SMALL">
-        <a href="https://www.wikitree.com/">
-        <img class="MIDDLE" src="https://www.wikitree.com/images/Wiki-family-tree.png" alt="WikiTree" title="WikiTree" width="360" height="32" border="0">
-        </a>
-    </div>
-    <div class="flex-center">
-      <h4>Bio Check Version 1.7.17</h4>
+    <div class="flex-grid">
+      <a href="https://www.wikitree.com/">
+        <img src="https://www.wikitree.com/images/wikitree-small.png" width="225" height="38">
+      </a>
+      <div class="flex-center">
+        <h4>Bio Check Version 1.8.0</h4>
+      </div>
     </div>
 
     <div class="flex-grid">
       <div class="col">
         <div class="flex-center">
           <div class="user-input">
-            <label>
-              {{loginMessage}}
-            </label>
+            {{loginMessage}}
           </div>
         </div>
         <div class="user-input">
           <div class="col">
             <span v-bind:title="promptMessage" >
-                  How to find profiles:
+              How to find profiles:
             </span>
           </div>
           <div class="col">
@@ -62,21 +60,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         <template v-if="isCheckByProfile">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="inputWikiTreeIdTip">
-                <label for="userArgs.inputWikiTreeId" >Profile</label>
-              </span>
+              <span v-bind:title="inputWikiTreeIdTip"> Profile </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.trim="userArgs.inputWikiTreeId" 
+               type="text"
                id="userArgs.inputWikiTreeId" :disabled="!isCheckByProfile"
+               @keyup.enter="checkProfiles" 
                placeholder="Enter Profile Id to check">
             </div>
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="numAncestorGenTip">
-                <label for="userArgs.numAncestorGen">Ancestor generations </label>
-              </span>
+              <span v-bind:title="numAncestorGenTip"> Ancestor generations </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.numAncestorGen" 
@@ -87,9 +83,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="numDescendantGenTip">
-                <label for="userArgs.numDescendantGen">Descendant generations </label>
-              </span>
+              <span v-bind:title="numDescendantGenTip"> Descendant generations </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.numDescendantGen" 
@@ -100,9 +94,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="numRelativesTip">
-                <label for="userArgs.numRelatives" >Number of degrees of connection to check</label>
-              </span>
+              <span v-bind:title="numRelativesTip"> Number of degrees of connection to check </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.numRelatives" type="number"
@@ -112,29 +104,29 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
 
           <div class="user-input">
+            <label>
             <div class="col">
-              <span v-bind:title="connectionsTip">
-                <label for="userArgs.checkAllConnections" >Check connections for all profiles</label>
-              </span>
+              <span v-bind:title="connectionsTip"> Check connections for all profiles </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model="userArgs.checkAllConnections" type="checkbox"
                      id="userArgs.checkAllConnections"
                      name="userArgs.checkAllConnections" >
             </div>
+            </label>
           </div>
 
         </template>
         <template v-if="isCheckByQuery">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="queryArgTip">
-                <label for="userArgs.queryArg" >Search text on WikiTree+</label>
-              </span>
+              <span v-bind:title="queryArgTip"> Search text on WikiTree+ </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.trim="userArgs.queryArg" id="userArgs.queryArg"
                    :disabled="disableQueryArg"
+                   @keyup.enter="checkProfiles" 
+                   type="text"
                    placeholder="Enter WikiTree+ Search/Text (same as you would enter for WikiTree+)">
             </div>
           </div>
@@ -142,9 +134,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         <template v-if="isCheckByQuery">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="maxQueryTip">
-                <label for="userArgs.maxQuery" >Max search profiles</label> 
-              </span>
+              <span v-bind:title="maxQueryTip"> Max search profiles </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.maxQuery" type="number"
@@ -155,9 +145,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchStartTip">
-                <label for="userArgs.searchStart" >Check starting at</label>
-              </span>
+              <span v-bind:title="searchStartTip"> Check starting at </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchStart" type="number"
@@ -168,12 +156,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMax" >Max to check</label> 
-              </span>
+              <span v-bind:title="searchMaxTip"> Max to check </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
+              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" 
+               id="userArgs.searchMax" name="searchMax" 
                min="0" max="5000" value="1000" >
             </div>
           </div>
@@ -181,9 +168,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         <template v-if="isCheckWatchlist">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="maxQueryTip">
-                <label for="userArgs.maxWatchlistCount" >Max profiles</label> 
-              </span>
+              <span v-bind:title="maxQueryTip"> Max profiles </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.maxWatchlistCount" type="number"
@@ -194,9 +179,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchStartTip">
-                <label for="userArgs.searchStartWatchlist" >Check starting at</label>
-              </span>
+              <span v-bind:title="searchStartTip"> Check starting at </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchStartWatchlist" type="number"
@@ -207,9 +190,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMaxWatchlist" >Max to check</label> 
-              </span>
+              <span v-bind:title="searchMaxTip"> Max to check </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchMaxWatchlist" type="number"
@@ -218,24 +199,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </div>
           </div>
           <div class="user-input">
+            <label>
             <div class="col">
-              <span v-bind:title="reportNonManagedTip">
-                <label for="userArgs.openOnly" >Report only profiles not managed by you</label>
-              </span>
+              <span v-bind:title="reportNonManagedTip"> Report only profiles not managed by you </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model="userArgs.reportNonManaged" type="checkbox"
                  id="userArgs.reportNonManaged"
                  name="userArgs.reportNonManaged" >
             </div>
+            </label>
           </div>
         </template>
         <template v-if="isCheckRandom">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="minRandomTip">
-                <label for="userArgs.minRandom" >Min random number</label>
-              </span>
+              <span v-bind:title="minRandomTip"> Min random number </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.minRandom" type="number"
@@ -246,9 +225,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="maxRandomTip">
-                <label for="userArgs.maxRandom" >Max random number</label> 
-              </span>
+              <span v-bind:title="maxRandomTip"> Max random number </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.maxRandom" type="number"
@@ -259,13 +236,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMaxRandom" >Max to check</label> 
-              </span>
+              <span v-bind:title="searchMaxTip"> Max to check </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchMaxRandom" type="number"
                  id="userArgs.searchMaxRandom" name="searchMaxRandom" 
+                 @keyup.enter="checkProfiles" 
                min="0" max="5000" value="1000" >
             </div>
           </div>
@@ -273,9 +249,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         <template v-if="isCheckChallenge">
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="challengeNameTip" >
-                Challenge:
-              </span>
+              <span v-bind:title="challengeNameTip" > Challenge: </span>
             </div>
             <div class="col">
                 <select v-model="selectedChallengeName">
@@ -287,9 +261,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="challengeDateTip" >
-                Challenge Date:
-              </span>
+              <span v-bind:title="challengeDateTip" > Challenge Date: </span>
             </div>
             <div class="col">
               <select :disabled="challengeDates.length == 0" v-model="selectedChallengeDate">
@@ -300,21 +272,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="inputWikiTreeIdTip">
-                <label for="userArgs.inputWikiTreeId" >Contributor Profile</label>
-              </span>
+              <span v-bind:title="inputWikiTreeIdTip"> Contributor Profile </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.trim="userArgs.inputWikiTreeId" 
                id="userArgs.inputWikiTreeId" :disabled="!isCheckChallenge"
+               type="text"
                placeholder="Enter Profile Id to search">
             </div>
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchStartTip">
-                <label for="userArgs.searchStart" >Check starting at</label>
-              </span>
+              <span v-bind:title="searchStartTip"> Check starting at </span>
             </div>
             <div class="col">
               <input class="vmodel-input" v-model.number="userArgs.searchStart" type="number"
@@ -325,12 +294,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
           <div class="user-input">
             <div class="col">
-              <span v-bind:title="searchMaxTip">
-                <label for="userArgs.searchMax" >Max to check</label> 
-              </span>
+              <span v-bind:title="searchMaxTip"> Max to check </span>
             </div>
             <div class="col">
-              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" id="userArgs.searchMax" name="searchMax" 
+              <input class="vmodel-input" v-model.number="userArgs.searchMax" type="number" 
+                     id="userArgs.searchMax" name="searchMax" 
                min="0" max="5000" value="1000" >
             </div>
           </div>
@@ -339,12 +307,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         <!-- find by any method uses this input -->
         <div class="user-input">
           <div class="col">
-            <span v-bind:title="maxReportTip">
-              <label for="userArgs.maxReport" >Max profiles to report</label>
-            </span>
+            <span v-bind:title="maxReportTip"> Max profiles to report </span>
           </div>
           <div class="col">
-            <input class="vmodel-input" v-model.number="userArgs.maxReport" type="number" id="userArgs.maxReport" name="maxReport" 
+            <input class="vmodel-input" v-model.number="userArgs.maxReport" 
+                   type="number" id="userArgs.maxReport" name="maxReport" 
                min="0" max="5000" value="1000" >
           </div>
         </div>
@@ -353,9 +320,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <div class="col">
         <div class="user-input">
           <div class="col">
-            <span v-bind:title="reportStyleTip" >
-              Profiles to report:
-            </span>
+            <span v-bind:title="reportStyleTip" > Profiles to report: </span>
           </div>
           <div class="col">
             <select v-model="reportType">
@@ -368,85 +333,85 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           </div>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="openOnlyTip">
-              <label for="userArgs.openOnly" >Check Open Profiles only</label>
-            </span>
+            <span v-bind:title="openOnlyTip"> Check Open Profiles only </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.openOnly" type="checkbox" id="userArgs.openOnly"
                name="userArgs.openOnly" >
           </div>
+          </label>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="orphanOnlyTip">
-              <label for="userArgs.orphanOnly" >Check Orphan Profiles only</label>
-            </span>
+            <span v-bind:title="orphanOnlyTip"> Check Orphan Profiles only </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.orphanOnly" type="checkbox" id="userArgs.orphanOnly"
                name="userArgs.orphanOnly" >
           </div>
+          </label>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="ignorePre1500Tip">
-              <label for="userArgs.ignorePre1500" >Ignore Pre-1500 Profiles</label>
-            </span>
+            <span v-bind:title="ignorePre1500Tip"> Ignore Pre-1500 Profiles </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.ignorePre1500"
                  type="checkbox" id="userArgs.ignorePre1500" name="userArgs.ignorePre1500" >
           </div>
+          </label>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="reliableSourcesOnlyTip">
-              <label for="userArgs.reliableSourcesOnly" >Reliable Sources Required</label>
-            </span>
+            <span v-bind:title="reliableSourcesOnlyTip"> Reliable Sources Required </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.reliableSourcesOnly"
                  type="checkbox" id="userArgs.reliableSourcesOnly"
                  name="userArgs.reliableSourcesOnly" >
           </div>
+          </label>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="reportStyleDetailsTip">
-              <label for="userArgs.reportStyleDetails" >Report style details</label>
-            </span>
+            <span v-bind:title="reportStyleDetailsTip"> Report style details </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.reportStyleDetails"
                  type="checkbox" id="userArgs.reportStyleDetails"
                  name="userArgs.reportStyleDetails" >
           </div>
+          </label>
         </div>
         <div class="user-input">
+          <label>
           <div class="col">
-            <span v-bind:title="reportAllProfilesTip">
-              <label for="userArgs.reportAllProfiles" >Report all profiles</label>
-            </span>
+            <span v-bind:title="reportAllProfilesTip"> Report all profiles </span>
           </div>
           <div class="col">
             <input class="vmodel-input" v-model="userArgs.reportAllProfiles"
                  type="checkbox" id="userArgs.reportAllProfiles"
                  name="userArgs.reportAllProfiles" >
           </div>
+          </label>
         </div>
-          <div class="user-input">
-            <div class="col">
-              <span v-bind:title="bioSearchStringTip">
-                <label for="userArgs.bioSearchString" >Search biography for:</label> 
-              </span>
-            </div>
-            <div class="col">
-              <input class="vmodel-input" v-model.trim="userArgs.bioSearchString" 
-                 placeholder="Enter phrase to find inside biography">
-            </div>
+        <div class="user-input">
+          <div class="col">
+            <span v-bind:title="bioSearchStringTip"> Search biography for: </span>
           </div>
+          <div class="col">
+            <input class="vmodel-input" v-model.trim="userArgs.bioSearchString" 
+               type="text"
+               id="bioSearchPhrase"
+               placeholder="Enter phrase to find inside biography">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -470,7 +435,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <div class="feedback">
       <template v-if="isCheckCompleted">
         <div class="feedback-complete">
-            <span v-html="checkStatus.stateMessage" style="font-weight: bolder"></span>
+            <span v-html="checkStatus.stateMessage" style="font-weight: bold"></span>
         </div>
       </template>
       <template v-else>
@@ -489,7 +454,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <template v-else>
         <div class="feedback-start">
           <span v-bind:title="checkStatus.progressMessageTitle">
-            <span v-html="checkStatus.progressMessage" style="font-weight: bolder"></span>
+            <span v-html="checkStatus.progressMessage" style="font-weight: bold"></span>
           </span>
         </div>
       </template>
@@ -525,10 +490,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
            <th class = "colPersonName" id = "personName" scope="col" @click="sortBy('personName')" >Name</th>
            <th class = "colUnsourcedStatus" id = "profileStatus" scope="col" @click="sortBy('profileStatus')" >Sourced?</th>
            <th class = "colStyleIssues" id = "hasStyleIssues" scope="col" @click="sortBy('hasStyleIssues')" >Style Issues?</th>
-           <th class = "colProfilePrivacy" id = "profilePrivacy" scope="col" @click="sortBy('profilePrivacy')" >Privacy</th>
-           <th class = "colOrphan" id = "profileIsOrphan" scope="col" @click="sortBy('profileIsOrphan')" >Orphan</th>
            <th class = "colBirthDate" id = "birthDate" scope="col" @click="sortBy('birthDate')" >Birth Date</th>
            <th class = "colDeathDate" id = "deathDate" scope="col" @click="sortBy('deathDate')" >Death Date</th>
+           <th class = "colProfilePrivacy" id = "profilePrivacy" scope="col" @click="sortBy('profilePrivacy')" >Privacy</th>
+           <th class = "colOrphan" id = "profileIsOrphan" scope="col" @click="sortBy('profileIsOrphan')" >Orphan</th>
         </tr>
         </thead>
         <tbody class="scrollContent">
@@ -540,10 +505,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             <td class = "colPersonName">{{ item.personName }} </td>
             <td class = "colUnsourcedStatus">{{ item.profileStatus }} </td>
             <td class = "colStyleIssues">{{ item.hasStyleIssues }} </td>
-            <td class = "colProfilePrivacy">{{ item.profilePrivacy }} </td>
-            <td class = "colOrphan">{{ item.profileIsOrphan }} </td>
             <td class = "colBirthDate">{{ item.birthDate }} </td>
             <td class = "colDeathDate">{{ item.deathDate }} </td>
+            <td class = "colProfilePrivacy">{{ item.profilePrivacy }} </td>
+            <td class = "colOrphan">{{ item.profileIsOrphan }} </td>
           </tr>
         </tbody>
       </template>
@@ -580,22 +545,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </template>
       </table>
     </div>
-
-      <div id="FOOTER">
-        <a href="https://www.wikitree.com/" class="NOLINE"><b>WikiTree</b></a>
-         &nbsp;~&nbsp; 
-        <a href="https://www.wikitree.com/wiki/About_WikiTree" class="NOLINE">About</a>
-         &nbsp;~&nbsp; 
-        <a href="https://www.wikitree.com/blog/" class="NOLINE">Blog</a>
-         &nbsp;~&nbsp; 
-        <a href="https://www.wikitree.com/wiki/How_to_use_WikiTree" class="NOLINE">Help <img src="https://www.wikitree.com/images/icons/help.gif" border="0" width="11" height="11" alt="Help" title="Help"></a>
-         &nbsp;~&nbsp; 
-        <a href="https://www.wikitree.com/g2g/" class="NOLINE">G2G Q&amp;A Forum</a>
-         &nbsp;~&nbsp; 
-        <a href="https://www.wikitree.com/wiki/Special:SearchPerson" class="NOLINE">Search <img src="https://www.wikitree.com/images/icons/find-matches.gif" border="0" width="11" height="11" alt="Person Search" title="Person Search"></a>
-        <p><a href="https://www.wikitree.com/index.php?title=Special:Userlogin" rel="nofollow" class="NOLINE">Login</a> | <a href="/index.php?title=Special:Userlogin&amp;type=signup" rel="nofollow" class="NOLINE">Register</a></p>
-        <p align="center"><a href="https://www.wikitree.com/about/terms.html"><img class="MIDDLE" src="https://www.wikitree.com/images/terms.gif" border="0" width="797" height="64" alt="disclaimer - terms - copyright"></a></p>
-      </div>
   </div>
 </template>
 
@@ -674,7 +623,7 @@ export default {
           searchStartWatchlist: 0,
           searchMaxWatchlist: 200,
           minRandom: 0,
-          maxRandom: 41681141,
+          maxRandom: 46016803,
           bioSearchString: "",
           abortController: null, // to cancel
           challengeName: "",
@@ -1233,7 +1182,6 @@ export default {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  border: 1px solid black;
 }
 .col {
   flex: 1;
@@ -1241,6 +1189,7 @@ export default {
 .flex-center {
   display: flex;
   justify-content: center;
+  padding: 0.5em 0.5em 0.5em 0.5em;
 }
 
 @media (max-width: 400px) {
@@ -1248,7 +1197,7 @@ export default {
     display: block;
     .col {
       width: 100%;
-      margin: 0 0 10px 0;
+      margin: 0 0 4px 0;
     }
   }
 }
@@ -1256,8 +1205,8 @@ export default {
 * {
     box-sizing: border-box;
   }
+
 body {
-  padding: 20px;
 }
 
 .vmodel-input {
@@ -1302,7 +1251,7 @@ button {
 }
 .feedback {
   display:flex;
-  padding: 0 0 0.5em 0;
+  padding: 0.5em 0.5em 0.5em 0.5em;
   flex-direction: column;
 }
 .feedback-progress {
@@ -1311,10 +1260,17 @@ button {
 }
 .feedback-start {
 }
+/*
+You want the horizontal scroll on the whole container
+You want the vertical scroll on the table body only
+*/
+
 .tableContainer {
+  display: flex;
+  flex-direction: column;
   clear: both;
-  width: 90vw;
-  height: 75vh;
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 .resultsTable {
   border: 1px solid black;
@@ -1322,7 +1278,8 @@ button {
 }
 
 table { 
-  width: 90vw;
+  table-layout: fixed;
+  width: 97vw;
 }
 tr {
   table-layout: fixed;
@@ -1331,14 +1288,18 @@ tr {
 
 thead, tbody, tr {
   display: table;
-  width: 90vw;
+  width: 97vw;
+}
+
+
+.scrollContent{
+  height: 75vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 tbody {
   display: block;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 66vh;
 }
 
 th {
@@ -1353,18 +1314,19 @@ td {
 
   white-space: pre-wrap;
 }
+/* these are key to column sizes, but are the totals correct? */
 .colWikiTreeId { width: 9% }
 .colPersonName { width: 15% }
-.colUnsourcedStatus { width: 5% }
-
 .colSourceCount { width: 4% }
 .colSourceLine { width: 51% }
+
 .colStyleIssues { width : 7% }
-.colProfilePrivacy { width : 7% }
-.colOrphan { width : 7% }
 .colBirthDate { width : 7% }
 .colDeathDate { width : 7% }
+.colProfilePrivacy { width : 7% }
+.colOrphan { width : 7% }
 
+.colUnsourcedStatus { width: 5% }
 .colRequiredSections { width : 14% }
 .colStyleDetails { width : 18% }
 .colSearchPhrase { width : 4% }
@@ -1376,4 +1338,5 @@ td {
 }
 td.colSourceLine { text-align: left }
 td.colStyleDetails { text-align: left }
+
 </style>

@@ -7,33 +7,6 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Bio Check</title>
     <style>
-      #HEADER {
-        clear: both;
-        padding: 0px 5% 0px 5%;
-        text-align: right;
-      }
-      .SMALL {
-        font-size: 11px;
-      }
-      #FOOTER {
-        clear:both;
-        margin: 1% 5% 1% 1%;
-        font-size: 13px;
-      }
-      .NOLINE {
-      }
-      #CONTENT {
-        clear:both;
-        margin: 0 1% 0 1%;
-        padding: 0.25em 0.75em 0.5em 0.75em;
-      }
-      .MISC-PAGE {
-        border: 4px solid #b7c0cf;
-      }
-      #HEADLINE {
-        display: flex;
-        justify-content: center;
-      }
       #logged_in {
         display: none;
       }
@@ -78,10 +51,8 @@
 
     <!-- This div is shown if the user is logged in. -->
     <div id="logged_in">
-      <div id="CONTENT" class="MISC-PAGE">
-        <div id="app"></div>
-          <script type="module" src="/src/main.js"></script>
-      </div>
+      <div id="app"></div>
+      <script type="module" src="/src/main.js"></script>
     </div>             <!-- end of content div -->
   </body>
 </html>

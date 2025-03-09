@@ -1,6 +1,6 @@
 {
   "name": "biocheck",
-  "version": "1.7.13",
+  "version": "1.8.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
     "docs": "jsdoc -c jsdoc.conf.js src/*.js"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.5",
     "node": "^19.3.0",
     "vue": "^3.2.41"
   },
